@@ -1,0 +1,339 @@
+{
+  "common": {
+    "close": "Close",
+    "save": "Save",
+    "apply": "Apply",
+    "approve": "Approve",
+    "reject": "Reject",
+    "viewAll": "View All",
+    "viewDetail": "🔍 View Detail (Popup)",
+    "likes": "Likes",
+    "comments": "Comments",
+    "count": "{{count}}",
+    "published": "Published",
+    "openBook": "Open Book →",
+    "scrapbookHardcover": "Scrapbook Hardcover",
+    "googleDriveSyncTag": "Google Shared Drive Sync",
+    "googleDriveLinkedTag": "Google Shared Drive Linked"
+  },
+  "header": {
+    "appTitle": "Shared Tracking Diary",
+    "appSubtitle": "Shared Peak & Path Archive (Next.js 14+ App Router)",
+    "ucDashboardRoot": "UC1 Dashboard Root",
+    "profileName": "San-gil Kim",
+    "profileUc": "UC4 My Trekking",
+    "profileLevel": "LV.4",
+    "profileInitial": "S",
+    "tabs": {
+      "dashboard": "📊 Dashboard",
+      "hikes": "🗓️ Trekking Schedule",
+      "diaries": "📚 Trekking Album & Diary",
+      "gallery": "📷 Photo Gallery (Drive)",
+      "my": "🏅 My Trekking & Badges",
+      "clubs": "🏘️ Clubs & Membership"
+    },
+    "tabUcCodes": {
+      "dashboard": "UC1",
+      "hikes": "UC2/UC7",
+      "diaries": "UC3/UC8/10",
+      "gallery": "UC9/UC12",
+      "my": "UC4/UC5/13",
+      "clubs": "UC14/15/17"
+    },
+    "clubs": {
+      "nationalPark": "🌲 National Park Alpine Club (Hiking Club)",
+      "hallaClub": "⛰️ Hallasan Summit Club (Summit Club)",
+      "weekendHealing": "👟 Weekend Healing Trekking (Healing Path)"
+    }
+  },
+  "footer": {
+    "title": "Shared Tracking Diary • Shared Peak & Path Archive",
+    "description": "A complete hiking memory archiving platform with Next.js 14+ App Router, Supabase & Google Shared Drive integration",
+    "specCompliance": "Full UC1~UC17 architecture spec compliance",
+    "driveApi": "Google Shared Drive API v3",
+    "geminiAi": "Gemini AI episode support"
+  },
+  "dashboard": {
+    "heroBadge": "🚀 UC1 Dashboard Comprehensive Archive",
+    "heroTitle": "Trails walked together,\nForever recorded in a single diary.",
+    "heroTitleLine1": "Trails walked together,",
+    "heroTitleLine2": "Forever recorded in a single diary.",
+    "heroDescription": "Archive your trekking memories — from hike recruitment (UC2), original photo storage on Google Shared Drive (UC9), monthly hardcover bookshelf (UC3), to summit badges (UC5).",
+    "heroCtaHikes": "⛰️ Browse Trekking Recruits (UC2)",
+    "heroCtaDiaries": "📖 Browse Bookshelf Archive (UC3)",
+    "metricsUpcomingLabel": "Upcoming Hikes",
+    "metricsUpcomingValue": "3 Recruiting",
+    "metricsDiariesLabel": "Published Diaries",
+    "metricsDiariesValue": "12 Archived",
+    "metricsPhotosLabel": "Shared Photos",
+    "metricsPhotosValue": "450 Saved",
+    "metricsBadgesLabel": "Earned Badges",
+    "metricsBadgesValue": "4 Owned",
+    "recentHikesTitle": "🚩 Recent Recruiting Hikes (UC2)",
+    "recentHikesUc": "UC2",
+    "hikeJirisan": {
+      "date": "2026.08.15",
+      "title": "🏔️ Jirisan Cheonwangbong Traverse",
+      "desc": "1 night at Jangteomok Shelter • 8/12 participants"
+    },
+    "hikeBukhansan": {
+      "date": "2026.08.29",
+      "title": "🌙 Bukhansan Baegundae Night Sunrise",
+      "desc": "4AM climb • 6/10 participants"
+    },
+    "bookshelfTitle": "📖 Latest Archived Edition (UC3)",
+    "bookshelfUc": "UC3",
+    "bookshelfVol": "VOL.12",
+    "bookshelfVolLabel": "2026.08 VOL.12 • Hardcover",
+    "bookshelfBookTitle": "Summer Exchange Diary on the Jirisan Ridge",
+    "bookshelfBookMeta": "12 episodes • 148 photos on Google Shared Drive",
+    "bookshelfCtaBrowse": "Browse all editions on the oak bookshelf (UC3) →",
+    "watermark": "PEAK"
+  },
+  "diaries": {
+    "badgeLabel": "Digital Scrapbook Archive",
+    "ucTag": "UC3 include UC8 (UC9+UC10)",
+    "sectionTitle": "📖 Trekking Album & Exchange Diary Bookshelf",
+    "sectionDesc": "Our club's hiking exchange diaries and episodes are preserved as monthly digital hardcover editions on the bookshelf.",
+    "tipText": "💡 Click the book cover on the shelf to open the hiking diary (UC8).",
+    "shelfHeader": "National Park Alpine Club • Archive Shelf (Library Shelf)",
+    "shelfMeta": "12 editions archived • Hardcover bound archive",
+    "shelfSeasonBadge": "📚 2026 Season Archives",
+    "shelfLedgeLabel": "🪵 OAK WOODEN SHELF NO. 01",
+    "shelfLedgeHint": "CLICK BOOK COVER TO OPEN DIARY (UC8)",
+    "book1": {
+      "vol": "VOL.12 • 2026.08",
+      "type": "👑 Hardcover",
+      "title": "Summer Exchange Diary\non the Jirisan Ridge",
+      "titleLine1": "Summer Exchange Diary",
+      "titleLine2": "on the Jirisan Ridge",
+      "meta": "12 episodes • 148 photos included",
+      "quote": "\"4AM ramen at Jangteomok Shelter and the sea of clouds at sunrise...\"",
+      "label": "Jirisan Cheonwangbong Traverse"
+    },
+    "book2": {
+      "vol": "VOL.11 • 2026.07",
+      "type": "🌸 Photo Book",
+      "title": "Deogyusan Hyangjeokbong\nWildflower Exploration",
+      "titleLine1": "Deogyusan Hyangjeokbong",
+      "titleLine2": "Wildflower Exploration",
+      "meta": "8 episodes • 92 photos included",
+      "quote": "\"Group photo at the daylily fields of Hyangjeokbong...\"",
+      "label": "Deogyusan Wildflower Trekking"
+    },
+    "book3": {
+      "vol": "VOL.10 • 2026.06",
+      "type": "🧗 Rock Ridge Record",
+      "title": "Gwanaksan Yeonjudae\nRock Ridge Memories",
+      "titleLine1": "Gwanaksan Yeonjudae",
+      "titleLine2": "Rock Ridge Memories",
+      "meta": "15 episodes • 210 photos included",
+      "quote": "\"The thrill of the rope section and makgeolli at Yeonjudae...\"",
+      "label": "Gwanaksan Rock Ridge Course"
+    }
+  },
+  "my": {
+    "sectionTitle": "🎖️ My Trekking & Badge Gallery",
+    "ucTag": "UC4 include UC5, UC13",
+    "sectionDesc": "Your personal hiking activity history and stamp badges granted by club administrators.",
+    "badgeCountLabel": "🎖️ 4 badges owned",
+    "stampCountLabel": "18 summit stamps",
+    "activityTitle": "🏃 My Activity Record (3-Column Card Grid)",
+    "activityUcTag": "UC13 Activity Record",
+    "activityMeta": "18 hikes completed • Badge sync active",
+    "summitCompleted": "Summited",
+    "badgeGranted": "Badge Granted",
+    "activity1": {
+      "date": "2026.08.15 Summited",
+      "distance": "14.2km",
+      "title": "Jirisan Cheonwangbong Traverse",
+      "icon": "🏔️",
+      "desc": "Peak altitude 1,915m • 1 night at Jangteomok Shelter",
+      "badgeName": "Cheonwangbong Summit Badge",
+      "grantedBy": "granted_by: Kim San-gil"
+    },
+    "activity2": {
+      "date": "2026.07.20 Summited",
+      "distance": "6.8km",
+      "title": "Bukhansan Baegundae Night Trekking",
+      "icon": "⛰️",
+      "desc": "Peak altitude 836m • Night climb & sunrise at Baegundae",
+      "badgeName": "Baegundae Sunrise Badge",
+      "grantedBy": "granted_by: Lee Jeong-sang"
+    },
+    "activity3": {
+      "date": "2026.06.11 Summited",
+      "distance": "9.5km",
+      "title": "Deogyusan Hyangjeokbong Wildflower Tour",
+      "icon": "🌸",
+      "desc": "Peak altitude 1,614m • Daylily field exploration",
+      "badgeName": "Hyangjeokbong Conquest Badge",
+      "grantedBy": "granted_by: Kim San-gil"
+    },
+    "badgesTitle": "🏆 My Collected Badges (UC5)",
+    "badgesUcTag": "UC5 My Badges",
+    "badgesCollectionRate": "Collection rate: 3 / 6 (50%)",
+    "badge1": {
+      "mountain": "Jirisan",
+      "name": "Cheonwangbong Summit",
+      "earnedDate": "Earned 2026.08.15",
+      "grantedBy": "granted_by: Kim San-gil"
+    },
+    "badge2": {
+      "mountain": "Bukhansan",
+      "name": "Baegundae Sunrise",
+      "earnedDate": "Earned 2026.07.20",
+      "grantedBy": "granted_by: Lee Jeong-sang"
+    },
+    "badge3": {
+      "mountain": "Deogyusan",
+      "name": "Hyangjeokbong Conquest",
+      "earnedDate": "Earned 2026.06.11",
+      "grantedBy": "granted_by: Kim San-gil"
+    },
+    "badge4": {
+      "mountain": "Hallasan",
+      "name": "Baengnokdam Summit",
+      "locked": "Locked Badge"
+    },
+    "badge5": {
+      "mountain": "Seoraksan",
+      "name": "Dinosaur Ridge Traverse",
+      "locked": "Locked Badge"
+    },
+    "badge6": {
+      "mountain": "Taebaeksan",
+      "name": "Cheonjedan Summit",
+      "locked": "Locked Badge"
+    },
+    "episodesTitle": "✍️ My Written Hiking Episodes",
+    "episodesUcTag": "UC10 include UC11",
+    "episodesMeta": "3 episodes completed (`author_id: 88a-231`)",
+    "episode1": {
+      "hikeName": "Jirisan Cheonwangbong Traverse",
+      "date": "2026.08.15",
+      "title": "Standing on the Summit of Jirisan Cheonwangbong",
+      "body": "At 4AM, I pushed through the cold winds of Jangteomok Shelter to reach the summit of Cheonwangbong. The joy of sipping warm tea with club members while watching the clouds turn crimson was beyond anything else.",
+      "fullContent": "At 4AM, I pushed through the cold winds of Jangteomok Shelter to reach the summit of Cheonwangbong. The joy of sipping warm tea with club members while watching the clouds turn crimson was beyond anything else.\n\nThe rock ridge section was thrilling, but we helped each other and successfully reached the summit.",
+      "likes": "12",
+      "comments": "4"
+    },
+    "episode2": {
+      "hikeName": "Jirisan Cheonwangbong Traverse",
+      "date": "2026.08.15",
+      "title": "Starlight and Memories at Jangteomok Shelter",
+      "body": "The warmth we shared at Jangteomok Shelter... Even the cold night wind of Jirisan melted away before a cup of warm tea and the laughter of our club members.",
+      "fullContent": "The warmth we shared at Jangteomok Shelter... Preserving memories with photos from the shared drive.",
+      "likes": "8",
+      "comments": "2"
+    }
+  },
+  "clubs": {
+    "sectionTitle": "🏘️ Club Status & Management Center",
+    "ucTag": "UC14 include UC15, UC17",
+    "sectionDesc": "Create a new trekking club (UC17), or manage Google Drive/Gemini key settings, member approvals, hike schedules, and badge creation (UC15).",
+    "adminBtn": "⚙️ Club Admin Center (UC15)",
+    "createBtn": "➕ Create New Club (UC17)",
+    "openAdminCenter": "⚙️ Open Club Admin Center (UC15)",
+    "club1": {
+      "category": "Category: Hiking",
+      "role": "👑 Owner",
+      "name": "National Park Alpine Club",
+      "meta": "48 members • 18 hikes completed",
+      "desc": "A traditional alpine club that conquers famous mountains in national parks and archives photos and diaries."
+    },
+    "club2": {
+      "category": "Category: Traverse/Tracking",
+      "role": "Approved (Member)",
+      "name": "Hallasan Summit Club",
+      "meta": "120 members • 42 hikes completed",
+      "desc": "A hiking group specializing in Jeju Hallasan Baengnokdam and Gwaneumsa course traverses.",
+      "founder": "Founded by: Lee Deung-san",
+      "status": "Membership Approved"
+    },
+    "club3": {
+      "category": "Category: Trekking/General",
+      "role": "Application Pending",
+      "name": "Weekend Healing Trekking",
+      "meta": "32 members • 10 hikes completed",
+      "desc": "A weekend group that walks light forest trails and healing paths to relieve daily fatigue.",
+      "waitingLabel": "Invite link pending",
+      "status": "Approval Pending"
+    }
+  },
+  "gallery": {
+    "title": "📷 Shared Drive Photo Gallery (UC9/UC12)",
+    "ucTag": "Google Shared Drive Sync",
+    "description": "Original photos and behind-the-scenes B-cut album stored in Google Shared Drive (`hikes/jirisan/`)."
+  },
+  "modal": {
+    "episode": {
+      "fullContentTitle": "📝 Full Episode Content",
+      "author": "Author:",
+      "likesCount": "❤️ {{count}} Likes",
+      "commentsCount": "💬 {{count}} Comments"
+    },
+    "admin": {
+      "ucTag": "UC15 Club Admin Center",
+      "ownerBadge": "Owner Privileges",
+      "title": "⚙️ {{clubName}} Management Center",
+      "description": "Manage Google Shared Drive Key, Gemini API Key integration, member approval, hike scheduling, and badge creation.",
+      "tabKeys": "🔑 Google Drive & AI Key Integration",
+      "tabMembers": "👥 Member Approval (UC14)",
+      "tabHikes": "🗓️ Trekking Schedule Registration",
+      "tabBadges": "🏆 Summit Badge Creation",
+      "keysSuccessAlert": "✅ Google Shared Drive Folder ID and Gemini API Key have been successfully updated!",
+      "keysFolderLabel": "📁 Google Shared Drive Folder ID (google_drive_folder_id)",
+      "keysFolderHint": "When uploading hike images, they will be automatically organized under hikes/id/ within this shared drive folder.",
+      "keysGeminiLabel": "🤖 Episode AI Writing Gemini API Key (gemini_api_key)",
+      "keysGeminiHint": "Assists with AI writing refinement and emotional sentence generation when composing episodes.",
+      "keysSaveBtn": "Save API Keys & Drive Configuration",
+      "membersTitle": "👥 Pending Member Applications (UC14 Approval)",
+      "membersColApplicant": "Applicant",
+      "membersColDate": "Applied Date",
+      "membersColInviteLink": "Invite Link Source",
+      "membersColAction": "Action",
+      "membersSampleName": "Park Trek (track_park@email.com)",
+      "membersSampleDate": "2026.08.22",
+      "membersSampleLink": "Valid (Link #4829)",
+      "hikesPlaceholder": "Register New Trekking Schedule",
+      "badgesPlaceholder": "Design Custom Stamp Badge",
+      "placeholderDesc": "Create new schedules or register badges with club admin privileges."
+    },
+    "alerts": {
+      "approveSuccess": "Membership has been approved.",
+      "rejectSuccess": "Membership has been rejected.",
+      "badgeGrant": "Granting a club badge to {{name}} (UC6).",
+      "clubCreate": "Opening the new trekking club creation form (UC17)."
+    },
+    "demoData": {
+      "hikeLeader": "Hike Leader (Kim San-gil)",
+      "hikeDate": "2026.08.15",
+      "hikeDesc": "Jirisan Cheonwangbong Traverse hiking recruitment schedule detail page.",
+      "hikesDetailDesc": "Trekking recruitment detailed schedule.",
+      "diaryEditor": "National Park Alpine Club Editorial",
+      "diaryVol": "2026.08 VOL.12",
+      "diaryDesc": "4AM ramen at Jangteomok Shelter and Cheonwangbong sunrise... A hardcover bound edition containing 12 episodes written together by club members.",
+      "episodeAuthor": "Kim San-gil (Me)",
+      "episodeTime1": "2026.08.15 09:30 AM",
+      "episodeTime2": "2026.08.15 08:15 PM"
+    }
+  },
+  "language": {
+    "ko": "한국어",
+    "en": "English"
+  },
+  "auth": {
+    "loginTitle": "Welcome to Shared Tracking Diary",
+    "loginSubtitle": "Sign in easily with your social account",
+    "loginWithKakao": "Continue with Kakao",
+    "loginWithGoogle": "Continue with Google",
+    "loginWithNaver": "Continue with Naver",
+    "logout": "Log Out",
+    "loginBtn": "Log In",
+    "greeting": "Hello, {{nickname}}",
+    "socialOnlyNotice": "We only support social login.",
+    "loggingIn": "Logging in...",
+    "redirecting": "Redirecting..."
+  }
+}

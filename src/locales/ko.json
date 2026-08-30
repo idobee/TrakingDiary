@@ -1,0 +1,339 @@
+{
+  "common": {
+    "close": "닫기",
+    "save": "저장하기",
+    "apply": "신청하기",
+    "approve": "승인",
+    "reject": "거절",
+    "viewAll": "전체보기",
+    "viewDetail": "🔍 상세보기 (팝업)",
+    "likes": "좋아요",
+    "comments": "댓글",
+    "count": "{{count}}개",
+    "published": "게시 완료",
+    "openBook": "책 펼치기 →",
+    "scrapbookHardcover": "Scrapbook Hardcover",
+    "googleDriveSyncTag": "Google Shared Drive Sync",
+    "googleDriveLinkedTag": "Google Shared Drive Linked"
+  },
+  "header": {
+    "appTitle": "함께쓰는 Tracking 일기",
+    "appSubtitle": "Shared Peak & Path Archive (Next.js 14+ App Router)",
+    "ucDashboardRoot": "UC1 대시보드 Root",
+    "profileName": "김산길 님",
+    "profileUc": "UC4 마이트레킹",
+    "profileLevel": "LV.4",
+    "profileInitial": "산",
+    "tabs": {
+      "dashboard": "📊 대시보드",
+      "hikes": "🗓️ 트레킹모집 & 일정표",
+      "diaries": "📚 트레킹앨범 & 일기",
+      "gallery": "📷 사진첩 (Drive)",
+      "my": "🏅 마이트레킹 & 뱃지",
+      "clubs": "🏘️ 동호회현황 & 신청"
+    },
+    "tabUcCodes": {
+      "dashboard": "UC1",
+      "hikes": "UC2/UC7",
+      "diaries": "UC3/UC8/10",
+      "gallery": "UC9/UC12",
+      "my": "UC4/UC5/13",
+      "clubs": "UC14/15/17"
+    },
+    "clubs": {
+      "nationalPark": "🌲 국립공원 산악회 (Hiking Club)",
+      "hallaClub": "⛰️ 한라산 종주 클럽 (Summit Club)",
+      "weekendHealing": "👟 주말 힐링 트레킹 (Healing Path)"
+    }
+  },
+  "footer": {
+    "title": "함께쓰는 Tracking 일기 • Shared Peak & Path Archive",
+    "description": "Next.js 14+ App Router & Supabase & Google Shared Drive 연동 완성형 산행 추억 아카이빙 플랫폼",
+    "specCompliance": "UC1~UC17 아키텍처 스펙 완벽 준수",
+    "driveApi": "Google Shared Drive API v3",
+    "geminiAi": "Gemini AI 에피소드 지원"
+  },
+  "dashboard": {
+    "heroBadge": "🚀 UC1 대시보드 종합 아카이브",
+    "heroTitle": "함께 발맞춘 산길,\n하나의 일기로 영원히 기록됩니다.",
+    "heroTitleLine1": "함께 발맞춘 산길,",
+    "heroTitleLine2": "하나의 일기로 영원히 기록됩니다.",
+    "heroDescription": "동호회 산행 모집(UC2), 구글 공유 드라이브 원본 사진 저장(UC9), 월별 하드커버 단행본 서가(UC3), 그리고 완성 뱃지(UC5)까지 산행 추억을 아카이빙하세요.",
+    "heroCtaHikes": "⛰️ 트레킹 모집 둘러보기 (UC2)",
+    "heroCtaDiaries": "📖 단행본 서가 열람 (UC3)",
+    "metricsUpcomingLabel": "Upcoming Hikes",
+    "metricsUpcomingValue": "3건 모집중",
+    "metricsDiariesLabel": "Published Diaries",
+    "metricsDiariesValue": "12권 아카이브",
+    "metricsPhotosLabel": "Shared Photos",
+    "metricsPhotosValue": "450장 저장됨",
+    "metricsBadgesLabel": "Earned Badges",
+    "metricsBadgesValue": "4개 보유중",
+    "recentHikesTitle": "🚩 모집중인 최근 산행 (UC2)",
+    "recentHikesUc": "UC2",
+    "hikeJirisan": {
+      "date": "2026.08.15",
+      "title": "🏔️ 지리산 천왕봉 종주",
+      "desc": "장터목 대피소 1박 • 모집인원 8/12명"
+    },
+    "hikeBukhansan": {
+      "date": "2026.08.29",
+      "title": "🌙 북한산 백운대 야간 일출",
+      "desc": "새벽 4시 등반 • 모집인원 6/10명"
+    },
+    "bookshelfTitle": "📖 최신 아카이빙 단행본 (UC3)",
+    "bookshelfUc": "UC3",
+    "bookshelfVol": "VOL.12",
+    "bookshelfVolLabel": "2026.08 VOL.12 • 양장본",
+    "bookshelfBookTitle": "지리산 능선에서의 여름날 교환일기",
+    "bookshelfBookMeta": "에피소드 12편 • 사진 148장 구글 공유드라이브 보관",
+    "bookshelfCtaBrowse": "원목 서가에서 전체 단행본 열람하기 (UC3) →",
+    "watermark": "PEAK"
+  },
+  "diaries": {
+    "badgeLabel": "Digital Scrapbook Archive",
+    "ucTag": "UC3 include UC8 (UC9+UC10)",
+    "sectionTitle": "📖 트레킹앨범 & 교환일기 단행본 서가",
+    "sectionDesc": "우리 동호회가 함께 쓴 산행 교환일기와 에피소드가 월별 디지털 하드커버 단행본으로 서가에 보관됩니다.",
+    "tipText": "💡 서가에 놓인 책 표지를 클릭하면 단위 산행일기(UC8)로 이동합니다.",
+    "shelfHeader": "국립공원 산악회 • 아카이빙 서가 (Library Shelf)",
+    "shelfMeta": "총 12권의 단행본 보관중 • 하드커버 양장본 아카이브",
+    "shelfSeasonBadge": "📚 2026 Season Archives",
+    "shelfLedgeLabel": "🪵 OAK WOODEN SHELF NO. 01",
+    "shelfLedgeHint": "CLICK BOOK COVER TO OPEN DIARY (UC8)",
+    "book1": {
+      "vol": "VOL.12 • 2026.08",
+      "type": "👑 양장본",
+      "title": "지리산 능선에서의\n여름날 교환일기",
+      "titleLine1": "지리산 능선에서의",
+      "titleLine2": "여름날 교환일기",
+      "meta": "에피소드 12편 • 사진 148장 포함",
+      "quote": "\"새벽 4시 장터목 대피소 라면과 운해 일출...\"",
+      "label": "지리산 천왕봉 종주"
+    },
+    "book2": {
+      "vol": "VOL.11 • 2026.07",
+      "type": "🌸 화보집",
+      "title": "덕유산 향적봉\n야생화 탐방기",
+      "titleLine1": "덕유산 향적봉",
+      "titleLine2": "야생화 탐방기",
+      "meta": "에피소드 8편 • 사진 92장 포함",
+      "quote": "\"원추리 꽃밭이 펼쳐진 향적봉 단체사진...\"",
+      "label": "덕유산 야생화 트래킹"
+    },
+    "book3": {
+      "vol": "VOL.10 • 2026.06",
+      "type": "🧗 암릉기록",
+      "title": "관악산 연주대\n암릉 산행 추억",
+      "titleLine1": "관악산 연주대",
+      "titleLine2": "암릉 산행 추억",
+      "meta": "에피소드 15편 • 사진 210장 포함",
+      "quote": "\"바위 밧줄 구간의 아찔함과 연주대 막걸리...\"",
+      "label": "관악산 암릉 코스"
+    }
+  },
+  "my": {
+    "sectionTitle": "🎖️ 마이트레킹 & 나의 뱃지 갤러리",
+    "ucTag": "UC4 include UC5, UC13",
+    "sectionDesc": "개인 등산 활동 이력과 동호회 관리자가 부여한 스탬프 뱃지 현황입니다.",
+    "badgeCountLabel": "🎖️ 보유 뱃지 4개",
+    "stampCountLabel": "완등 스탬프 18개",
+    "activityTitle": "🏃 나의 활동 기록 (3열 카드 그리드)",
+    "activityUcTag": "UC13 활동기록",
+    "activityMeta": "총 18회 산행 완료 • 획득 뱃지 동기화",
+    "summitCompleted": "완등",
+    "badgeGranted": "뱃지 수여됨",
+    "activity1": {
+      "date": "2026.08.15 완등",
+      "distance": "14.2km",
+      "title": "지리산 천왕봉 종주",
+      "icon": "🏔️",
+      "desc": "최고 고도 1,915m • 장터목 대피소 1박",
+      "badgeName": "천왕봉 완등 뱃지",
+      "grantedBy": "granted_by: 김산길"
+    },
+    "activity2": {
+      "date": "2026.07.20 완등",
+      "distance": "6.8km",
+      "title": "북한산 백운대 야간 트래킹",
+      "icon": "⛰️",
+      "desc": "최고 고도 836m • 백운대 야간 등반 & 일출",
+      "badgeName": "백운대 일출 뱃지",
+      "grantedBy": "granted_by: 이정상"
+    },
+    "activity3": {
+      "date": "2026.06.11 완등",
+      "distance": "9.5km",
+      "title": "덕유산 향적봉 야생화 탐방",
+      "icon": "🌸",
+      "desc": "최고 고도 1,614m • 원추리 꽃밭 탐방",
+      "badgeName": "향적봉 정복 뱃지",
+      "grantedBy": "granted_by: 김산길"
+    },
+    "badgesTitle": "🏆 나의 수집 뱃지 (UC5)",
+    "badgesUcTag": "UC5 나의뱃지",
+    "badgesCollectionRate": "수집률: 3 / 6 (50%)",
+    "badge1": {
+      "mountain": "지리산",
+      "name": "천왕봉 완등",
+      "earnedDate": "2026.08.15 획득",
+      "grantedBy": "granted_by: 김산길"
+    },
+    "badge2": {
+      "mountain": "북한산",
+      "name": "백운대 일출",
+      "earnedDate": "2026.07.20 획득",
+      "grantedBy": "granted_by: 이정상"
+    },
+    "badge3": {
+      "mountain": "덕유산",
+      "name": "향적봉 정복",
+      "earnedDate": "2026.06.11 획득",
+      "grantedBy": "granted_by: 김산길"
+    },
+    "badge4": {
+      "mountain": "한라산",
+      "name": "백록담 완등",
+      "locked": "미획득 뱃지"
+    },
+    "badge5": {
+      "mountain": "설악산",
+      "name": "공룡능선 종주",
+      "locked": "미획득 뱃지"
+    },
+    "badge6": {
+      "mountain": "태백산",
+      "name": "천제단 완등",
+      "locked": "미획득 뱃지"
+    },
+    "episodesTitle": "✍️ 내가 작성한 산행 에피소드 목록",
+    "episodesUcTag": "UC10 include UC11",
+    "episodesMeta": "총 3편의 에피소드 작성 완료 (`author_id: 88a-231`)",
+    "episode1": {
+      "hikeName": "지리산 천왕봉 종주",
+      "date": "2026.08.15",
+      "title": "지리산 천왕봉 정상을 밟으며",
+      "body": "새벽 4시, 장터목 대피소의 차가운 바람을 뚫고 오른 천왕봉 정상. 붉게 물드는 운해를 바라보며 모임원들과 함께 끓여 마신 따뜻한 차 한 잔의 기쁨은 그 무엇과도 바꿀 수 없었다.",
+      "fullContent": "새벽 4시, 장터목 대피소의 차가운 바람을 뚫고 오른 천왕봉 정상. 붉게 물드는 운해를 바라보며 모임원들과 함께 끓여 마신 따뜻한 차 한 잔의 기쁨은 그 무엇과도 바꿀 수 없었다.\n\n암릉 구간을 오를 때는 아찔했지만 서로 손을 잡아끌어주며 완등에 성공했다.",
+      "likes": "12",
+      "comments": "4"
+    },
+    "episode2": {
+      "hikeName": "지리산 천왕봉 종주",
+      "date": "2026.08.15",
+      "title": "장터목 대피소의 별빛과 추억",
+      "body": "장터목 대피소에 모여 나누었던 온기... 지리산의 차가운 밤바람도 따뜻한 차 한 잔과 모임원들의 웃음소리 앞에서는 사르르 녹아내렸습니다.",
+      "fullContent": "장터목 대피소에 모여 나누었던 온기... 선택한 공유 드라이브 사진과 함께 추억을 간직합니다.",
+      "likes": "8",
+      "comments": "2"
+    }
+  },
+  "clubs": {
+    "sectionTitle": "🏘️ 동호회 현황 & 관리 센터",
+    "ucTag": "UC14 include UC15, UC17",
+    "sectionDesc": "새로운 트레킹 동호회를 개설 신청(UC17)하거나, 동호회의 구글 드라이브/Gemini 키 설정, 회원 승인, 산행 일정 및 뱃지 생성을 통합 관리(UC15)합니다.",
+    "adminBtn": "⚙️ 동호회 종합 관리 (UC15)",
+    "createBtn": "➕ 신규 동호회 개설 신청 (UC17)",
+    "openAdminCenter": "⚙️ 동호회 관리 센터 열기 (UC15)",
+    "club1": {
+      "category": "카테고리: 등산/hiking",
+      "role": "👑 개설자 (Owner)",
+      "name": "국립공원 산악회",
+      "meta": "회원 48명 • 산행 완료 18회",
+      "desc": "전국 국립공원 명산을 정복하고 사진과 일기를 아카이빙하는 전통 산악 동호회입니다."
+    },
+    "club2": {
+      "category": "카테고리: 종주/tracking",
+      "role": "승인됨 (Member)",
+      "name": "한라산 종주 클럽",
+      "meta": "회원 120명 • 산행 완료 42회",
+      "desc": "제주 한라산 백록담 및 관음사 코스 종주를 전문으로 하는 산행 그룹입니다.",
+      "founder": "개설자: 이등산",
+      "status": "가입 승인 완료"
+    },
+    "club3": {
+      "category": "카테고리: 트레킹/general",
+      "role": "가입 신청중 (Pending)",
+      "name": "주말 힐링 트레킹",
+      "meta": "회원 32명 • 산행 완료 10회",
+      "desc": "가벼운 둘레길과 치유의 숲길을 걸으며 일상의 피로를 푸는 주말 모임입니다.",
+      "waitingLabel": "초청링크 대기중",
+      "status": "승인 대기중"
+    }
+  },
+  "gallery": {
+    "title": "📷 공유 드라이브 사진첩 (UC9/UC12)",
+    "ucTag": "Google Shared Drive Sync",
+    "description": "Google Shared Drive (`hikes/jirisan/`)에 저장된 원본 사진 및 B컷 비하인드 앨범입니다."
+  },
+  "modal": {
+    "episode": {
+      "fullContentTitle": "📝 전체 에피소드 본문",
+      "author": "작성자:",
+      "likesCount": "❤️ 좋아요 {{count}}개",
+      "commentsCount": "💬 댓글 {{count}}개"
+    },
+    "admin": {
+      "ucTag": "UC15 Club Admin Center",
+      "ownerBadge": "개설자 권한",
+      "title": "⚙️ {{clubName}} 종합 관리 센터",
+      "description": "구글 공유 드라이브 Key 및 Gemini API Key 연동, 회원 가입 승인, 산행 일정 및 뱃지 생성을 관리합니다.",
+      "tabKeys": "🔑 구글 드라이브 & AI Key 연동",
+      "tabMembers": "👥 회원 가입 승인 (UC14)",
+      "tabHikes": "🗓️ 트레킹 일정 등록",
+      "tabBadges": "🏆 완등 뱃지 생성",
+      "keysSuccessAlert": "✅ 구글 공유 드라이브 Folder ID 및 Gemini API Key가 성공적으로 업데이트 되었습니다!",
+      "keysFolderLabel": "📁 구글 공유 드라이브 전용 폴더 ID (google_drive_folder_id)",
+      "keysFolderHint": "산행 이미지 업로드 시 해당 공유 드라이브 폴더 하위에 hikes/id/ 형식으로 자동 분류됩니다.",
+      "keysGeminiLabel": "🤖 에피소드 윤색용 Gemini API Key (gemini_api_key)",
+      "keysGeminiHint": "에피소드 작성 시 AI 글쓰기 윤색 및 감성 문장 생성을 보조합니다.",
+      "keysSaveBtn": "API 인증 키 및 드라이브 정보 저장하기",
+      "membersTitle": "👥 가입 신청 대기 회원 (UC14 승인)",
+      "membersColApplicant": "신청자",
+      "membersColDate": "신청일",
+      "membersColInviteLink": "초청 링크 유입",
+      "membersColAction": "관리 조치",
+      "membersSampleName": "박트렉 (track_park@email.com)",
+      "membersSampleDate": "2026.08.22",
+      "membersSampleLink": "유효 (Link #4829)",
+      "hikesPlaceholder": "트레킹 산행 일정 추가 등록",
+      "badgesPlaceholder": "커스텀 스탬프 뱃지 디자인 등록",
+      "placeholderDesc": "동호회 관리자 권한으로 새로운 일정을 수립하거나 부여 뱃지를 등록합니다."
+    },
+    "alerts": {
+      "approveSuccess": "가입을 승인하였습니다.",
+      "rejectSuccess": "가입을 거절하였습니다.",
+      "badgeGrant": "{{name}} 님에게 동호회 수여 뱃지를 부여합니다 (UC6).",
+      "clubCreate": "신규 트레킹 동호회 개설 신청 폼 (UC17) 모달을 엽니다."
+    },
+    "demoData": {
+      "hikeLeader": "산행 대장 (김산길)",
+      "hikeDate": "2026.08.15",
+      "hikeDesc": "지리산 천왕봉 종주 산행 모집 일정 상세 페이지입니다.",
+      "hikesDetailDesc": "트레킹 모집 상세 일정표입니다.",
+      "diaryEditor": "국립공원 산악회 편집부",
+      "diaryVol": "2026.08 VOL.12",
+      "diaryDesc": "새벽 4시 장터목 대피소 라면과 천왕봉 일출... 모임원들과 함께 쓴 12편의 에피소드가 수록된 하드커버 양장본 단행본입니다.",
+      "episodeAuthor": "김산길 (나)",
+      "episodeTime1": "2026.08.15 09:30 AM",
+      "episodeTime2": "2026.08.15 08:15 PM"
+    }
+  },
+  "language": {
+    "ko": "한국어",
+    "en": "English"
+  },
+  "auth": {
+    "loginTitle": "함께쓰는 Tracking 일기에 오신 것을 환영합니다",
+    "loginSubtitle": "소셜 계정으로 간편하게 시작하세요",
+    "loginWithKakao": "카카오로 시작하기",
+    "loginWithGoogle": "Google로 시작하기",
+    "loginWithNaver": "네이버로 시작하기",
+    "logout": "로그아웃",
+    "loginBtn": "로그인",
+    "greeting": "{{nickname}} 님",
+    "socialOnlyNotice": "소셜 로그인만 지원합니다",
+    "loggingIn": "로그인 중...",
+    "redirecting": "리다이렉트 중..."
+  }
+}
