@@ -259,6 +259,28 @@
       "desc": "A weekend group that walks light forest trails and healing paths to relieve daily fatigue.",
       "waitingLabel": "Invite link pending",
       "status": "Approval Pending"
+    },
+    "categoryMapping": {
+      "hiking": {
+        "icon": "🌲",
+        "name": "Hiking"
+      },
+      "running": {
+        "icon": "🏃",
+        "name": "Running"
+      },
+      "cycling": {
+        "icon": "🚴",
+        "name": "Cycling"
+      },
+      "tracking": {
+        "icon": "🥾",
+        "name": "Trekking"
+      },
+      "general": {
+        "icon": "✨",
+        "name": "General"
+      }
     }
   },
   "gallery": {

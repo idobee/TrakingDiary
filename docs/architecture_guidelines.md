@@ -34,10 +34,10 @@
 | **UC11** | **에피소드등록** | 단위 트래킹일기(UC8) 내에서 해당 트래킹의 구글 공유 드라이브 사진(`photos` DB)을 선택하고 배치 스타일(상단/인라인/하단)을 지정하여 에피소드 작성 및 저장 | 에피소드 작성 액션 (UC8 내) | `에피소드 작성 폼 (UC8 단위 트레킹일기 내)` |
 | **UC12** | **사진등록** | Google Shared Drive API를 활용한 원본 및 B컷 사진 업로드 | 사진 업로드 액션 | `사진 업로드 모달/폼` |
 | **UC13** | **활동기록** | 누적 고도, 등반 거리, 참석률 등 트래킹 활동 타임라인 | UC4 하위 연동 | `활동 타임라인 (/my/activities)` |
-| **UC14** | **동호회현황** | 개설된 동호회 목록, 멤버 현황 및 초청링크로 진입한 가입 신청 현황 조회 | `include UC15, UC17` | `동호회 현황 (/clubs)` |
-| **UC15** | **동호회관리** | 회원 가입 승인, 신규 트레킹 일정 등록, 동호회 전용 뱃지 생성, 동호회 전용 구글 공유 드라이브 키 & Gemini AI Key 등록/관리 센터 | Admin 전용 액션 | `동호회 관리 센터 (/clubs/[id]/admin)` |
+| **UC14** | **동호회현황 & 승인** | 일반 유저: 승인된(Approved) 동호회 목록 조회. <br> 시스템 관리자(System Admin): 신규 동호회 개설 신청(Pending) 목록 조회 및 승인/거절 처리 | `include UC15, UC17` | `동호회 현황 및 승인 센터 (/clubs)` |
+| **UC15** | **동호회관리** | 동호회 자체 관리자(Owner/Admin)의 회원 가입 승인, 신규 트레킹 일정 등록, 동호회 전용 뱃지 생성, 구글 공유 드라이브 키 & Gemini AI Key 등록/관리 | Club Admin 전용 액션 | `동호회 관리 센터 모달` |
 | **UC16** | **트래킹일기** | 일정표(UC7) 완등 클릭 시 팝업 렌더링. 참가자 동그란 사인 목록, 사진들, 에피소드 요약 표출 및 사진올리기(UC12), 에피소드등록(UC11) 연동 | `include UC9, UC10, UC11, UC12` | `트래킹일기 팝업 모달 (UC16)` |
-| **UC17** | **동호회개설** | 사용자가 새로운 트레킹 동호회를 생성 및 개설 신청하는 기능 (가입은 초청 링크를 통해 유입 후 개설자 승인) | UC14 하위 연동 | `동호회 개설 신청 폼 (/clubs/new)` |
+| **UC17** | **동호회개설** | 사용자가 새로운 트레킹 동호회 개설을 신청(Pending)하는 폼. 시스템 관리자(UC14)가 승인 시 정식 개설되며 신청자가 Owner 권한 획득 | UC14 하위 연동 | `동호회 개설 신청 모달 (/clubs_new)` |
 
 ---
 
@@ -127,125 +127,10 @@ src/app/
 
 ### 3.1 DDL SQL Schema
 
-```sql
--- 1. Users Table (auth.users 연동 - Kakao, Google 등 Social OAuth 회원가입만 허용)
-CREATE TABLE public.users (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  email TEXT NOT NULL,
-  nickname TEXT NOT NULL,
-  avatar_url TEXT,
-  provider TEXT NOT NULL CHECK (provider IN ('kakao', 'google', 'naver', 'oauth')), -- OAuth 소셜 로그인 제공자
-  provider_id TEXT, -- OAuth 고유 식별자
-  character_type TEXT DEFAULT 'beginner',
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 2. Clubs Table (동호회 메타데이터 & 구글드라이브/AI API 키 연동 - UC14, UC15, UC17)
-CREATE TABLE public.clubs (
-  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- Sequential Max ID (user_id 외 정수 PK)
-  owner_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
-  category TEXT NOT NULL CHECK (category IN ('hiking', 'running', 'cycling', 'tracking', 'general')),
-  description TEXT,
-  logo_url TEXT,
-  google_drive_folder_id TEXT, -- 해당 동호회 전용 구글 공유 드라이브 폴더 ID
-  google_drive_credentials_json TEXT, -- 서비스 계정 인증 JSON
-  gemini_api_key TEXT, -- AI 에피소드 윤색 및 맥락 분석용 Gemini API Key
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 3. Club Members Table (동호회 가입 신청, 승인 및 관리자 권한 지정 - UC14, UC15)
-CREATE TABLE public.club_members (
-  club_id BIGINT REFERENCES public.clubs(id) ON DELETE CASCADE,
-  user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
-  role TEXT DEFAULT 'member' CHECK (role IN ('owner', 'admin', 'member')), -- 동호회 관리자 권한 지정 (owner, admin, member)
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
-  applied_at TIMESTAMPTZ DEFAULT NOW(),
-  approved_at TIMESTAMPTZ,
-  PRIMARY KEY (club_id, user_id)
-);
-
--- 4. Hikes Table (트래킹 모집 및 일정 - UC2, UC7)
-CREATE TABLE public.hikes (
-  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- Sequential Max ID
-  club_id BIGINT REFERENCES public.clubs(id) ON DELETE CASCADE,
-  organizer_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
-  title TEXT NOT NULL,
-  mountain_name TEXT NOT NULL,
-  hike_date TIMESTAMPTZ NOT NULL,
-  difficulty TEXT CHECK (difficulty IN ('easy', 'medium', 'hard', 'expert')),
-  status TEXT DEFAULT 'recruiting' CHECK (status IN ('recruiting', 'completed', 'cancelled')),
-  description TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 5. Hike Members Table (트래킹 신청상태 및 참여완료 관리 - UC2, UC7, UC8)
-CREATE TABLE public.hike_members (
-  hike_id BIGINT REFERENCES public.hikes(id) ON DELETE CASCADE,
-  user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
-  role TEXT DEFAULT 'member' CHECK (role IN ('organizer', 'member')),
-  status TEXT DEFAULT 'applied' CHECK (status IN ('applied', 'approved', 'rejected', 'completed')), -- 신청상태(applied), 승인(approved), 거절(rejected), 참여완료(completed)
-  joined_at TIMESTAMPTZ DEFAULT NOW(),
-  completed_at TIMESTAMPTZ, -- 참여완료 일시
-  PRIMARY KEY (hike_id, user_id)
-);
-
--- 6. Episodes Table (episodes 테이블 명칭 변경 및 다중 사진 링크 배열 저장 - UC3, UC8, UC10, UC11)
-CREATE TABLE public.episodes (
-  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- Sequential Max ID
-  hike_id BIGINT NOT NULL REFERENCES public.hikes(id) ON DELETE CASCADE,
-  author_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
-  title TEXT NOT NULL,
-  content TEXT NOT NULL,
-  photo_urls TEXT[], -- 다중 사진 링크 배열 저장 (Multi-Photo Links)
-  is_published BOOLEAN DEFAULT true,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 7. Photos Table (Google Shared Drive 연동 사진 metadata - UC9, UC12)
-CREATE TABLE public.photos (
-  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- Sequential Max ID
-  hike_id BIGINT NOT NULL REFERENCES public.hikes(id) ON DELETE CASCADE,
-  episode_id BIGINT REFERENCES public.episodes(id) ON DELETE SET NULL,
-  uploader_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
-  google_drive_file_id TEXT NOT NULL,
-  google_drive_web_link TEXT NOT NULL,
-  thumbnail_url TEXT,
-  is_bside BOOLEAN DEFAULT false,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 8. Badges Table (완등/참여 뱃지 정의 - UC5, UC6)
-CREATE TABLE public.badges (
-  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- Sequential Max ID
-  club_id BIGINT REFERENCES public.clubs(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
-  icon_name TEXT NOT NULL,
-  description TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 9. User Badges Table (하이킹 참여자 뱃지 수여 - UC5, UC6)
-CREATE TABLE public.user_badges (
-  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- Sequential Max ID
-  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
-  badge_id BIGINT NOT NULL REFERENCES public.badges(id) ON DELETE CASCADE,
-  hike_id BIGINT REFERENCES public.hikes(id) ON DELETE SET NULL,
-  granted_by UUID NOT NULL REFERENCES public.users(id) ON DELETE SET NULL,
-  earned_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE (user_id, badge_id, hike_id)
-);
-
--- Row Level Security (RLS) Enable
-ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.clubs ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.club_members ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.hikes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.hike_members ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.episodes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.photos ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.badges ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.user_badges ENABLE ROW LEVEL SECURITY;
+```markdown
+> **참고:** 전체 데이터베이스 스키마(DDL) 및 RLS 정책의 최신 코드는 AI 에이전트와의 컨텍스트 동기화를 위해 `.agents/AGENTS.md` 파일 또는 `supabase/migrations/` 폴더에서 중앙 관리하고 있습니다.
+> 
+> 자세한 테이블 생성 쿼리 및 제약조건은 해당 파일을 참조해 주시기 바랍니다.
 ```
 
 ---

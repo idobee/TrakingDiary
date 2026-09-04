@@ -4,7 +4,12 @@ import React, { useState } from 'react'
 import { useTranslation } from '@/lib/i18n'
 import { useAuth } from '@/lib/auth'
 
-export const LoginPage: React.FC = () => {
+interface LoginPageProps {
+  inviteClubId?: number | null
+  inviteRole?: string | null
+}
+
+export const LoginPage: React.FC<LoginPageProps> = ({ inviteClubId, inviteRole }) => {
   const { t } = useTranslation()
   const { signInWithProvider } = useAuth()
   const [isRedirecting, setIsRedirecting] = useState(false)
@@ -12,7 +17,7 @@ export const LoginPage: React.FC = () => {
   const handleLogin = async (provider: 'kakao' | 'google') => {
     try {
       setIsRedirecting(true)
-      await signInWithProvider(provider)
+      await signInWithProvider(provider, inviteClubId, inviteRole)
     } catch (error) {
       console.error('Login error:', error)
       setIsRedirecting(false)
@@ -32,14 +37,16 @@ export const LoginPage: React.FC = () => {
         {/* Branding & Logo */}
         <div className="space-y-4">
           <div className="w-20 h-20 mx-auto rounded-full bg-terracotta flex items-center justify-center text-white text-4xl shadow-lg border-4 border-white">
-            ⛰️
+            {inviteClubId ? '✉️' : '⛰️'}
           </div>
           <div>
             <h1 className="font-heading font-extrabold text-2xl text-forest tracking-tight">
-              {t('header.appTitle')}
+              {inviteClubId ? '동호회 초대 수락' : t('header.appTitle')}
             </h1>
             <p className="text-sm text-gray-500 font-body mt-2 font-medium">
-              {t('auth.loginSubtitle')}
+              {inviteClubId 
+                ? '가입을 완료하려면 아래 소셜 계정으로 3초 만에 로그인해 주세요.'
+                : t('auth.loginSubtitle')}
             </p>
           </div>
         </div>

@@ -259,6 +259,28 @@
       "desc": "가벼운 둘레길과 치유의 숲길을 걸으며 일상의 피로를 푸는 주말 모임입니다.",
       "waitingLabel": "초청링크 대기중",
       "status": "승인 대기중"
+    },
+    "categoryMapping": {
+      "hiking": {
+        "icon": "🌲",
+        "name": "하이킹"
+      },
+      "running": {
+        "icon": "🏃",
+        "name": "러닝"
+      },
+      "cycling": {
+        "icon": "🚴",
+        "name": "자전거"
+      },
+      "tracking": {
+        "icon": "🥾",
+        "name": "트레킹"
+      },
+      "general": {
+        "icon": "✨",
+        "name": "일반"
+      }
     }
   },
   "gallery": {

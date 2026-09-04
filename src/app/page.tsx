@@ -7,16 +7,42 @@ import { DashboardPage } from './dashboard_page'
 import { DiariesPage } from './diaries_page'
 import { MyPage } from './my_page'
 import { ClubsPage } from './clubs_page'
+import { ClubsNewPage } from './clubs_new_page'
+import { ClubsAdminPage } from './clubs_admin_page'
 import { LoginPage } from './login_page'
 import { useTranslation } from '@/lib/i18n'
 import { useAuth } from '@/lib/auth'
+import { useClubs } from '@/hooks/useClubs'
+import { useHikes } from '@/hooks/useHikes'
 
 export default function Home() {
   const { t } = useTranslation()
-  const { user, isLoading } = useAuth()
+  const { user, isLoading: isAuthLoading } = useAuth()
+  const { clubs, isLoading: isClubsLoading } = useClubs(user?.id)
 
   const [activeTab, setActiveTab] = useState('dashboard')
-  const [selectedClub, setSelectedClub] = useState('국립공원 산악회')
+  const [selectedClubId, setSelectedClubId] = useState<number | null>(null)
+  
+  const [inviteClubId, setInviteClubId] = useState<number | null>(null)
+  const [inviteRole, setInviteRole] = useState<string | null>(null)
+
+  const { hikes, isLoading: isHikesLoading } = useHikes(selectedClubId || undefined)
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const clubId = params.get('invite_club_id')
+      const role = params.get('invite_role')
+      if (clubId) setInviteClubId(parseInt(clubId, 10))
+      if (role) setInviteRole(role)
+    }
+  }, [])
+
+  React.useEffect(() => {
+    if (clubs.length > 0 && selectedClubId === null) {
+      setSelectedClubId(clubs[0].id)
+    }
+  }, [clubs, selectedClubId])
 
   // Modal States
   const [episodeModalOpen, setEpisodeModalOpen] = useState(false)
@@ -29,6 +55,7 @@ export default function Home() {
   })
 
   const [clubAdminModalOpen, setClubAdminModalOpen] = useState(false)
+  const [clubCreateModalOpen, setClubCreateModalOpen] = useState(false)
   const [adminTab, setAdminTab] = useState<'keys' | 'members' | 'hikes' | 'badges'>('keys')
   const [googleFolderId, setGoogleFolderId] = useState('1A2b3C4d5E6f7G8h9I0j')
   const [geminiApiKey, setGeminiApiKey] = useState('AIzaSyD_SampleGeminiKey987654321')
@@ -52,7 +79,7 @@ export default function Home() {
     setTimeout(() => setSavedSuccessAlert(false), 3000)
   }
 
-  if (isLoading) {
+  if (isAuthLoading || (user && isClubsLoading)) {
     return (
       <div className="min-h-screen bg-forest flex items-center justify-center">
         <p className="text-paper font-heading font-bold animate-pulse">Loading...</p>
@@ -61,7 +88,7 @@ export default function Home() {
   }
 
   if (!user) {
-    return <LoginPage />
+    return <LoginPage inviteClubId={inviteClubId} inviteRole={inviteRole} />
   }
 
   return (
@@ -71,8 +98,9 @@ export default function Home() {
         <Header
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          selectedClub={selectedClub}
-          setSelectedClub={setSelectedClub}
+          selectedClubId={selectedClubId}
+          setSelectedClubId={setSelectedClubId}
+          clubs={clubs}
         />
 
         {/* Main Content Area */}
@@ -89,6 +117,7 @@ export default function Home() {
                   t('modal.demoData.hikeDesc'),
                 )
               }
+              hikes={hikes}
             />
           )}
 
@@ -104,6 +133,7 @@ export default function Home() {
                   t('modal.demoData.hikesDetailDesc'),
                 )
               }
+              hikes={hikes}
             />
           )}
 
@@ -148,11 +178,13 @@ export default function Home() {
 
           {activeTab === 'clubs' && (
             <ClubsPage
-              onOpenClubAdminModal={() => setClubAdminModalOpen(true)}
-              onOpenClubCreateModal={() =>
-                alert(t('modal.alerts.clubCreate'))
-              }
+              onOpenClubAdminModal={() => setActiveTab('club_admin')}
+              onOpenClubCreateModal={() => setClubCreateModalOpen(true)}
             />
+          )}
+
+          {activeTab === 'club_admin' && selectedClubId && (
+            <ClubsAdminPage clubId={selectedClubId} />
           )}
         </main>
       </div>
@@ -202,6 +234,15 @@ export default function Home() {
         </div>
       )}
 
+      {/* Club Creation Modal */}
+      <ClubsNewPage 
+        isOpen={clubCreateModalOpen} 
+        onClose={() => setClubCreateModalOpen(false)}
+        onSuccess={() => {
+          alert('동호회 신청이 완료되었습니다. 관리자 승인 후 목록에 표시됩니다.')
+        }}
+      />
+
       {/* Club Admin Center Modal (UC15) */}
       {clubAdminModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -212,7 +253,7 @@ export default function Home() {
                   <span className="bg-forest text-white font-label text-[10px] px-2.5 py-0.5 rounded-full font-bold">{t('modal.admin.ucTag')}</span>
                   <span className="bg-emerald-100 text-emerald-800 font-label text-[10px] px-2 py-0.5 rounded font-bold">{t('modal.admin.ownerBadge')}</span>
                 </div>
-                <h3 className="font-heading font-extrabold text-2xl text-forest mt-1">{t('modal.admin.title', { clubName: selectedClub })}</h3>
+                <h3 className="font-heading font-extrabold text-2xl text-forest mt-1">{t('modal.admin.title', { clubName: clubs.find(c => c.id === selectedClubId)?.name || '' })}</h3>
                 <p className="text-xs text-gray-500 font-body mt-0.5">{t('modal.admin.description')}</p>
               </div>
               <button

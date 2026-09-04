@@ -28,6 +28,7 @@ CREATE TABLE public.users (
   provider TEXT NOT NULL CHECK (provider IN ('kakao', 'google', 'naver', 'oauth')), -- OAuth 소셜 로그인 제공자
   provider_id TEXT, -- OAuth 고유 식별자
   character_type TEXT DEFAULT 'beginner',
+  system_role TEXT DEFAULT 'user' CHECK (system_role IN ('admin', 'user')), -- 사용자 권한
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -42,6 +43,7 @@ CREATE TABLE public.clubs (
   google_drive_folder_id TEXT, -- 해당 동호회 전용 구글 공유 드라이브 폴더 ID
   google_drive_credentials_json TEXT, -- 서비스 계정 인증 JSON
   gemini_api_key TEXT, -- AI 에피소드 윤색 및 맥락 분석용 Gemini API Key
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')), -- 관리자 승인 상태
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

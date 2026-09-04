@@ -3,19 +3,22 @@
 import React from 'react'
 import { useTranslation, LanguageSwitcher } from '@/lib/i18n'
 import { useAuth } from '@/lib/auth'
+import { Club } from '@/hooks/useClubs'
 
 interface HeaderProps {
   activeTab: string
   setActiveTab: (tab: string) => void
-  selectedClub: string
-  setSelectedClub: (club: string) => void
+  selectedClubId: number | null
+  setSelectedClubId: (id: number) => void
+  clubs: Club[]
 }
 
 export const Header: React.FC<HeaderProps> = ({
   activeTab,
   setActiveTab,
-  selectedClub,
-  setSelectedClub,
+  selectedClubId,
+  setSelectedClubId,
+  clubs,
 }) => {
   const { t } = useTranslation()
   const { user, signOut } = useAuth()
@@ -57,13 +60,17 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="relative inline-block text-left">
               <select
                 id="clubSelect"
-                value={selectedClub}
-                onChange={(e) => setSelectedClub(e.target.value)}
+                value={selectedClubId || ''}
+                onChange={(e) => setSelectedClubId(Number(e.target.value))}
                 className="bg-forest-container text-paper text-xs sm:text-sm font-body font-medium rounded-full px-4 py-2 border border-forest-surface focus:outline-none focus:ring-2 focus:ring-terracotta cursor-pointer"
               >
-                <option value="국립공원 산악회">{t('header.clubs.nationalPark')}</option>
-                <option value="한라산 종주 클럽">{t('header.clubs.hallaClub')}</option>
-                <option value="주말 힐링 트레킹">{t('header.clubs.weekendHealing')}</option>
+                {clubs.length > 0 ? (
+                  clubs.map(club => (
+                    <option key={club.id} value={club.id}>{club.name}</option>
+                  ))
+                ) : (
+                  <option value="" disabled>소속 동호회 없음</option>
+                )}
               </select>
             </div>
 

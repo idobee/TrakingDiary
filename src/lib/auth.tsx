@@ -7,13 +7,14 @@ import { Session, User } from '@supabase/supabase-js'
 export type ExtendedUser = User & {
   nickname?: string
   avatar_url?: string
+  system_role?: 'admin' | 'user'
 }
 
 interface AuthContextValue {
   user: ExtendedUser | null
   session: Session | null
   isLoading: boolean
-  signInWithProvider: (provider: 'kakao' | 'google') => Promise<void>
+  signInWithProvider: (provider: 'kakao' | 'google', inviteClubId?: number | null, inviteRole?: string | null) => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -59,16 +60,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data } = await supabase
         .from('users')
-        .select('nickname, avatar_url')
+        .select('nickname, avatar_url, system_role')
         .eq('id', authUser.id)
         .single()
         
-      const profile = data as { nickname: string; avatar_url: string } | null
+      const profile = data as { nickname: string; avatar_url: string; system_role: 'admin' | 'user' } | null
 
       setUser({
         ...authUser,
-        nickname: profile?.nickname || authUser.user_metadata?.name || authUser.email?.split('@')[0],
-        avatar_url: profile?.avatar_url || authUser.user_metadata?.avatar_url,
+        nickname: profile?.nickname || authUser.user_metadata?.name || authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Trekker',
+        avatar_url: profile?.avatar_url || authUser.user_metadata?.avatar_url || '',
+        system_role: profile?.system_role || 'user',
       })
     } catch (error) {
       console.error('Failed to fetch user profile', error)
@@ -78,12 +80,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
-  const signInWithProvider = async (provider: 'kakao' | 'google') => {
+  const signInWithProvider = async (provider: 'kakao' | 'google', inviteClubId?: number | null, inviteRole?: string | null) => {
+    let callbackUrl = `${window.location.origin}/auth/callback`
+    if (inviteClubId && inviteRole) {
+      callbackUrl += `?invite_club_id=${inviteClubId}&invite_role=${inviteRole}`
+    }
+
+    const options: any = {
+      redirectTo: callbackUrl,
+    }
+
+    if (provider === 'kakao') {
+      // Supabase 백엔드가 강제로 추가하는 이메일/프로필 이미지 권한 요청을 덮어쓰기 위해 
+      // queryParams로 커스텀 scope를 강제 주입합니다.
+      options.queryParams = {
+        scope: 'profile_nickname'
+      }
+    }
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options,
     })
     if (error) throw error
   }

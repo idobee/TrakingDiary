@@ -18,6 +18,7 @@ export interface Database {
           provider: 'kakao' | 'google' | 'naver' | 'oauth'
           provider_id: string | null
           character_type: string
+          system_role: 'admin' | 'user'
           created_at: string
         }
         Insert: {
@@ -28,6 +29,7 @@ export interface Database {
           provider: 'kakao' | 'google' | 'naver' | 'oauth'
           provider_id?: string | null
           character_type?: string
+          system_role?: 'admin' | 'user'
           created_at?: string
         }
         Update: {
@@ -38,8 +40,10 @@ export interface Database {
           provider?: 'kakao' | 'google' | 'naver' | 'oauth'
           provider_id?: string | null
           character_type?: string
+          system_role?: 'admin' | 'user'
           created_at?: string
         }
+        Relationships: []
       }
       clubs: {
         Row: {
@@ -52,6 +56,10 @@ export interface Database {
           google_drive_folder_id: string | null
           google_drive_credentials_json: string | null
           gemini_api_key: string | null
+          contact_phone: string | null
+          applicant_id: string | null
+          applicant_name: string | null
+          status: 'pending' | 'approved' | 'rejected'
           created_at: string
         }
         Insert: {
@@ -64,6 +72,10 @@ export interface Database {
           google_drive_folder_id?: string | null
           google_drive_credentials_json?: string | null
           gemini_api_key?: string | null
+          contact_phone?: string | null
+          applicant_id?: string | null
+          applicant_name?: string | null
+          status?: 'pending' | 'approved' | 'rejected'
           created_at?: string
         }
         Update: {
@@ -76,14 +88,20 @@ export interface Database {
           google_drive_folder_id?: string | null
           google_drive_credentials_json?: string | null
           gemini_api_key?: string | null
+          contact_phone?: string | null
+          applicant_id?: string | null
+          applicant_name?: string | null
+          status?: 'pending' | 'approved' | 'rejected'
           created_at?: string
         }
+        Relationships: []
       }
       club_members: {
         Row: {
           club_id: number
           user_id: string
-          role: 'owner' | 'admin' | 'member'
+          role: 'owner' | 'admin' | 'regular' | 'guest'
+          role_title: string | null
           status: 'pending' | 'approved' | 'rejected'
           applied_at: string
           approved_at: string | null
@@ -91,7 +109,8 @@ export interface Database {
         Insert: {
           club_id: number
           user_id: string
-          role?: 'owner' | 'admin' | 'member'
+          role?: 'owner' | 'admin' | 'regular' | 'guest'
+          role_title?: string | null
           status?: 'pending' | 'approved' | 'rejected'
           applied_at?: string
           approved_at?: string | null
@@ -99,11 +118,13 @@ export interface Database {
         Update: {
           club_id?: number
           user_id?: string
-          role?: 'owner' | 'admin' | 'member'
+          role?: 'owner' | 'admin' | 'regular' | 'guest'
+          role_title?: string | null
           status?: 'pending' | 'approved' | 'rejected'
           applied_at?: string
           approved_at?: string | null
         }
+        Relationships: []
       }
       hikes: {
         Row: {
@@ -142,6 +163,7 @@ export interface Database {
           description?: string | null
           created_at?: string
         }
+        Relationships: []
       }
       hike_members: {
         Row: {
@@ -168,6 +190,7 @@ export interface Database {
           joined_at?: string
           completed_at?: string | null
         }
+        Relationships: []
       }
       episodes: {
         Row: {
@@ -200,6 +223,7 @@ export interface Database {
           is_published?: boolean
           created_at?: string
         }
+        Relationships: []
       }
       photos: {
         Row: {
@@ -235,6 +259,7 @@ export interface Database {
           is_bside?: boolean
           created_at?: string
         }
+        Relationships: []
       }
       badges: {
         Row: {
@@ -261,6 +286,7 @@ export interface Database {
           description?: string | null
           created_at?: string
         }
+        Relationships: []
       }
       user_badges: {
         Row: {
@@ -287,7 +313,20 @@ export interface Database {
           granted_by?: string | null
           earned_at?: string
         }
+        Relationships: []
       }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }

@@ -2,15 +2,18 @@
 
 import React from 'react'
 import { useTranslation } from '@/lib/i18n'
+import { Hike } from '@/hooks/useHikes'
 
 interface DashboardPageProps {
   onNavigateTab: (tab: string) => void
   onOpenScheduleModal: (title: string) => void
+  hikes: Hike[]
 }
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({
   onNavigateTab,
   onOpenScheduleModal,
+  hikes,
 }) => {
   const { t } = useTranslation()
 
@@ -108,29 +111,30 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
 
           <div className="space-y-3">
-            <div
-              onClick={() => onOpenScheduleModal(t('dashboard.hikeJirisan.title'))}
-              className="p-4 bg-paper-low hover:bg-sand-light/50 rounded-2xl border border-paper-high transition cursor-pointer flex justify-between items-center"
-            >
-              <div>
-                <span className="bg-forest text-white text-[10px] font-label font-bold px-2 py-0.5 rounded-full">{t('dashboard.hikeJirisan.date')}</span>
-                <h4 className="font-heading font-bold text-base text-forest mt-1">{t('dashboard.hikeJirisan.title')}</h4>
-                <p className="text-xs text-gray-500 font-body">{t('dashboard.hikeJirisan.desc')}</p>
+            {hikes.length > 0 ? (
+              hikes.slice(0, 3).map((hike) => (
+                <div
+                  key={hike.id}
+                  onClick={() => onOpenScheduleModal(hike.title)}
+                  className="p-4 bg-paper-low hover:bg-sand-light/50 rounded-2xl border border-paper-high transition cursor-pointer flex justify-between items-center"
+                >
+                  <div>
+                    <span className="bg-forest text-white text-[10px] font-label font-bold px-2 py-0.5 rounded-full">
+                      {new Date(hike.hike_date).toLocaleDateString()}
+                    </span>
+                    <h4 className="font-heading font-bold text-base text-forest mt-1">{hike.title}</h4>
+                    <p className="text-xs text-gray-500 font-body">{hike.description}</p>
+                  </div>
+                  <span className="bg-terracotta text-white font-label text-[10px] px-3 py-1 rounded-full font-bold">
+                    {hike.status === 'recruiting' ? t('common.apply') : t('common.viewDetail')}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="p-4 text-center text-sm text-gray-500 font-body">
+                모집 중인 산행이 없습니다.
               </div>
-              <span className="bg-terracotta text-white font-label text-[10px] px-3 py-1 rounded-full font-bold">{t('common.apply')}</span>
-            </div>
-
-            <div
-              onClick={() => onOpenScheduleModal(t('dashboard.hikeBukhansan.title'))}
-              className="p-4 bg-paper-low hover:bg-sand-light/50 rounded-2xl border border-paper-high transition cursor-pointer flex justify-between items-center"
-            >
-              <div>
-                <span className="bg-forest text-white text-[10px] font-label font-bold px-2 py-0.5 rounded-full">{t('dashboard.hikeBukhansan.date')}</span>
-                <h4 className="font-heading font-bold text-base text-forest mt-1">{t('dashboard.hikeBukhansan.title')}</h4>
-                <p className="text-xs text-gray-500 font-body">{t('dashboard.hikeBukhansan.desc')}</p>
-              </div>
-              <span className="bg-terracotta text-white font-label text-[10px] px-3 py-1 rounded-full font-bold">{t('common.apply')}</span>
-            </div>
+            )}
           </div>
         </div>
 

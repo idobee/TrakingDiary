@@ -4,6 +4,10 @@ const nextConfig = {
   images: {
     domains: ['images.unsplash.com', 'drive.google.com', 'lh3.googleusercontent.com'],
   },
+  webpack: (config) => {
+    config.cache = false;
+    return config;
+  },
 }
 
 module.exports = nextConfig
