@@ -1,14 +1,28 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from '@/lib/i18n'
+import { useHikes } from '@/hooks/useHikes'
 
 interface DiariesPageProps {
-  onOpenDiaryDetail: (title: string) => void
+  clubId: number | null
+  clubName?: string
+  onOpenDiaryDetail: (hikeId: number) => void
 }
 
-export const DiariesPage: React.FC<DiariesPageProps> = ({ onOpenDiaryDetail }) => {
+export const DiariesPage: React.FC<DiariesPageProps> = ({ clubId, clubName, onOpenDiaryDetail }) => {
   const { t } = useTranslation()
+  const { hikes, isLoading } = useHikes(clubId || undefined)
+
+  const completedHikes = hikes // 완주하지 않아도 모든 일정을 앨범에 표시
+
+  // Covers predefined colors for books
+  const bookGradients = [
+    'from-[#0a3a27] via-[#012d1d] to-[#001c12]', // Emerald
+    'from-[#802410] via-[#500c00] to-[#360600]', // Terracotta
+    'from-[#192b4d] via-[#0b172a] to-[#040914]', // Navy
+    'from-[#4d3a19] via-[#2a1d0b] to-[#140d04]', // Bronze
+  ]
 
   return (
     <div className="space-y-6">
@@ -34,7 +48,7 @@ export const DiariesPage: React.FC<DiariesPageProps> = ({ onOpenDiaryDetail }) =
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 rounded-full bg-amber-700/60 border border-amber-400/40 text-amber-200 flex items-center justify-center font-heading font-bold text-sm shadow">🏛️</div>
             <div>
-              <h3 className="font-heading font-extrabold text-lg text-amber-100 tracking-wide">{t('diaries.shelfHeader')}</h3>
+              <h3 className="font-heading font-extrabold text-lg text-amber-100 tracking-wide">{clubName ? `${clubName} 앨범` : t('diaries.shelfHeader')}</h3>
               <p className="text-[10px] text-amber-300/70 font-label">{t('diaries.shelfMeta')}</p>
             </div>
           </div>
@@ -43,100 +57,48 @@ export const DiariesPage: React.FC<DiariesPageProps> = ({ onOpenDiaryDetail }) =
           </span>
         </div>
 
-        {/* 3D Books Grid Standing on Shelf */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4 pb-2">
-          
-          {/* Hardcover Book 1 (Emerald Leather Cover - Vol 12) */}
-          <div
-            onClick={() => onOpenDiaryDetail(t('diaries.book1.label'))}
-            className="hardcover-book bg-gradient-to-br from-[#0a3a27] via-[#012d1d] to-[#001c12] p-6 text-paper flex flex-col justify-between h-80 group cursor-pointer"
-          >
-            <div className="space-y-3">
-              <div className="flex justify-between items-center border-b border-sand/30 pb-2">
-                <span className="font-label text-xs text-amber-300 font-bold bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-500/40 shadow-sm">{t('diaries.book1.vol')}</span>
-                <span className="text-xs text-amber-200">{t('diaries.book1.type')}</span>
-              </div>
-              <div className="pt-2">
-                <span className="text-[10px] font-label text-sand/70 block uppercase tracking-wider">{t('common.scrapbookHardcover')}</span>
-                <h3 className="font-heading font-extrabold text-xl text-amber-100 group-hover:text-white transition mt-1 leading-snug">
-                  {t('diaries.book1.titleLine1')}<br />{t('diaries.book1.titleLine2')}
-                </h3>
-                <p className="text-[11px] text-sand/80 font-body mt-2">{t('diaries.book1.meta')}</p>
-              </div>
-            </div>
+        {isLoading ? (
+          <div className="text-amber-200/50 text-center py-10 font-body">앨범을 불러오는 중입니다...</div>
+        ) : completedHikes.length === 0 ? (
+          <div className="text-amber-200/50 text-center py-10 font-body">아직 완성된 트레킹 앨범이 없습니다.</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4 pb-2">
+            {completedHikes.map((hike, index) => {
+              const bgGradient = bookGradients[index % bookGradients.length]
+              return (
+                <div
+                  key={hike.id}
+                  onClick={() => onOpenDiaryDetail(hike.id)}
+                  className={`hardcover-book bg-gradient-to-br ${bgGradient} p-6 text-paper flex flex-col justify-between h-80 group cursor-pointer`}
+                >
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center border-b border-sand/30 pb-2">
+                      <span className="font-label text-xs text-amber-300 font-bold bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-500/40 shadow-sm">Vol {index + 1}</span>
+                      <span className="text-xs text-amber-200">단행본</span>
+                    </div>
+                    <div className="pt-2">
+                      <span className="text-[10px] font-label text-sand/70 block uppercase tracking-wider">{t('common.scrapbookHardcover')}</span>
+                      <h3 className="font-heading font-extrabold text-xl text-amber-100 group-hover:text-white transition mt-1 leading-snug">
+                        {hike.title}
+                      </h3>
+                      <p className="text-[11px] text-sand/80 font-body mt-2">{hike.mountain_name} • {new Date(hike.hike_date).toLocaleDateString()}</p>
+                    </div>
+                  </div>
 
-            <div className="space-y-3">
-              <div className="p-2.5 bg-black/30 rounded-xl border border-sand/20 text-[10px] text-amber-100/90 font-body line-clamp-2 italic">
-                {t('diaries.book1.quote')}
-              </div>
-              <div className="pt-2 border-t border-sand/20 flex justify-between items-center text-[10px] font-label text-amber-300">
-                <span className="font-bold">{t('diaries.book1.label')}</span>
-                <span className="bg-amber-400 text-amber-950 font-extrabold px-2 py-0.5 rounded-full shadow text-[9px] group-hover:bg-white transition">{t('common.openBook')}</span>
-              </div>
-            </div>
+                  <div className="space-y-3">
+                    <div className="p-2.5 bg-black/30 rounded-xl border border-sand/20 text-[10px] text-amber-100/90 font-body line-clamp-2 italic">
+                      {hike.description}
+                    </div>
+                    <div className="pt-2 border-t border-sand/20 flex justify-between items-center text-[10px] font-label text-amber-300">
+                      <span className="font-bold">{hike.mountain_name}</span>
+                      <span className="bg-amber-400 text-amber-950 font-extrabold px-2 py-0.5 rounded-full shadow text-[9px] group-hover:bg-white transition">{t('common.openBook')}</span>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
           </div>
-
-          {/* Hardcover Book 2 (Terracotta Leather Cover - Vol 11) */}
-          <div
-            onClick={() => onOpenDiaryDetail(t('diaries.book2.label'))}
-            className="hardcover-book bg-gradient-to-br from-[#802410] via-[#500c00] to-[#360600] p-6 text-paper flex flex-col justify-between h-80 group cursor-pointer"
-          >
-            <div className="space-y-3">
-              <div className="flex justify-between items-center border-b border-sand/30 pb-2">
-                <span className="font-label text-xs text-amber-300 font-bold bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-500/40 shadow-sm">{t('diaries.book2.vol')}</span>
-                <span className="text-xs text-amber-200">{t('diaries.book2.type')}</span>
-              </div>
-              <div className="pt-2">
-                <span className="text-[10px] font-label text-sand/70 block uppercase tracking-wider">{t('common.scrapbookHardcover')}</span>
-                <h3 className="font-heading font-extrabold text-xl text-amber-100 group-hover:text-white transition mt-1 leading-snug">
-                  {t('diaries.book2.titleLine1')}<br />{t('diaries.book2.titleLine2')}
-                </h3>
-                <p className="text-[11px] text-sand/80 font-body mt-2">{t('diaries.book2.meta')}</p>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="p-2.5 bg-black/30 rounded-xl border border-sand/20 text-[10px] text-amber-100/90 font-body line-clamp-2 italic">
-                {t('diaries.book2.quote')}
-              </div>
-              <div className="pt-2 border-t border-sand/20 flex justify-between items-center text-[10px] font-label text-amber-300">
-                <span className="font-bold">{t('diaries.book2.label')}</span>
-                <span className="bg-amber-400 text-amber-950 font-extrabold px-2 py-0.5 rounded-full shadow text-[9px] group-hover:bg-white transition">{t('common.openBook')}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Hardcover Book 3 (Mahogany Oak Cover - Vol 10) */}
-          <div
-            onClick={() => onOpenDiaryDetail(t('diaries.book3.label'))}
-            className="hardcover-book bg-gradient-to-br from-[#2d3a2f] via-[#152417] to-[#0a140b] p-6 text-paper flex flex-col justify-between h-80 group cursor-pointer"
-          >
-            <div className="space-y-3">
-              <div className="flex justify-between items-center border-b border-sand/30 pb-2">
-                <span className="font-label text-xs text-amber-300 font-bold bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-500/40 shadow-sm">{t('diaries.book3.vol')}</span>
-                <span className="text-xs text-amber-200">{t('diaries.book3.type')}</span>
-              </div>
-              <div className="pt-2">
-                <span className="text-[10px] font-label text-sand/70 block uppercase tracking-wider">{t('common.scrapbookHardcover')}</span>
-                <h3 className="font-heading font-extrabold text-xl text-amber-100 group-hover:text-white transition mt-1 leading-snug">
-                  {t('diaries.book3.titleLine1')}<br />{t('diaries.book3.titleLine2')}
-                </h3>
-                <p className="text-[11px] text-sand/80 font-body mt-2">{t('diaries.book3.meta')}</p>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="p-2.5 bg-black/30 rounded-xl border border-sand/20 text-[10px] text-amber-100/90 font-body line-clamp-2 italic">
-                {t('diaries.book3.quote')}
-              </div>
-              <div className="pt-2 border-t border-sand/20 flex justify-between items-center text-[10px] font-label text-amber-300">
-                <span className="font-bold">{t('diaries.book3.label')}</span>
-                <span className="bg-amber-400 text-amber-950 font-extrabold px-2 py-0.5 rounded-full shadow text-[9px] group-hover:bg-white transition">{t('common.openBook')}</span>
-              </div>
-            </div>
-          </div>
-
-        </div>
+        )}
 
         {/* Realistic 3D Wooden Shelf Ledge Bar */}
         <div className="wooden-shelf-ledge h-10 w-full rounded-xl flex items-center justify-between px-6 shadow-inner">

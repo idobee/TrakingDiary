@@ -69,6 +69,8 @@ CREATE TABLE public.hikes (
   difficulty TEXT CHECK (difficulty IN ('easy', 'medium', 'hard', 'expert')),
   status TEXT DEFAULT 'recruiting' CHECK (status IN ('recruiting', 'completed', 'cancelled')),
   description TEXT,
+  cover_image_url TEXT,
+  google_drive_folder_id TEXT, -- 해당 트레킹 모임 전용 구글 드라이브 서브 폴더 ID
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -146,8 +148,11 @@ ALTER TABLE public.user_badges ENABLE ROW LEVEL SECURITY;
 ## 3. 📂 Google Shared Drive 연동 규격
 
 1. **서비스 계정(Service Account) 인증**: Backend API Route (`/api/drive/upload`)에서 OAuth JWT Client로 Google Shared Drive 접근 권한 획득.
-2. **폴더 구조화**: 각 산행 등록 시 구글 드라이브 내 `hikes/{hike_id}/` 전용 폴더 자동 생성.
-3. **메타데이터 저장**: 원본 파일은 구글 공유 드라이브에 저장하고, URL 및 File ID만 Supabase `photos` 테이블에 기록.
+2. **폴더 구조화 (첨부파일 관리 기본 지침)**: 
+   - 처음 이미지를 업로드할 때, 해당 트레킹의 **예정 날짜(YYYY-MM-DD)**를 이름으로 하는 서브 폴더를 동호회 구글 드라이브 내에 자동 생성합니다.
+   - 만약 동일한 일자 이름의 폴더가 이미 존재한다면, 뒤에 `(1)`, `(2)` 등 숫자를 붙여 폴더명을 구분하여 생성합니다 (예: `2026-09-05 (1)`).
+   - 이후 해당 트레킹 모임과 관련된 모든 이미지는 위에서 배정된 전용 서브 폴더에 저장됩니다.
+3. **메타데이터 저장**: 원본 파일은 구글 공유 드라이브에 저장하고, URL 및 File ID, 그리고 생성된 서브 폴더의 ID를 Supabase 데이터베이스에 기록하여 재사용합니다.
 
 ---
 

@@ -137,6 +137,7 @@ export interface Database {
           difficulty: 'easy' | 'medium' | 'hard' | 'expert' | null
           status: 'recruiting' | 'completed' | 'cancelled'
           description: string | null
+          cover_image_url: string | null
           created_at: string
         }
         Insert: {
@@ -149,6 +150,7 @@ export interface Database {
           difficulty?: 'easy' | 'medium' | 'hard' | 'expert' | null
           status?: 'recruiting' | 'completed' | 'cancelled'
           description?: string | null
+          cover_image_url?: string | null
           created_at?: string
         }
         Update: {
@@ -161,6 +163,7 @@ export interface Database {
           difficulty?: 'easy' | 'medium' | 'hard' | 'expert' | null
           status?: 'recruiting' | 'completed' | 'cancelled'
           description?: string | null
+          cover_image_url?: string | null
           created_at?: string
         }
         Relationships: []

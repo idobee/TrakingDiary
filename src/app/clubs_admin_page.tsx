@@ -7,6 +7,7 @@ interface ClubsAdminPageProps {
 }
 
 import { HikeNewForm } from '@/components/hikes/HikeNewForm'
+import { createClient } from '@/lib/supabase/client'
 
 export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
   const { t } = useTranslation()
@@ -14,6 +15,46 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
   
   const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'hikes_new'>('pending')
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null)
+
+  const [showDriveModal, setShowDriveModal] = useState(false)
+  const [driveFolderId, setDriveFolderId] = useState('')
+  const [driveJson, setDriveJson] = useState('')
+  const [isSavingDrive, setIsSavingDrive] = useState(false)
+  const supabase = createClient()
+
+  const handleOpenDriveModal = async () => {
+    setShowDriveModal(true)
+    const { data } = await supabase.from('clubs').select('google_drive_folder_id, google_drive_credentials_json').eq('id', clubId).single()
+    if (data) {
+      setDriveFolderId((data as any).google_drive_folder_id || '')
+      setDriveJson((data as any).google_drive_credentials_json || '')
+    }
+  }
+
+  const handleSaveDriveSettings = async () => {
+    // Only used if they want to manually unlink, but we'll repurpose this to clear the link if needed
+    if (window.confirm("정말 드라이브 연동을 해제하시겠습니까?")) {
+      setIsSavingDrive(true)
+      try {
+        const { error } = await (supabase as any).from('clubs').update({
+          google_drive_folder_id: null,
+          google_drive_credentials_json: null
+        }).eq('id', clubId)
+        if (error) throw error
+        alert('해제되었습니다.')
+        setDriveFolderId('')
+        setDriveJson('')
+      } catch (e: any) {
+        alert('해제 실패: ' + e.message)
+      } finally {
+        setIsSavingDrive(false)
+      }
+    }
+  }
+
+  const handleOAuthLogin = () => {
+    window.location.href = `/api/drive/auth?club_id=${clubId}`
+  }
 
   const pendingMembers = members.filter(m => m.status === 'pending')
   const approvedMembers = members.filter(m => m.status === 'approved')
@@ -117,6 +158,13 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
         <div className="flex flex-col items-end gap-2">
           <div className="flex space-x-2">
             <button 
+              onClick={handleOpenDriveModal}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-xl transition shadow-sm flex items-center space-x-2"
+            >
+              <span>📁</span>
+              <span>구글 드라이브 연동</span>
+            </button>
+            <button 
               onClick={() => copyInviteLink('regular')}
               className="bg-forest-container hover:bg-forest text-white text-sm font-bold py-2 px-4 rounded-xl transition shadow-sm flex items-center space-x-2"
             >
@@ -217,6 +265,76 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
           </>
         )}
       </div>
+
+      {showDriveModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl w-full max-w-xl shadow-2xl p-6">
+            <h3 className="font-heading font-extrabold text-2xl text-forest mb-4">구글 드라이브 연동 설정</h3>
+            <div className="bg-blue-50 text-blue-800 text-sm p-4 rounded-xl mb-6">
+              <p className="font-bold mb-1">ℹ️ 방법 안내</p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>하단의 버튼을 눌러 본인의 구글 계정으로 로그인합니다.</li>
+                <li>접근 권한(Drive)을 모두 허용해 주시면 즉시 연동됩니다.</li>
+                <li>연동이 완료되면 앨범 사진들이 자동으로 해당 계정에 저장됩니다.</li>
+              </ul>
+            </div>
+
+            <div className="space-y-4 text-center py-6">
+              {driveFolderId ? (
+                <div className="bg-green-50 text-green-800 p-6 rounded-2xl border border-green-200">
+                  <div className="text-4xl mb-3">✅</div>
+                  <h4 className="font-bold text-lg mb-2">구글 드라이브 연동 완료</h4>
+                  <p className="text-sm opacity-90 mb-4 font-body leading-relaxed">
+                    회원님의 구글 드라이브(내 드라이브) 최상단에 <br/>
+                    <strong className="text-forest">TrackingDiary_동호회이름</strong> 폴더가 자동 생성되었습니다.<br/>
+                    앞으로 업로드되는 사진들은 이곳에 저장됩니다!
+                  </p>
+                  <a 
+                    href={`https://drive.google.com/drive/folders/${driveFolderId}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center space-x-2 bg-white text-green-700 px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm border border-green-200 hover:bg-green-100 transition"
+                  >
+                    <span>📂</span>
+                    <span>내 구글 드라이브 폴더 열기</span>
+                  </a>
+                  <p className="text-[10px] font-mono mt-5 opacity-40">Folder ID: {driveFolderId}</p>
+                </div>
+              ) : (
+                <div className="bg-gray-50 text-gray-800 p-6 rounded-2xl border border-gray-200">
+                  <div className="text-4xl mb-3">🔒</div>
+                  <h4 className="font-bold text-lg mb-1">연동 대기 중</h4>
+                  <p className="text-xs opacity-80 mb-6">아래 버튼을 눌러 구글 계정으로 로그인해 주세요.</p>
+                  <button 
+                    onClick={handleOAuthLogin}
+                    className="w-full py-4 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-lg flex items-center justify-center space-x-2"
+                  >
+                    <span>🚀 구글 로그인으로 드라이브 1초 연동하기</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="flex space-x-3 mt-6">
+              <button 
+                onClick={() => setShowDriveModal(false)}
+                className="flex-1 py-3 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition"
+              >
+                닫기
+              </button>
+              {driveFolderId && (
+                <button 
+                  onClick={handleSaveDriveSettings}
+                  disabled={isSavingDrive}
+                  className="flex-1 py-3 rounded-xl font-bold text-white bg-terracotta hover:bg-red-700 transition shadow-md disabled:opacity-50"
+                >
+                  {isSavingDrive ? '처리 중...' : '연동 해제'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

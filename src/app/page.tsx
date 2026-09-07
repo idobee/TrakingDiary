@@ -5,11 +5,14 @@ import { Header } from '@/components/ui/Header'
 import { Footer } from '@/components/ui/Footer'
 import { DashboardPage } from './dashboard_page'
 import { DiariesPage } from './diaries_page'
+import DiariesIdPage from './diaries_id_page'
 import { MyPage } from './my_page'
 import { ClubsPage } from './clubs_page'
 import { ClubsNewPage } from './clubs_new_page'
 import { ClubsAdminPage } from './clubs_admin_page'
 import { LoginPage } from './login_page'
+import { GalleryPage } from './gallery_page'
+import HikesPage from './hikes_page'
 import { useTranslation } from '@/lib/i18n'
 import { useAuth } from '@/lib/auth'
 import { useClubs } from '@/hooks/useClubs'
@@ -22,6 +25,8 @@ export default function Home() {
 
   const [activeTab, setActiveTab] = useState('dashboard')
   const [selectedClubId, setSelectedClubId] = useState<number | null>(null)
+  const [selectedHikeId, setSelectedHikeId] = useState<number | null>(null)
+  const [galleryInitialHikeId, setGalleryInitialHikeId] = useState<number | null>(null)
   
   const [inviteClubId, setInviteClubId] = useState<number | null>(null)
   const [inviteRole, setInviteRole] = useState<string | null>(null)
@@ -122,49 +127,33 @@ export default function Home() {
           )}
 
           {activeTab === 'hikes' && (
-            <DashboardPage
-              onNavigateTab={(tab) => setActiveTab(tab)}
-              onOpenScheduleModal={(title) =>
-                handleOpenEpisodeModal(
-                  title,
-                  t('modal.demoData.hikeLeader'),
-                  t('modal.demoData.hikeDate'),
-                  'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900',
-                  t('modal.demoData.hikesDetailDesc'),
-                )
-              }
-              hikes={hikes}
-            />
+            <HikesPage onNavigateTab={(tab) => setActiveTab(tab)} />
           )}
 
           {activeTab === 'diaries' && (
             <DiariesPage
-              onOpenDiaryDetail={(title) =>
-                handleOpenEpisodeModal(
-                  title,
-                  t('modal.demoData.diaryEditor'),
-                  t('modal.demoData.diaryVol'),
-                  'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900',
-                  t('modal.demoData.diaryDesc'),
-                )
-              }
+              clubId={selectedClubId}
+              clubName={clubs.find(c => c.id === selectedClubId)?.name}
+              onOpenDiaryDetail={(hikeId) => {
+                setSelectedHikeId(hikeId)
+                setActiveTab('diaries_id')
+              }}
+            />
+          )}
+
+          {activeTab === 'diaries_id' && selectedHikeId && (
+            <DiariesIdPage 
+              hikeId={selectedHikeId} 
+              onBack={() => setActiveTab('diaries')} 
+              onOpenGallery={(hikeId) => {
+                setGalleryInitialHikeId(hikeId)
+                setActiveTab('gallery')
+              }}
             />
           )}
 
           {activeTab === 'gallery' && (
-            <div className="bg-white p-8 rounded-3xl border border-paper-high shadow-md space-y-4">
-              <div className="flex justify-between items-center border-b border-gray-100 pb-4">
-                <h2 className="font-heading font-bold text-2xl text-forest">{t('gallery.title')}</h2>
-                <span className="uc-tag">{t('gallery.ucTag')}</span>
-              </div>
-              <p className="text-xs text-gray-600 font-body">{t('gallery.description')}</p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
-                <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600" className="rounded-xl shadow object-cover h-48 w-full" />
-                <img src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600" className="rounded-xl shadow object-cover h-48 w-full" />
-                <img src="https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?w=600" className="rounded-xl shadow object-cover h-48 w-full" />
-                <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600" className="rounded-xl shadow object-cover h-48 w-full" />
-              </div>
-            </div>
+            <GalleryPage clubId={selectedClubId} initialHikeId={galleryInitialHikeId} />
           )}
 
           {activeTab === 'my' && (
