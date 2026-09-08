@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useTranslation } from '@/lib/i18n'
 import { useClubMembers } from '@/hooks/useClubMembers'
 
@@ -9,18 +9,72 @@ interface ClubsAdminPageProps {
 import { HikeNewForm } from '@/components/hikes/HikeNewForm'
 import { createClient } from '@/lib/supabase/client'
 
+import { useAuth } from '@/lib/auth'
+
 export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const { members, isLoading, updateMemberStatus, removeMember } = useClubMembers(clubId)
   
-  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'hikes_new'>('pending')
+  const currentUserMember = members.find(m => m.user_id === user?.id)
+  const isClubAdmin = user?.system_role === 'admin' || currentUserMember?.role === 'owner' || currentUserMember?.role === 'admin'
+
+  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'hikes_new' | 'badges'>('approved')
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null)
+
+  const [customBadges, setCustomBadges] = useState<any[]>([])
+  const [newBadgeName, setNewBadgeName] = useState('')
+  const [newBadgeIcon, setNewBadgeIcon] = useState('🏆')
+  const [newBadgeDesc, setNewBadgeDesc] = useState('')
+  const [isCreatingBadge, setIsCreatingBadge] = useState(false)
 
   const [showDriveModal, setShowDriveModal] = useState(false)
   const [driveFolderId, setDriveFolderId] = useState('')
   const [driveJson, setDriveJson] = useState('')
   const [isSavingDrive, setIsSavingDrive] = useState(false)
   const supabase = createClient()
+
+  useEffect(() => {
+    fetchCustomBadges()
+  }, [clubId])
+
+  const fetchCustomBadges = async () => {
+    const { data } = await supabase.from('badges').select('*').eq('club_id', clubId)
+    if (data) setCustomBadges(data)
+  }
+
+  const handleCreateBadge = async () => {
+    if (!newBadgeName.trim() || !newBadgeIcon.trim()) return
+    setIsCreatingBadge(true)
+    try {
+      const { error } = await supabase.from('badges').insert({
+        club_id: clubId,
+        name: newBadgeName,
+        icon_name: newBadgeIcon,
+        description: newBadgeDesc
+      })
+      if (error) throw error
+      alert('뱃지가 생성되었습니다!')
+      setNewBadgeName('')
+      setNewBadgeDesc('')
+      fetchCustomBadges()
+    } catch (err: any) {
+      alert('뱃지 생성 실패: ' + err.message)
+    } finally {
+      setIsCreatingBadge(false)
+    }
+  }
+  
+  const handleDeleteBadge = async (badgeId: number) => {
+    if (!window.confirm('정말 이 뱃지를 삭제하시겠습니까?')) return
+    try {
+      const { error } = await supabase.from('badges').delete().eq('id', badgeId)
+      if (error) throw error
+      fetchCustomBadges()
+    } catch (err: any) {
+      alert('뱃지 삭제 실패: ' + err.message)
+    }
+  }
 
   const handleOpenDriveModal = async () => {
     setShowDriveModal(true)
@@ -114,33 +168,36 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
           </div>
         </div>
         
+        
         <div className="flex space-x-2">
-          {isPending ? (
-            <>
-              <button onClick={() => updateMemberStatus(member.user_id, 'approved', 'regular')} className="bg-forest hover:bg-forest-light text-white text-xs font-bold py-2 px-3 rounded-lg transition">정회원 승인</button>
-              <button onClick={() => updateMemberStatus(member.user_id, 'approved', 'guest')} className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-bold py-2 px-3 rounded-lg transition">게스트 승인</button>
-              <button onClick={() => updateMemberStatus(member.user_id, 'rejected')} className="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold py-2 px-3 rounded-lg transition">거절</button>
-            </>
-          ) : (
-            <>
-              {member.role !== 'owner' && (
-                <>
-                  {member.role === 'guest' && (
-                    <button onClick={() => updateMemberStatus(member.user_id, 'approved', 'regular')} className="bg-green-50 hover:bg-green-100 text-green-700 text-xs font-bold py-2 px-3 rounded-lg transition">정회원으로 변경</button>
-                  )}
-                  {member.role === 'regular' && (
-                    <>
-                      <button onClick={() => handlePromoteAdmin(member.user_id)} className="bg-forest-container hover:bg-forest hover:text-white text-forest-dark text-xs font-bold py-2 px-3 rounded-lg transition">부관리자 임명</button>
-                      <button onClick={() => updateMemberStatus(member.user_id, 'approved', 'guest')} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold py-2 px-3 rounded-lg transition">게스트로 변경</button>
-                    </>
-                  )}
-                  {member.role === 'admin' && (
-                    <button onClick={() => handleDemoteAdmin(member.user_id)} className="bg-orange-50 hover:bg-orange-100 text-orange-600 text-xs font-bold py-2 px-3 rounded-lg transition">권한 회수</button>
-                  )}
-                  <button onClick={() => removeMember(member.user_id)} className="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold py-2 px-3 rounded-lg transition">강제 탈퇴</button>
-                </>
-              )}
-            </>
+          {isClubAdmin && (
+            isPending ? (
+              <>
+                <button onClick={() => updateMemberStatus(member.user_id, 'approved', 'regular')} className="bg-forest hover:bg-forest-light text-white text-xs font-bold py-2 px-3 rounded-lg transition">정회원 승인</button>
+                <button onClick={() => updateMemberStatus(member.user_id, 'approved', 'guest')} className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-bold py-2 px-3 rounded-lg transition">게스트 승인</button>
+                <button onClick={() => updateMemberStatus(member.user_id, 'rejected')} className="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold py-2 px-3 rounded-lg transition">거절</button>
+              </>
+            ) : (
+              <>
+                {member.role !== 'owner' && (
+                  <>
+                    {member.role === 'guest' && (
+                      <button onClick={() => updateMemberStatus(member.user_id, 'approved', 'regular')} className="bg-green-50 hover:bg-green-100 text-green-700 text-xs font-bold py-2 px-3 rounded-lg transition">정회원으로 변경</button>
+                    )}
+                    {member.role === 'regular' && (
+                      <>
+                        <button onClick={() => handlePromoteAdmin(member.user_id)} className="bg-forest-container hover:bg-forest hover:text-white text-forest-dark text-xs font-bold py-2 px-3 rounded-lg transition">부관리자 임명</button>
+                        <button onClick={() => updateMemberStatus(member.user_id, 'approved', 'guest')} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold py-2 px-3 rounded-lg transition">게스트로 변경</button>
+                      </>
+                    )}
+                    {member.role === 'admin' && (
+                      <button onClick={() => handleDemoteAdmin(member.user_id)} className="bg-orange-50 hover:bg-orange-100 text-orange-600 text-xs font-bold py-2 px-3 rounded-lg transition">권한 회수</button>
+                    )}
+                    <button onClick={() => removeMember(member.user_id)} className="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold py-2 px-3 rounded-lg transition">강제 탈퇴</button>
+                  </>
+                )}
+              </>
+            )
           )}
         </div>
       </div>
@@ -151,52 +208,56 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
     <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-paper-high min-h-[500px]">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
-          <h2 className="font-heading font-extrabold text-3xl text-forest">동호회 관리 센터</h2>
-          <p className="text-gray-500 text-sm mt-1">멤버를 초대하고 가입 신청을 관리하세요.</p>
+          <h2 className="font-heading font-extrabold text-3xl text-forest">{isClubAdmin ? '동호회 관리 센터' : '동호회 회원 명단'}</h2>
+          <p className="text-gray-500 text-sm mt-1">{isClubAdmin ? '멤버를 초대하고 가입 신청을 관리하세요.' : '우리 동호회에 가입된 회원들을 확인해 보세요.'}</p>
         </div>
         
-        <div className="flex flex-col items-end gap-2">
-          <div className="flex space-x-2">
-            <button 
-              onClick={handleOpenDriveModal}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-xl transition shadow-sm flex items-center space-x-2"
-            >
-              <span>📁</span>
-              <span>구글 드라이브 연동</span>
-            </button>
-            <button 
-              onClick={() => copyInviteLink('regular')}
-              className="bg-forest-container hover:bg-forest text-white text-sm font-bold py-2 px-4 rounded-xl transition shadow-sm flex items-center space-x-2"
-            >
-              <span>🔗</span>
-              <span>정회원 초대 링크 복사</span>
-            </button>
-            <button 
-              onClick={() => copyInviteLink('guest')}
-              className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold py-2 px-4 rounded-xl transition shadow-sm flex items-center space-x-2"
-            >
-              <span>🔗</span>
-              <span>게스트 초대 링크 복사</span>
-            </button>
+        {isClubAdmin && (
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex space-x-2">
+              <button 
+                onClick={handleOpenDriveModal}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-xl transition shadow-sm flex items-center space-x-2"
+              >
+                <span>📁</span>
+                <span>구글 드라이브 연동</span>
+              </button>
+              <button 
+                onClick={() => copyInviteLink('regular')}
+                className="bg-forest-container hover:bg-forest text-white text-sm font-bold py-2 px-4 rounded-xl transition shadow-sm flex items-center space-x-2"
+              >
+                <span>🔗</span>
+                <span>정회원 초대 링크 복사</span>
+              </button>
+              <button 
+                onClick={() => copyInviteLink('guest')}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold py-2 px-4 rounded-xl transition shadow-sm flex items-center space-x-2"
+              >
+                <span>🔗</span>
+                <span>게스트 초대 링크 복사</span>
+              </button>
+            </div>
+            {copyFeedback && (
+              <span className="text-xs text-terracotta font-bold animate-pulse">{copyFeedback}</span>
+            )}
           </div>
-          {copyFeedback && (
-            <span className="text-xs text-terracotta font-bold animate-pulse">{copyFeedback}</span>
-          )}
-        </div>
+        )}
       </div>
 
       {/* Tabs */}
       <div className="flex space-x-6 border-b border-gray-200 mb-6 overflow-x-auto whitespace-nowrap pb-2">
-        <button
-          onClick={() => setActiveTab('pending')}
-          className={`pb-3 font-heading font-bold text-lg transition ${
-            activeTab === 'pending'
-              ? 'text-forest border-b-4 border-terracotta'
-              : 'text-gray-400 hover:text-gray-600'
-          }`}
-        >
-          가입신청 대기 회원 <span className="ml-1 bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">{pendingMembers.length}</span>
-        </button>
+        {isClubAdmin && (
+          <button
+            onClick={() => setActiveTab('pending')}
+            className={`pb-3 font-heading font-bold text-lg transition ${
+              activeTab === 'pending'
+                ? 'text-forest border-b-4 border-terracotta'
+                : 'text-gray-400 hover:text-gray-600'
+            }`}
+          >
+            가입신청 대기 회원 <span className="ml-1 bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">{pendingMembers.length}</span>
+          </button>
+        )}
         <button
           onClick={() => setActiveTab('approved')}
           className={`pb-3 font-heading font-bold text-lg transition ${
@@ -205,18 +266,32 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
               : 'text-gray-400 hover:text-gray-600'
           }`}
         >
-          가입회원 관리 <span className="ml-1 bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">{approvedMembers.length}</span>
+          가입회원 명단 <span className="ml-1 bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">{approvedMembers.length}</span>
         </button>
-        <button
-          onClick={() => setActiveTab('hikes_new')}
-          className={`pb-3 font-heading font-bold text-lg transition ${
-            activeTab === 'hikes_new'
-              ? 'text-forest border-b-4 border-terracotta'
-              : 'text-gray-400 hover:text-gray-600'
-          }`}
-        >
-          ⛰️ 트레킹 일정 등록
-        </button>
+        {isClubAdmin && (
+          <>
+            <button
+              onClick={() => setActiveTab('hikes_new')}
+              className={`pb-3 font-heading font-bold text-lg transition ${
+                activeTab === 'hikes_new'
+                  ? 'text-forest border-b-4 border-terracotta'
+                  : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              ⛰️ 트레킹 일정 등록
+            </button>
+            <button
+              onClick={() => setActiveTab('badges')}
+              className={`pb-3 font-heading font-bold text-lg transition ${
+                activeTab === 'badges'
+                  ? 'text-forest border-b-4 border-terracotta'
+                  : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              🏅 커스텀 뱃지 관리
+            </button>
+          </>
+        )}
       </div>
 
       {/* Content */}
@@ -261,6 +336,96 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
                   // Optionally redirect or reset
                 }} 
               />
+            )}
+
+            {activeTab === 'badges' && (
+              <div className="space-y-6">
+                <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                  <h3 className="font-heading font-bold text-lg text-forest mb-4">새 커스텀 뱃지 만들기</h3>
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="w-full sm:w-24">
+                      <label className="block text-xs font-bold text-gray-500 mb-1">아이콘(이모지)</label>
+                      <input 
+                        type="text" 
+                        value={newBadgeIcon}
+                        onChange={(e) => setNewBadgeIcon(e.target.value)}
+                        className="w-full text-center text-2xl py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-forest outline-none"
+                        maxLength={2}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-xs font-bold text-gray-500 mb-1">뱃지 이름</label>
+                      <input 
+                        type="text" 
+                        value={newBadgeName}
+                        onChange={(e) => setNewBadgeName(e.target.value)}
+                        placeholder="예: 한라산 날다람쥐"
+                        className="w-full px-3 py-3 border border-gray-200 rounded-xl font-heading text-sm text-forest focus:ring-2 focus:ring-forest outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <label className="block text-[10px] font-bold text-gray-400 mb-1">빠른 선택</label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {['🏆', '⛰️', '🔥', '🦅', '👟', '🌲', '🎒', '🏅', '⭐', '🏃‍♂️', '💪', '👑', '🥇', '🍀', '🍎'].map(emoji => (
+                        <button
+                          key={emoji}
+                          onClick={() => setNewBadgeIcon(emoji)}
+                          className="w-8 h-8 flex items-center justify-center text-lg bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-200 transition"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <label className="block text-xs font-bold text-gray-500 mb-1">부여 조건 (선택)</label>
+                    <input 
+                      type="text" 
+                      value={newBadgeDesc}
+                      onChange={(e) => setNewBadgeDesc(e.target.value)}
+                      placeholder="예: 한라산 등반 3회 완료 시 부여"
+                      className="w-full px-3 py-3 border border-gray-200 rounded-xl font-body text-sm text-gray-700 focus:ring-2 focus:ring-forest outline-none"
+                    />
+                  </div>
+                  <div className="mt-4 flex justify-end">
+                    <button 
+                      onClick={handleCreateBadge}
+                      disabled={isCreatingBadge || !newBadgeName.trim() || !newBadgeIcon.trim()}
+                      className="bg-forest hover:bg-forest-light text-white font-bold py-2.5 px-6 rounded-xl transition disabled:opacity-50"
+                    >
+                      {isCreatingBadge ? '생성 중...' : '뱃지 만들기'}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-heading font-bold text-lg text-forest mb-4">등록된 커스텀 뱃지</h3>
+                  {customBadges.length === 0 ? (
+                    <div className="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                      <p className="text-gray-500 font-body text-sm">등록된 커스텀 뱃지가 없습니다.</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      {customBadges.map(badge => (
+                        <div key={badge.id} className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm text-center relative group">
+                          <button 
+                            onClick={() => handleDeleteBadge(badge.id)}
+                            className="absolute top-2 right-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition"
+                          >
+                            ✕
+                          </button>
+                          <div className="w-12 h-12 mx-auto bg-gray-50 rounded-full flex items-center justify-center text-2xl mb-2 shadow-inner border border-gray-100">
+                            {badge.icon_name}
+                          </div>
+                          <h4 className="font-heading font-bold text-forest text-sm">{badge.name}</h4>
+                          {badge.description && <p className="text-[10px] text-gray-400 mt-1 line-clamp-2">{badge.description}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
           </>
         )}

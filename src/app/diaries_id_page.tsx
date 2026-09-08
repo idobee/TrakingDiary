@@ -34,6 +34,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
   const [episodeTitle, setEpisodeTitle] = useState('')
   const [episodeContent, setEpisodeContent] = useState('')
   const [episodeType, setEpisodeType] = useState('general')
+  const [isPublished, setIsPublished] = useState(true)
   const [editingEpisodeId, setEditingEpisodeId] = useState<number | null>(null)
   const [selectedPhotoIds, setSelectedPhotoIds] = useState<number[]>([])
 
@@ -77,9 +78,9 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
       `).eq('hike_id', hikeId).order('created_at', { ascending: false })
       setEpisodes(epData || [])
 
-      // 5. Fetch Badges for Admin
-      if (isAdmin && hikeAny?.club_id) {
-        const { data: badgeData } = await supabase.from('badges').select('*').eq('club_id', hikeAny.club_id)
+      // 5. Fetch Badges
+      if (hikeAny?.club_id) {
+        const { data: badgeData } = await supabase.from('badges').select('*').or(`club_id.is.null,club_id.eq.${hikeAny.club_id}`)
         setBadges(badgeData || [])
       }
 
@@ -137,7 +138,10 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
 
     const selectedPhotoUrls = photos
       .filter(p => selectedPhotoIds.includes(p.id))
-      .map(p => p.thumbnail_url || `https://drive.google.com/thumbnail?id=${p.google_drive_file_id}&sz=w800`)
+      .map(p => {
+        const fileId = p.google_drive_file_id
+        return `/api/drive/image?id=${fileId}`
+      })
 
     try {
       if (editingEpisodeId) {
@@ -145,6 +149,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
           title: episodeTitle,
           content: episodeContent,
           episode_type: episodeType,
+          is_published: isPublished,
           photo_urls: selectedPhotoUrls.length > 0 ? selectedPhotoUrls : null
         }).eq('id', editingEpisodeId)
         if (error) throw error
@@ -155,6 +160,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
           title: episodeTitle,
           content: episodeContent,
           episode_type: episodeType,
+          is_published: isPublished,
           photo_urls: selectedPhotoUrls.length > 0 ? selectedPhotoUrls : null
         })
         if (error) throw error
@@ -163,6 +169,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
       setEpisodeTitle('')
       setEpisodeContent('')
       setEpisodeType('general')
+      setIsPublished(true)
       setEditingEpisodeId(null)
       setSelectedPhotoIds([])
       fetchData()
@@ -176,6 +183,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
     setEpisodeTitle(ep.title)
     setEpisodeContent(ep.content)
     setEpisodeType(ep.episode_type || 'general')
+    setIsPublished(ep.is_published ?? true)
     setEditingEpisodeId(ep.id)
     setShowEpisodeForm(true)
   }
@@ -340,8 +348,8 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
           ) : (
             <div className="grid grid-cols-5 gap-3">
               {photos.slice(0, 5).map((photo) => {
-                // If thumbnail_url is missing or null, use Google Drive thumbnail proxy endpoint
-                const imgSrc = photo.thumbnail_url || `https://drive.google.com/thumbnail?id=${photo.google_drive_file_id}&sz=w800`
+                const fileId = photo.google_drive_file_id
+                const imgSrc = `/api/drive/image?id=${fileId}`
                 return (
                   <div key={photo.id} className="w-full aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition border border-gray-200">
                     <img src={imgSrc} alt="Hike Photo" className="w-full h-full object-cover" />
@@ -362,6 +370,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                   setEpisodeTitle('')
                   setEpisodeContent('')
                   setEpisodeType('general')
+                  setIsPublished(true)
                   setEditingEpisodeId(null)
                   setSelectedPhotoIds([])
                   setShowEpisodeForm(true)
@@ -411,7 +420,8 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                   <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
                     {photos.map(photo => {
                       const isSelected = selectedPhotoIds.includes(photo.id)
-                      const imgSrc = photo.thumbnail_url || `https://drive.google.com/thumbnail?id=${photo.google_drive_file_id}&sz=w800`
+                      const fileId = photo.google_drive_file_id
+                      const imgSrc = `/api/drive/image?id=${fileId}`
                       return (
                         <div 
                           key={photo.id} 
@@ -429,9 +439,20 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                 </div>
               )}
 
-              <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => { setShowEpisodeForm(false); setEditingEpisodeId(null); setEpisodeTitle(''); setEpisodeContent(''); setEpisodeType('general'); }} className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700">취소</button>
-                <button type="submit" className="bg-forest text-white px-6 py-2 rounded-xl text-xs font-bold shadow hover:bg-forest-light">{editingEpisodeId ? '수정 완료' : '등록 완료'}</button>
+              <div className="flex justify-between items-center pt-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={isPublished} 
+                    onChange={(e) => setIsPublished(e.target.checked)} 
+                    className="w-4 h-4 text-forest rounded border-gray-300 focus:ring-forest"
+                  />
+                  <span className="text-xs font-bold text-gray-700">전체 공유 (대시보드 노출)</span>
+                </label>
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => { setShowEpisodeForm(false); setEditingEpisodeId(null); setEpisodeTitle(''); setEpisodeContent(''); setEpisodeType('general'); setIsPublished(true); }} className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700">취소</button>
+                  <button type="submit" className="bg-forest text-white px-6 py-2 rounded-xl text-xs font-bold shadow hover:bg-forest-light">{editingEpisodeId ? '수정 완료' : '등록 완료'}</button>
+                </div>
               </div>
             </form>
           )}

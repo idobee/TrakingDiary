@@ -13,6 +13,7 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) =
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard' | 'expert'>('medium')
   const [description, setDescription] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imageUrl, setImageUrl] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -26,33 +27,7 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) =
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('로그인이 필요합니다.')
 
-      let coverImageUrl = null
-      let driveFolderId = null
-      
-      if (imageFile) {
-        if (!hikeDate) {
-          throw new Error('이미지를 업로드하려면 먼저 트레킹 일시를 입력해야 합니다.')
-        }
-        
-        const formData = new FormData()
-        formData.append('file', imageFile)
-        formData.append('club_id', String(clubId))
-        formData.append('hike_date', hikeDate)
-
-        const uploadRes = await fetch('/api/drive/upload', {
-          method: 'POST',
-          body: formData
-        })
-
-        const uploadData = await uploadRes.json()
-        if (!uploadRes.ok) {
-          throw new Error(uploadData.error || '이미지 업로드에 실패했습니다.')
-        }
-        coverImageUrl = uploadData.webContentLink
-        driveFolderId = uploadData.targetFolderId
-      }
-
-      // 1. Insert Hike
+      // 1. Insert Hike first (with image URL if provided, else without cover image)
       const { data: newHike, error: hikeError } = await supabase
         .from('hikes')
         .insert({
@@ -63,8 +38,7 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) =
           hike_date: hikeDate,
           difficulty,
           description,
-          cover_image_url: coverImageUrl,
-          google_drive_folder_id: driveFolderId,
+          cover_image_url: imageUrl || null,
           status: 'recruiting'
         } as any)
         .select()
@@ -82,6 +56,32 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) =
         })
       }
 
+      // 3. Upload image if exists and update hike
+      if (imageFile && newHike) {
+        const formData = new FormData()
+        formData.append('file', imageFile)
+        formData.append('club_id', String(clubId))
+        formData.append('hike_date', hikeDate)
+        formData.append('hike_id', String((newHike as any).id))
+        formData.append('uploader_id', user.id)
+
+        const uploadRes = await fetch('/api/drive/upload', {
+          method: 'POST',
+          body: formData
+        })
+
+        const uploadData = await uploadRes.json()
+        if (!uploadRes.ok) {
+          throw new Error(uploadData.error || '이미지 업로드에 실패했습니다.')
+        }
+
+        // Update hike with image url and folder id
+        await supabase.from('hikes').update({
+          cover_image_url: uploadData.webContentLink,
+          google_drive_folder_id: uploadData.targetFolderId
+        }).eq('id', (newHike as any).id)
+      }
+
       if (onSuccess) onSuccess()
       // reset form
       setTitle('')
@@ -89,6 +89,7 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) =
       setHikeDate('')
       setDescription('')
       setImageFile(null)
+      setImageUrl('')
     } catch (err: any) {
       console.error(err)
       setError(err.message || '일정 등록에 실패했습니다.')
@@ -137,19 +138,41 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) =
               placeholder="코스 설명, 준비물, 회비 등을 입력하세요." 
             />
           </div>
-          <div className="md:col-span-2">
-            <label className="block text-sm font-bold text-gray-700 mb-1">커버 이미지 첨부 (선택)</label>
-            <input 
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                if (e.target.files && e.target.files[0]) {
-                  setImageFile(e.target.files[0])
-                }
-              }}
-              className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-forest focus:border-forest outline-none transition bg-gray-50 text-sm" 
-            />
-            <p className="text-xs text-gray-500 mt-1">이미지는 동호회의 구글 공유 드라이브 일정 폴더에 안전하게 업로드됩니다.</p>
+          <div className="md:col-span-2 space-y-2">
+            <label className="block text-sm font-bold text-gray-700">커버 이미지 첨부 (선택)</label>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <span className="text-[10px] text-gray-500 mb-1 block">파일 직접 업로드 (구글 드라이브 저장)</span>
+                <input 
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      setImageFile(e.target.files[0])
+                      setImageUrl('')
+                    }
+                  }}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-forest focus:border-forest outline-none transition bg-gray-50 text-sm" 
+                />
+              </div>
+              <div className="flex items-center justify-center pt-5">
+                <span className="text-gray-400 text-xs font-bold bg-white px-2">또는</span>
+              </div>
+              <div className="flex-1">
+                <span className="text-[10px] text-gray-500 mb-1 block">이미지 링크(URL) 입력</span>
+                <input 
+                  type="text" 
+                  value={imageUrl}
+                  onChange={(e) => {
+                    setImageUrl(e.target.value)
+                    if (e.target.value) setImageFile(null)
+                  }}
+                  placeholder="https://..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-forest focus:border-forest outline-none transition text-sm" 
+                />
+              </div>
+            </div>
+            <p className="text-[10px] text-gray-400 mt-1">파일을 직접 업로드하거나, 외부 이미지 링크(URL)를 복사해서 붙여넣을 수 있습니다.</p>
           </div>
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">트레킹 일시</label>

@@ -127,6 +127,15 @@ export async function POST(req: NextRequest) {
       fields: 'id, webContentLink, webViewLink, thumbnailLink'
     })
 
+    // Make the file publicly readable so it can be rendered on the web
+    await drive.permissions.create({
+      fileId: uploadRes.data.id!,
+      requestBody: {
+        role: 'reader',
+        type: 'anyone'
+      }
+    })
+
     const webContentLink = uploadRes.data.webContentLink || uploadRes.data.webViewLink || ''
     const webViewLink = uploadRes.data.webViewLink || ''
 

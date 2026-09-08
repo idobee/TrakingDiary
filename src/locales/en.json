@@ -59,8 +59,8 @@
     "heroTitleLine1": "Trails walked together,",
     "heroTitleLine2": "Forever recorded in a single diary.",
     "heroDescription": "Archive your trekking memories — from hike recruitment (UC2), original photo storage on Google Shared Drive (UC9), monthly hardcover bookshelf (UC3), to summit badges (UC5).",
-    "heroCtaHikes": "⛰️ Browse Trekking Recruits (UC2)",
-    "heroCtaDiaries": "📖 Browse Bookshelf Archive (UC3)",
+    "heroCtaHikes": "📖 Browse Shared Diary",
+    "heroCtaDiaries": "📸 Go to Trekking Album",
     "metricsUpcomingLabel": "Upcoming Hikes",
     "metricsUpcomingValue": "3 Recruiting",
     "metricsDiariesLabel": "Published Diaries",
@@ -74,21 +74,32 @@
     "hikeJirisan": {
       "date": "2026.08.15",
       "title": "🏔️ Jirisan Cheonwangbong Traverse",
-      "desc": "1 night at Jangteomok Shelter • 8/12 participants"
+      "desc": "1 Night at Jangteomok • 8/12 Enrolled"
     },
     "hikeBukhansan": {
       "date": "2026.08.29",
       "title": "🌙 Bukhansan Baegundae Night Sunrise",
-      "desc": "4AM climb • 6/10 participants"
+      "desc": "4 AM Climb • 6/10 Enrolled"
     },
-    "bookshelfTitle": "📖 Latest Archived Edition (UC3)",
+    "bookshelfTitle": "📖 Latest Archival Books (UC3)",
     "bookshelfUc": "UC3",
     "bookshelfVol": "VOL.12",
     "bookshelfVolLabel": "2026.08 VOL.12 • Hardcover",
-    "bookshelfBookTitle": "Summer Exchange Diary on the Jirisan Ridge",
-    "bookshelfBookMeta": "12 episodes • 148 photos on Google Shared Drive",
-    "bookshelfCtaBrowse": "Browse all editions on the oak bookshelf (UC3) →",
-    "watermark": "PEAK"
+    "bookshelfBookTitle": "Summer Diary on Jirisan Ridge",
+    "bookshelfBookMeta": "12 Episodes • 148 Photos in Google Drive",
+    "bookshelfCtaBrowse": "Browse all books in the wooden shelf (UC3) →",
+    "watermark": "PEAK",
+    "publicEpisodesTitle": "🌟 Shared Memories Diaries",
+    "publicEpisodesEmpty": "No public diaries yet.",
+    "publicPhotosTitle": "📸 Public Photo Gallery (Google Drive)",
+    "publicPhotosEmpty": "No photos uploaded yet.",
+    "allClubsTitle": "🌍 All Registered Clubs",
+    "allClubsEmpty": "No clubs registered yet.",
+    "joinedClubsTitle": "🏕️ My Clubs",
+    "joinedClubsEmpty": "You haven't joined any clubs yet. Find a new club!",
+    "loginPromptTitle": "Join us to share more memories",
+    "loginPromptDesc": "Join clubs, upload photos, and write diaries.",
+    "loginButton": "Login / Sign Up"
   },
   "diaries": {
     "badgeLabel": "Digital Scrapbook Archive",

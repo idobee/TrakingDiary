@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/auth'
 import { useAllClubs } from '@/hooks/useAllClubs'
 
 interface ClubsPageProps {
-  onOpenClubAdminModal: () => void
+  onOpenClubAdminModal: (clubId: number) => void
   onOpenClubCreateModal: () => void
 }
 
@@ -23,6 +23,22 @@ export const ClubsPage: React.FC<ClubsPageProps> = ({
 
   const approvedClubs = clubs.filter(c => c.status === 'approved')
   const pendingClubs = clubs.filter(c => c.status === 'pending')
+
+  const [myClubIds, setMyClubIds] = useState<number[]>([])
+  
+  React.useEffect(() => {
+    if (user) {
+      const { createClient } = require('@/lib/supabase/client')
+      const supabase = createClient()
+      supabase.from('club_members')
+        .select('club_id')
+        .eq('user_id', user.id)
+        .eq('status', 'approved')
+        .then(({ data }: { data: any }) => {
+          if (data) setMyClubIds(data.map((d: any) => d.club_id))
+        })
+    }
+  }, [user])
 
   if (isLoading) {
     return (
@@ -159,13 +175,13 @@ export const ClubsPage: React.FC<ClubsPageProps> = ({
                 </p>
               </div>
 
-              {user?.id === club.owner_id && (
+              {(user?.id === club.owner_id || myClubIds.includes(club.id) || isAdmin) && (
                 <div className="space-y-2 pt-3 border-t border-gray-100">
                   <button
-                    onClick={onOpenClubAdminModal}
+                    onClick={() => onOpenClubAdminModal(club.id)}
                     className="w-full bg-paper-high hover:bg-forest hover:text-white text-forest font-heading font-bold text-xs py-2 rounded-xl transition flex items-center justify-center space-x-1"
                   >
-                    <span>{t('clubs.openAdminCenter')}</span>
+                    <span>{user?.id === club.owner_id || isAdmin ? t('clubs.openAdminCenter') : '동호회 열람 (회원)'}</span>
                   </button>
                 </div>
               )}

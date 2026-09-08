@@ -13,10 +13,14 @@ import { ClubsAdminPage } from './clubs_admin_page'
 import { LoginPage } from './login_page'
 import { GalleryPage } from './gallery_page'
 import HikesPage from './hikes_page'
+import { IntroPage } from './intro_page'
 import { useTranslation } from '@/lib/i18n'
 import { useAuth } from '@/lib/auth'
 import { useClubs } from '@/hooks/useClubs'
 import { useHikes } from '@/hooks/useHikes'
+import { createClient } from '@/lib/supabase/client'
+
+const supabase = createClient()
 
 export default function Home() {
   const { t } = useTranslation()
@@ -32,6 +36,47 @@ export default function Home() {
   const [inviteRole, setInviteRole] = useState<string | null>(null)
 
   const { hikes, isLoading: isHikesLoading } = useHikes(selectedClubId || undefined)
+
+  const [publicEpisodes, setPublicEpisodes] = useState<any[]>([])
+  const [publicPhotos, setPublicPhotos] = useState<any[]>([])
+  const [allClubs, setAllClubs] = useState<any[]>([])
+
+  React.useEffect(() => {
+    async function fetchPublicData() {
+      // Fetch public episodes
+      const { data: eps } = await supabase
+        .from('episodes')
+        .select(`id, title, content, created_at, photo_urls, episode_type, users(nickname, avatar_url)`)
+        .eq('is_published', true)
+        .order('created_at', { ascending: false })
+        .limit(6)
+      
+      if (eps) setPublicEpisodes(eps)
+
+      // Fetch public photos
+      const { data: photos } = await supabase
+        .from('photos')
+        .select(`id, google_drive_file_id, google_drive_web_link, thumbnail_url, created_at, hikes(title)`)
+        .eq('is_published', true)
+        .order('created_at', { ascending: false })
+        .limit(12)
+
+      if (photos) setPublicPhotos(photos)
+
+      // Fetch all approved clubs
+      const { data: all_clubs } = await supabase
+        .from('clubs')
+        .select(`id, owner_id, name, category, description, logo_url`)
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false })
+      
+      if (all_clubs) setAllClubs(all_clubs)
+    }
+    
+    if (activeTab === 'dashboard') {
+      fetchPublicData()
+    }
+  }, [activeTab])
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -92,7 +137,8 @@ export default function Home() {
     )
   }
 
-  if (!user) {
+  // Dashboard is public, but other tabs require login.
+  if (!user && activeTab !== 'dashboard') {
     return <LoginPage inviteClubId={inviteClubId} inviteRole={inviteRole} />
   }
 
@@ -123,11 +169,24 @@ export default function Home() {
                 )
               }
               hikes={hikes}
+              clubs={clubs}
+              allClubs={allClubs}
+              publicEpisodes={publicEpisodes}
+              publicPhotos={publicPhotos}
+              user={user}
+              onOpenDiaryDetail={(hikeId) => {
+                setSelectedHikeId(hikeId)
+                setActiveTab('diaries_id')
+              }}
             />
           )}
 
           {activeTab === 'hikes' && (
             <HikesPage onNavigateTab={(tab) => setActiveTab(tab)} />
+          )}
+
+          {activeTab === 'intro' && (
+            <IntroPage />
           )}
 
           {activeTab === 'diaries' && (
@@ -158,6 +217,7 @@ export default function Home() {
 
           {activeTab === 'my' && (
             <MyPage
+              user={user}
               onOpenEpisodeModal={handleOpenEpisodeModal}
               onOpenBadgeGrantModal={(name) =>
                 alert(t('modal.alerts.badgeGrant', { name }))
@@ -167,7 +227,10 @@ export default function Home() {
 
           {activeTab === 'clubs' && (
             <ClubsPage
-              onOpenClubAdminModal={() => setActiveTab('club_admin')}
+              onOpenClubAdminModal={(clubId: number) => {
+                setSelectedClubId(clubId)
+                setActiveTab('club_admin')
+              }}
               onOpenClubCreateModal={() => setClubCreateModalOpen(true)}
             />
           )}

@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase/client'
 const supabase = createClient()
 import { useTranslation } from '@/lib/i18n'
 
+import { useAuth } from '@/lib/auth'
+
 interface GalleryPageProps {
   clubId: number | null
   initialHikeId?: number | null
@@ -13,6 +15,7 @@ interface GalleryPageProps {
 
 export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const [hikes, setHikes] = useState<any[]>([])
   const [photos, setPhotos] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -36,7 +39,6 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
     if (!clubId) return
     setIsLoading(true)
     try {
-      // 1. 해당 동호회의 모든 트레킹(Hike) 조회
       const { data: hikeData, error: hikeError } = await supabase
         .from('hikes')
         .select('id, title, hike_date')
@@ -53,7 +55,6 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
         return
       }
 
-      // 2. 조건에 맞는 사진 조회
       let query = supabase
         .from('photos')
         .select(`
@@ -93,6 +94,23 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
     setFilterEndDate('')
   }
 
+  const handleTogglePublish = async (photoId: number, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('photos')
+        .update({ is_published: !currentStatus })
+        .eq('id', photoId)
+      
+      if (error) throw error
+      
+      // Update local state
+      setPhotos(photos.map(p => p.id === photoId ? { ...p, is_published: !currentStatus } : p))
+    } catch (err) {
+      console.error('Failed to toggle publish status:', err)
+      alert('공유 상태 변경에 실패했습니다.')
+    }
+  }
+
   return (
     <div className="bg-white p-6 md:p-8 rounded-3xl border border-paper-high shadow-sm space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-100 pb-4 gap-4">
@@ -102,7 +120,6 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
         </div>
       </div>
 
-      {/* 필터 영역 */}
       <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-100 flex flex-wrap gap-4 items-end">
         <div className="space-y-1 flex-1 min-w-[200px]">
           <label className="text-xs font-bold text-gray-500">트레킹 다이어리</label>
@@ -146,7 +163,6 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
         </button>
       </div>
 
-      {/* 사진 갤러리 영역 (Masonry 스타일) */}
       {isLoading ? (
         <div className="py-20 flex justify-center items-center">
           <span className="text-forest animate-pulse font-bold">로딩 중...</span>
@@ -158,13 +174,27 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
       ) : (
         <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
           {photos.map(photo => {
-            const imgSrc = photo.thumbnail_url || `https://drive.google.com/thumbnail?id=${photo.google_drive_file_id}&sz=w800`
+            const fileId = photo.google_drive_file_id
+            const imgSrc = `/api/drive/image?id=${fileId}`
+            const isUploaderOrAdmin = user?.id === photo.uploader_id || user?.system_role === 'admin'
+            
             return (
               <div key={photo.id} className="break-inside-avoid relative group rounded-xl overflow-hidden bg-gray-100 shadow-sm border border-gray-200">
                 <img src={imgSrc} alt="Gallery Photo" className="w-full h-auto object-cover group-hover:scale-105 transition duration-500" />
                 
-                {/* 메타데이터 오버레이 (Hover 시 표시) */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex flex-col justify-end p-3">
+                {/* Publish Toggle Button */}
+                {isUploaderOrAdmin && (
+                  <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleTogglePublish(photo.id, photo.is_published); }}
+                      className={`px-3 py-1 text-xs font-bold rounded-full shadow backdrop-blur-md border ${photo.is_published ? 'bg-forest/80 text-white border-forest' : 'bg-white/80 text-gray-600 border-gray-300 hover:bg-white'}`}
+                    >
+                      {photo.is_published ? '공개 중' : '비공개'}
+                    </button>
+                  </div>
+                )}
+                
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex flex-col justify-end p-3 pointer-events-none">
                   <span className="text-white font-bold text-xs line-clamp-1">{photo.hikes?.title}</span>
                   <div className="flex items-center justify-between mt-1">
                     <span className="text-gray-300 text-[10px]">{photo.users?.nickname}</span>
