@@ -33,7 +33,7 @@ export function useAllClubs(isAdmin: boolean) {
     if (error) {
       console.error('Failed to fetch all clubs:', error)
     } else if (data) {
-      setClubs(data as ExtendedClub[])
+      setClubs(data as unknown as ExtendedClub[])
     }
     setIsLoading(false)
   }, [isAdmin, supabase])

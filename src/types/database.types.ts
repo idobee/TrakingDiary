@@ -138,6 +138,7 @@ export interface Database {
           status: 'recruiting' | 'completed' | 'cancelled'
           description: string | null
           cover_image_url: string | null
+          google_drive_folder_id: string | null
           created_at: string
         }
         Insert: {
@@ -151,6 +152,7 @@ export interface Database {
           status?: 'recruiting' | 'completed' | 'cancelled'
           description?: string | null
           cover_image_url?: string | null
+          google_drive_folder_id?: string | null
           created_at?: string
         }
         Update: {
@@ -164,6 +166,7 @@ export interface Database {
           status?: 'recruiting' | 'completed' | 'cancelled'
           description?: string | null
           cover_image_url?: string | null
+          google_drive_folder_id?: string | null
           created_at?: string
         }
         Relationships: []
@@ -238,6 +241,7 @@ export interface Database {
           google_drive_web_link: string
           thumbnail_url: string | null
           is_bside: boolean
+          is_published: boolean
           created_at: string
         }
         Insert: {
@@ -249,6 +253,7 @@ export interface Database {
           google_drive_web_link: string
           thumbnail_url?: string | null
           is_bside?: boolean
+          is_published?: boolean
           created_at?: string
         }
         Update: {
@@ -260,6 +265,7 @@ export interface Database {
           google_drive_web_link?: string
           thumbnail_url?: string | null
           is_bside?: boolean
+          is_published?: boolean
           created_at?: string
         }
         Relationships: []

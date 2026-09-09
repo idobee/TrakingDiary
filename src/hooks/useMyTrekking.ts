@@ -86,8 +86,8 @@ export const useMyTrekking = (userId?: string) => {
             hikeDate: hike.hike_date,
             description: hike.description || '',
             earnedBadge: earnedBadgeData ? {
-              name: earnedBadgeData.badges.name,
-              grantedBy: earnedBadgeData.granter?.nickname
+              name: (earnedBadgeData.badges as any)?.name,
+              grantedBy: (earnedBadgeData.granter as any)?.nickname
             } : undefined
           }
         }).sort((a, b) => new Date(b.hikeDate).getTime() - new Date(a.hikeDate).getTime())
@@ -123,8 +123,8 @@ export const useMyTrekking = (userId?: string) => {
               icon_name: badge.icon_name,
               isLocked: !earned,
               earnedAt: earned ? earned.earned_at : undefined,
-              grantedBy: earned ? earned.granter?.nickname : undefined,
-              mountainName: earned && earned.hikes ? earned.hikes.mountain_name : undefined
+              grantedBy: earned ? (earned.granter as any)?.nickname : undefined,
+              mountainName: earned && earned.hikes ? (earned.hikes as any)?.mountain_name : undefined
             }
           })
         }
