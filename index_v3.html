@@ -1,0 +1,3199 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>함께쓰는 크루 일기 (CrewLog) - 트레킹 & 모임 추억 아카이브 (UC1~UC15 대화형 프로토타입)</title>
+
+  <!-- Google Fonts: Bricolage Grotesque, Be Vietnam Pro, Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Space+Grotesk:wght@500;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            forest: {
+              DEFAULT: '#012d1d',
+              container: '#1b4332',
+              light: '#274e3d',
+              surface: '#3f6653'
+            },
+            paper: {
+              DEFAULT: '#fdfae7',
+              low: '#f7f4e1',
+              high: '#ece9d6',
+              highest: '#e6e3d0'
+            },
+            terracotta: {
+              DEFAULT: '#e76f51',
+              dark: '#741b04',
+              deep: '#500c00',
+              light: '#ff8364'
+            },
+            sand: '#ffca98'
+          },
+          fontFamily: {
+            heading: ['Bricolage Grotesque', 'sans-serif'],
+            body: ['Be Vietnam Pro', 'sans-serif'],
+            label: ['Space Grotesk', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      background-color: #fdfae7;
+      color: #1c1c11;
+    }
+
+    .font-heading {
+      font-family: 'Bricolage Grotesque', sans-serif;
+    }
+
+    .font-label {
+      font-family: 'Space Grotesk', monospace;
+    }
+
+    /* Polaroid photo shadow and tape detail */
+    .polaroid-card {
+      background: #ffffff;
+      padding: 12px 12px 28px 12px;
+      box-shadow: 0 10px 25px -5px rgba(1, 45, 29, 0.08), 0 8px 10px -6px rgba(1, 45, 29, 0.04);
+      border-radius: 4px;
+      position: relative;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .polaroid-card:hover {
+      transform: translateY(-4px) rotate(0.5deg);
+      box-shadow: 0 18px 30px -5px rgba(1, 45, 29, 0.15);
+    }
+
+    /* Washi tape overlay effect */
+    .washi-tape {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-2deg);
+      width: 90px;
+      height: 24px;
+      background-color: rgba(231, 111, 81, 0.45);
+      border-left: 2px dashed rgba(255, 255, 255, 0.6);
+      border-right: 2px dashed rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(2px);
+      z-index: 10;
+    }
+
+    /* Rubber stamp badge effect */
+    .rubber-stamp {
+      border: 3px dashed #741b04;
+      color: #741b04;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Bricolage Grotesque', sans-serif;
+      text-transform: uppercase;
+      transform: rotate(-6deg);
+      box-shadow: inset 0 0 0 2px rgba(116, 27, 4, 0.1);
+      transition: all 0.2s ease;
+    }
+
+    .rubber-stamp:hover {
+      transform: rotate(0deg) scale(1.05);
+    }
+
+    .rubber-stamp.locked {
+      border-color: #a1a8a3;
+      color: #a1a8a3;
+      opacity: 0.45;
+    }
+
+    /* UC Tag Badge */
+    .uc-tag {
+      font-family: 'Space Grotesk', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background-color: #1b4332;
+      color: #ffca98;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Realistic Hardcover Book Cover & Spine Styling (UC3 서가 책 표지) */
+    .hardcover-book {
+      position: relative;
+      background-size: cover;
+      border-radius: 4px 14px 14px 4px;
+      box-shadow: 6px 12px 25px rgba(0, 0, 0, 0.4), inset -4px 0 8px rgba(0, 0, 0, 0.25);
+      border-left: 14px solid #1a0f07;
+      /* Leather spine binding strip */
+      border-right: 6px solid #fdfbf7;
+      /* Paper pages edge effect */
+      transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+      cursor: pointer;
+    }
+
+    .hardcover-book::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 100%);
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+    }
+
+    .hardcover-book:hover {
+      transform: translateY(-10px) rotate(1deg) scale(1.02);
+      box-shadow: 14px 24px 38px rgba(0, 0, 0, 0.55), inset -4px 0 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Wooden Bookshelf Ledge & Shadow */
+    .wooden-shelf-ledge {
+      background: linear-gradient(180deg, #6e411b 0%, #4a2a10 50%, #2e1707 100%);
+      box-shadow: inset 0 3px 5px rgba(255, 255, 255, 0.25), 0 12px 24px rgba(0, 0, 0, 0.6);
+      border-top: 4px solid #8e5527;
+      border-bottom: 6px solid #1f0f04;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col antialiased selection:bg-terracotta selection:text-white">
+
+  <!-- Header / Navigation Bar -->
+  <header class="bg-forest border-b border-forest-container sticky top-0 z-40 text-paper shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+
+        <!-- Logo & Branding -->
+        <div class="flex items-center space-x-3">
+          <div
+            class="w-10 h-10 rounded-full bg-terracotta flex items-center justify-center text-white font-heading font-extrabold text-xl shadow-inner">
+            ⛰️
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h1 class="font-heading font-extrabold text-lg sm:text-xl tracking-tight text-paper leading-tight">
+                함께쓰는 크루 일기 (CrewLog)
+              </h1>
+              <span class="uc-tag">UC1 대시보드 Root</span>
+            </div>
+            <p class="font-label text-xs text-sand/80 font-medium">Shared Crew Activity Archive (UC1~UC15 Interactive
+              Prototype)</p>
+          </div>
+        </div>
+
+        <!-- Club Selector Dropdown & Profile -->
+        <div class="flex items-center space-x-4">
+          <div class="relative inline-block text-left">
+            <select id="clubSelect"
+              class="bg-forest-container text-paper text-xs sm:text-sm font-body font-medium rounded-full px-4 py-2 border border-forest-surface focus:outline-none focus:ring-2 focus:ring-terracotta">
+              <option value="1">🍷 강남 내추럴 와인 클럽 (Wine)</option>
+              <option value="2">🏃 서울 나이트 러닝 크루 (Running)</option>
+              <option value="3">🌲 주말 명산 하이킹 (Hiking)</option>
+            </select>
+          </div>
+
+          <!-- Language Switcher Mock -->
+          <div
+            class="flex items-center space-x-1 bg-forest-container/80 px-2 py-1.5 rounded-full border border-forest-surface text-xs hidden sm:flex">
+            <button
+              class="bg-terracotta text-white px-2 py-0.5 rounded-full font-bold shadow-sm transition">🇰🇷</button>
+            <button class="text-paper/70 hover:text-white px-2 py-0.5 rounded-full font-bold transition">🇺🇸</button>
+          </div>
+
+          <!-- User Profile (UC4 마이 크루 라이프 연동) -->
+          <button onclick="switchTab('my')"
+            class="flex items-center space-x-2 bg-forest-container/80 hover:bg-forest-container px-3 py-1.5 rounded-full border border-forest-surface transition">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
+              alt="Avatar" class="w-7 h-7 rounded-full object-cover border border-sand">
+            <div class="text-left hidden sm:block">
+              <p class="font-heading text-xs font-bold text-paper leading-none">김산길 님</p>
+              <span class="text-[9px] text-sand font-label">UC4 마이 크루 라이프</span>
+            </div>
+            <span class="bg-terracotta text-white text-[10px] font-label px-2 py-0.5 rounded-full font-bold">LV.4</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Navigation Tabs (UC Hierarchy Mapping) -->
+      <nav
+        class="flex space-x-1 sm:space-x-3 overflow-x-auto py-2 border-t border-forest-container/40 text-xs sm:text-sm font-heading font-semibold"
+        id="mainTabs">
+        <button onclick="switchTab('dashboard')" id="tab-dashboard"
+          class="tab-btn active bg-terracotta text-white px-3.5 py-1.5 rounded-full whitespace-nowrap transition-colors flex items-center space-x-1.5">
+          <span>📊 대시보드</span>
+          <span class="text-[10px] font-label opacity-90">UC1</span>
+        </button>
+        <button onclick="switchTab('hikes')" id="tab-hikes"
+          class="tab-btn text-paper/80 hover:text-white px-3.5 py-1.5 rounded-full whitespace-nowrap transition-colors flex items-center space-x-1.5">
+          <span>🗓️ 액티비티모집 & 일정표</span>
+          <span class="text-[10px] font-label opacity-90">UC2/UC7</span>
+        </button>
+        <button onclick="switchTab('diaries')" id="tab-diaries"
+          class="tab-btn text-paper/80 hover:text-white px-3.5 py-1.5 rounded-full whitespace-nowrap transition-colors flex items-center space-x-1.5">
+          <span>📚 크루에피소드 & 일기</span>
+          <span class="text-[10px] font-label opacity-90">UC3/UC8/10</span>
+        </button>
+        <button onclick="switchTab('gallery')" id="tab-gallery"
+          class="tab-btn text-paper/80 hover:text-white px-3.5 py-1.5 rounded-full whitespace-nowrap transition-colors flex items-center space-x-1.5">
+          <span>📷 사진첩 (Drive)</span>
+          <span class="text-[10px] font-label opacity-90">UC9/UC12</span>
+        </button>
+        <button onclick="switchTab('my')" id="tab-my"
+          class="tab-btn text-paper/80 hover:text-white px-3.5 py-1.5 rounded-full whitespace-nowrap transition-colors flex items-center space-x-1.5">
+          <span>🎖️ 마이 크루 라이프 & 뱃지</span>
+          <span class="text-[10px] font-label opacity-90">UC4/UC5/13</span>
+        </button>
+        <button onclick="switchTab('clubs')" id="tab-clubs"
+          class="tab-btn text-paper/80 hover:text-white px-3.5 py-1.5 rounded-full whitespace-nowrap transition-colors flex items-center space-x-1.5">
+          <span>🏘️ 동호회현황 & 신청</span>
+          <span class="text-[10px] font-label opacity-90">UC14/UC15</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ================================================================= -->
+    <!-- 1. UC1 대시보드 SECTION (includes UC2, UC3, UC4, UC5) -->
+    <!-- ================================================================= -->
+    <section id="sec-dashboard" class="space-y-6">
+
+      <!-- UC Inclusion Notice Banner -->
+      <div
+        class="bg-forest-container text-paper p-4 rounded-xl flex items-center justify-between border border-forest-surface text-xs font-label">
+        <div class="flex items-center space-x-2">
+          <span class="bg-sand text-forest font-bold px-2 py-0.5 rounded">UC1 include 관계</span>
+          <span>대시보드는 <strong class="text-sand">UC2(모집)</strong>, <strong class="text-sand">UC3(앨범)</strong>, <strong
+              class="text-sand">UC4(마이 크루 라이프)</strong>, <strong class="text-sand">UC5(해냄뱃지)</strong> 핵심 요약 정보를 종합
+            렌더링합니다.</span>
+        </div>
+        <span class="text-sand/70 hidden sm:inline">Next.js `/` Route</span>
+      </div>
+
+      <!-- Top Banner: Character Card & Stats (UC4 & UC5 Summary) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Character Level Card (UC4 include UC5 요약) -->
+        <div
+          class="bg-forest text-paper rounded-2xl p-6 shadow-xl border border-forest-container relative overflow-hidden flex flex-col justify-between">
+          <div class="absolute -right-6 -bottom-6 w-40 h-40 bg-forest-container rounded-full opacity-40 blur-xl"></div>
+
+          <div class="flex items-start justify-between relative z-10">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="font-label text-xs uppercase tracking-widest text-sand font-bold">Trekker Persona</span>
+                <span class="uc-tag">UC4 / UC5</span>
+              </div>
+              <h2 class="font-heading font-extrabold text-2xl text-paper mt-1">지리산 능선 개척자</h2>
+              <p class="text-xs text-paper/80 font-body mt-1">국립공원 산악회 4기 정회원</p>
+            </div>
+            <span
+              class="bg-terracotta text-white text-xs font-label px-3 py-1 rounded-full font-bold shadow-md">LV.4</span>
+          </div>
+
+          <div class="my-6 relative z-10 flex items-center space-x-4">
+            <div
+              class="w-20 h-20 rounded-2xl bg-paper-high border-2 border-sand flex items-center justify-center text-4xl shadow-inner">
+              🏔️
+            </div>
+            <div class="flex-1 space-y-2">
+              <div class="flex justify-between text-xs font-label">
+                <span class="text-sand font-bold">다음 레벨까지</span>
+                <span>1,915m / 2,500m (76%)</span>
+              </div>
+              <div
+                class="w-full bg-forest-container rounded-full h-3 overflow-hidden p-0.5 border border-forest-surface">
+                <div class="bg-terracotta h-full rounded-full transition-all duration-500" style="width: 76%"></div>
+              </div>
+              <p class="text-[11px] text-paper/70 font-body">한라산 백록담 성채 등반 시 레벨업!</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 pt-4 border-t border-forest-container text-center relative z-10">
+            <button onclick="switchTab('my')" class="hover:bg-forest-container p-1 rounded transition">
+              <p class="font-label text-xs text-paper/70">누적 산행</p>
+              <p class="font-heading font-bold text-lg text-sand">18회</p>
+            </button>
+            <button onclick="switchTab('my')" class="hover:bg-forest-container p-1 rounded transition">
+              <p class="font-label text-xs text-paper/70">총 누적 고도</p>
+              <p class="font-heading font-bold text-lg text-sand">14,350m</p>
+            </button>
+            <button onclick="switchTab('my')" class="hover:bg-forest-container p-1 rounded transition">
+              <p class="font-label text-xs text-paper/70">UC5 해냄뱃지</p>
+              <p class="font-heading font-bold text-lg text-sand">9개 획득</p>
+            </button>
+          </div>
+        </div>
+
+        <!-- Recent Hike Activity Summary (UC2 & UC13 Summary) -->
+        <div
+          class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-md border border-paper-high flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <div class="flex items-center space-x-2">
+                  <h3 class="font-heading font-bold text-xl text-forest">최근 액티비티 모집 및 출석 현황</h3>
+                  <span class="uc-tag">UC2 액티비티모집</span>
+                </div>
+                <p class="text-xs text-gray-500 font-body">2026년 8월 하이킹 모집 및 회원 활동 커밋 로그</p>
+              </div>
+              <button onclick="switchTab('hikes')"
+                class="text-xs font-heading font-bold text-terracotta hover:underline">
+                전체 모집 일정 보기 (UC2/UC7) &rarr;
+              </button>
+            </div>
+
+            <!-- Heatmap Activity Preview (UC13 활동기록) -->
+            <div class="p-4 bg-paper-low rounded-xl border border-paper-high mb-4">
+              <div class="flex justify-between items-center mb-2">
+                <p class="font-label text-xs text-gray-600 font-bold">월별 활동 타임라인 (2026 Season)</p>
+                <span class="uc-tag">UC13 활동기록</span>
+              </div>
+              <div class="grid grid-cols-12 gap-1.5 text-center">
+                <div class="bg-forest-container text-white text-[10px] p-2 rounded font-label font-bold">1월<br>3회</div>
+                <div class="bg-forest-container text-white text-[10px] p-2 rounded font-label font-bold">2월<br>2회</div>
+                <div class="bg-forest text-white text-[10px] p-2 rounded font-label font-bold">3월<br>4회</div>
+                <div class="bg-forest-container text-white text-[10px] p-2 rounded font-label font-bold">4월<br>2회</div>
+                <div class="bg-terracotta text-white text-[10px] p-2 rounded font-label font-bold">5월<br>5회</div>
+                <div class="bg-forest text-white text-[10px] p-2 rounded font-label font-bold">6월<br>4회</div>
+                <div class="bg-forest-container text-white text-[10px] p-2 rounded font-label font-bold">7월<br>3회</div>
+                <div
+                  class="bg-terracotta text-white text-[10px] p-2 rounded font-label font-bold border-2 border-forest">
+                  8월<br>4회</div>
+                <div class="bg-paper-high text-gray-400 text-[10px] p-2 rounded font-label">9월<br>-</div>
+                <div class="bg-paper-high text-gray-400 text-[10px] p-2 rounded font-label">10월<br>-</div>
+                <div class="bg-paper-high text-gray-400 text-[10px] p-2 rounded font-label">11월<br>-</div>
+                <div class="bg-paper-high text-gray-400 text-[10px] p-2 rounded font-label">12월<br>-</div>
+              </div>
+            </div>
+
+            <!-- Recent Hike Card Preview -->
+            <div class="flex items-center justify-between p-3.5 bg-paper rounded-xl border border-paper-high">
+              <div class="flex items-center space-x-3">
+                <div
+                  class="w-12 h-12 rounded-lg bg-forest text-white flex items-center justify-center font-heading font-bold text-lg">
+                  🏔️
+                </div>
+                <div>
+                  <div class="flex items-center space-x-2">
+                    <h4 class="font-heading font-bold text-sm text-forest">지리산 천왕봉 일출 트래킹</h4>
+                    <span class="uc-tag">UC7 일정표</span>
+                  </div>
+                  <p class="text-xs text-gray-600 font-body">2026.08.15 • 참여 8명 • 교환일기 3편 작성 완료</p>
+                </div>
+              </div>
+              <button onclick="openScheduleModal('지리산 천왕봉 일출 트래킹')"
+                class="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 text-xs font-label px-3 py-1 rounded-full font-bold transition">
+                상세 일정표 (UC7) 보기
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 font-label">
+            <span>⚡ Google Shared Drive API v3 자동 동기화 활성화됨</span>
+            <span>최종 상태: Supabase DB 정상 동기화</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Section: Shared Photo Album Preview (UC3 & UC9 Summary) -->
+      <div class="bg-white rounded-2xl p-6 shadow-md border border-paper-high">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <div class="flex items-center space-x-2">
+              <h3 class="font-heading font-bold text-xl text-forest">📸 이번 주 이벤트 사진 아카이브</h3>
+              <span class="uc-tag">UC3 크루에피소드 include UC9 사진첩</span>
+            </div>
+            <p class="text-xs text-gray-500 font-body">구글 공유 드라이브(`hikes/jirisan-0815/`)에 업로드된 현장 사진</p>
+          </div>
+          <div class="flex space-x-2">
+            <button onclick="openUploadModal()"
+              class="bg-terracotta text-white text-xs font-heading px-3.5 py-2 rounded-full font-bold hover:bg-terracotta-dark transition">
+              + UC12 사진등록
+            </button>
+            <button onclick="switchTab('gallery')"
+              class="bg-forest text-white text-xs font-heading px-4 py-2 rounded-full font-bold hover:bg-forest-container transition">
+              UC9 사진전체보기
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+
+          <!-- Polaroid Item 1 -->
+          <div class="polaroid-card">
+            <div class="washi-tape"></div>
+            <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=600&q=80"
+              alt="Hike photo" class="w-full h-44 object-cover rounded-sm mb-3">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-heading font-bold text-forest">천왕봉 표지석에서</span>
+              <span class="font-label text-[10px] text-gray-400">Drive #0815</span>
+            </div>
+            <p class="text-[11px] text-gray-500 font-body mt-1">Photo by 김산길</p>
+          </div>
+
+          <!-- Polaroid Item 2 -->
+          <div class="polaroid-card">
+            <div class="washi-tape" style="background-color: rgba(1, 45, 29, 0.35)"></div>
+            <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80"
+              alt="Hike photo" class="w-full h-44 object-cover rounded-sm mb-3">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-heading font-bold text-forest">운해를 바라보며</span>
+              <span class="font-label text-[10px] text-gray-400">Drive #0816</span>
+            </div>
+            <p class="text-[11px] text-gray-500 font-body mt-1">Photo by 이정상</p>
+          </div>
+
+          <!-- Polaroid Item 3 -->
+          <div class="polaroid-card">
+            <div class="washi-tape" style="background-color: rgba(255, 202, 152, 0.7)"></div>
+            <img src="https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?auto=format&fit=crop&w=600&q=80"
+              alt="Hike photo" class="w-full h-44 object-cover rounded-sm mb-3">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-heading font-bold text-forest">장터목 대피소 라면 B컷</span>
+              <span class="bg-terracotta text-white text-[9px] font-label px-1.5 rounded">B컷</span>
+            </div>
+            <p class="text-[11px] text-gray-500 font-body mt-1">Photo by 박동호</p>
+          </div>
+
+          <!-- Polaroid Item 4 -->
+          <div class="polaroid-card">
+            <div class="washi-tape"></div>
+            <img src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=600&q=80"
+              alt="Hike photo" class="w-full h-44 object-cover rounded-sm mb-3">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-heading font-bold text-forest">하산길 숲속 오솔길</span>
+              <span class="font-label text-[10px] text-gray-400">Drive #0818</span>
+            </div>
+            <p class="text-[11px] text-gray-500 font-body mt-1">Photo by 최구름</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- 2. UC2 액티비티모집 & UC7 일정표 SECTION (월간 다이어리 구조) -->
+    <!-- ================================================================= -->
+    <section id="sec-hikes" class="space-y-8 hidden">
+      <div
+        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-md border border-paper-high">
+        <div>
+          <div class="flex items-center space-x-2">
+            <h2 class="font-heading font-extrabold text-2xl text-forest">⛰️ 동호회 액티비티 모집 & 월간 다이어리 일정표</h2>
+            <span class="uc-tag">UC2 include UC7</span>
+          </div>
+          <p class="text-xs text-gray-600 font-body mt-1">상단에서 모집 중인 이벤트를 확인하고, 하단 월간 다이어리 캘린더에서 전체 일정을 한눈에 파악하세요.</p>
+        </div>
+        <button onclick="alert('새 액티비티 모집 작성 폼을 오픈합니다.')"
+          class="bg-terracotta text-white font-heading font-bold px-5 py-2.5 rounded-full text-sm hover:bg-terracotta-dark transition shadow-md">
+          + 새 액티비티 모집하기 (UC2)
+        </button>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- [상단] 현재 모집 중인 액티비티 목록 (UC2) -->
+      <!-- ========================================== -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <h3 class="font-heading font-extrabold text-xl text-forest">🔥 [상단] 현재 모집 중인 액티비티</h3>
+            <span class="uc-tag">UC2 액티비티모집</span>
+          </div>
+          <span class="font-label text-xs text-gray-500">모집 진행 중: 2건</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <!-- Hike Card 1 -->
+          <div
+            class="bg-white rounded-2xl p-6 shadow-md border border-paper-high flex flex-col justify-between relative overflow-hidden">
+            <div class="flex items-start justify-between">
+              <div>
+                <span class="bg-emerald-100 text-emerald-800 text-xs font-label font-bold px-3 py-1 rounded-full">모집중
+                  (6/10명)</span>
+                <h3 class="font-heading font-bold text-xl text-forest mt-2">북한산 백운대 야간 산행 & 일출</h3>
+                <p class="text-xs text-gray-500 font-body mt-1">북한산 국립공원 • 836m</p>
+              </div>
+              <span class="bg-paper-high text-forest text-xs font-label px-3 py-1 rounded-full font-bold">난이도: 중</span>
+            </div>
+
+            <div class="my-4 py-3 border-y border-paper-high text-xs space-y-1.5 font-body">
+              <div class="flex items-center justify-between text-gray-700">
+                <div class="flex items-center">
+                  <span class="w-16 font-label text-gray-400 font-bold">일시</span>
+                  <span>2026년 8월 29일 (토) 04:00 AM</span>
+                </div>
+                <span class="uc-tag">UC7 일정표</span>
+              </div>
+              <div class="flex items-center text-gray-700">
+                <span class="w-16 font-label text-gray-400 font-bold">모임장소</span>
+                <span>북한산우이역 2번 출구 앞</span>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-2">
+              <div class="flex -space-x-2">
+                <img class="w-8 h-8 rounded-full border-2 border-white object-cover"
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" alt="member">
+                <img class="w-8 h-8 rounded-full border-2 border-white object-cover"
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" alt="member">
+                <img class="w-8 h-8 rounded-full border-2 border-white object-cover"
+                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" alt="member">
+                <div
+                  class="w-8 h-8 rounded-full bg-paper-high border-2 border-white flex items-center justify-center text-[10px] font-label font-bold text-forest">
+                  +3</div>
+              </div>
+              <div class="flex space-x-2">
+                <button onclick="openScheduleModal('북한산 백운대 야간 산행 & 일출')"
+                  class="bg-paper-high text-forest font-heading font-bold text-xs px-3 py-2 rounded-full hover:bg-forest hover:text-white transition">
+                  상세 일정표 (UC7)
+                </button>
+                <button onclick="alert('참가 신청이 등록되었습니다!')"
+                  class="bg-forest text-white font-heading font-bold text-xs px-4 py-2 rounded-full hover:bg-forest-container transition">
+                  참가 신청하기
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hike Card 2 -->
+          <div
+            class="bg-white rounded-2xl p-6 shadow-md border border-paper-high flex flex-col justify-between relative overflow-hidden">
+            <div class="flex items-start justify-between">
+              <div>
+                <span class="bg-amber-100 text-amber-800 text-xs font-label font-bold px-3 py-1 rounded-full">마감임박
+                  (9/10명)</span>
+                <h3 class="font-heading font-bold text-xl text-forest mt-2">🏃 한강 나이트 러닝 10K</h3>
+                <p class="text-xs text-gray-500 font-body mt-1">반포대교 왕복 코스 • 페이스 530</p>
+              </div>
+              <span
+                class="bg-terracotta/20 text-terracotta-dark text-xs font-label px-3 py-1 rounded-full font-bold">난이도:
+                상</span>
+            </div>
+
+            <div class="my-4 py-3 border-y border-paper-high text-xs space-y-1.5 font-body">
+              <div class="flex items-center justify-between text-gray-700">
+                <div class="flex items-center">
+                  <span class="w-16 font-label text-gray-400 font-bold">일시</span>
+                  <span>2026년 9월 12일 (토) 03:00 AM</span>
+                </div>
+                <span class="uc-tag">UC7 일정표</span>
+              </div>
+              <div class="flex items-center text-gray-700">
+                <span class="w-16 font-label text-gray-400 font-bold">모임장소</span>
+                <span>반포 한강공원 달빛광장</span>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-2">
+              <div class="flex -space-x-2">
+                <img class="w-8 h-8 rounded-full border-2 border-white object-cover"
+                  src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100" alt="member">
+                <img class="w-8 h-8 rounded-full border-2 border-white object-cover"
+                  src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100" alt="member">
+                <div
+                  class="w-8 h-8 rounded-full bg-paper-high border-2 border-white flex items-center justify-center text-[10px] font-label font-bold text-forest">
+                  +7</div>
+              </div>
+              <div class="flex space-x-2">
+                <button onclick="openScheduleModal('🏃 한강 나이트 러닝 10K')"
+                  class="bg-paper-high text-forest font-heading font-bold text-xs px-3 py-2 rounded-full hover:bg-forest hover:text-white transition">
+                  상세 일정표 (UC7)
+                </button>
+                <button onclick="alert('대기 신청이 접수되었습니다.')"
+                  class="bg-forest text-white font-heading font-bold text-xs px-4 py-2 rounded-full hover:bg-forest-container transition">
+                  대기 신청하기
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- [하단] UC7 3개월 주차별 액티비티 다이어리 캘린더 (1주 = 1칸 매트릭스) -->
+      <!-- ========================================== -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-lg border-2 border-paper-high space-y-6">
+
+        <!-- Controls & Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-paper-high">
+          <div>
+            <div class="flex items-center space-x-2">
+              <h3 class="font-heading font-extrabold text-2xl text-forest">📅 [하단] 3개월 주차별 액티비티 캘린더</h3>
+              <span class="uc-tag">UC7 1주 = 1칸 (3개월 뷰)</span>
+            </div>
+            <p class="text-xs text-gray-600 font-body mt-1">1주가 1칸으로 구성된 3개월(7월, 8월, 9월) 이벤트 다이어리 행렬입니다. 각 주차 카드를 클릭하여
+              상세 일정표(UC7)를 확인하세요.</p>
+          </div>
+
+          <!-- Controls -->
+          <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-2 bg-paper-low border border-paper-high px-4 py-2 rounded-full">
+              <button class="text-forest hover:text-terracotta font-bold text-sm">◀ 이전 3개월</button>
+              <span class="font-heading font-extrabold text-sm text-forest">2026년 3분기 (7월 ~ 9월)</span>
+              <button class="text-forest hover:text-terracotta font-bold text-sm">다음 3개월 ▶</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3-Month x 5-Week Matrix Table -->
+        <div class="overflow-x-auto">
+          <div class="min-w-[850px]">
+
+            <!-- Month Header Row (3 Columns) -->
+            <div
+              class="grid grid-cols-4 gap-3 text-center font-heading font-bold text-sm py-3 bg-forest text-paper rounded-xl mb-3">
+              <div class="font-label text-xs text-sand flex items-center justify-center">주차 (ROW)</div>
+              <div class="text-paper">7월 (July)</div>
+              <div class="text-sand">8월 (August)</div>
+              <div class="text-paper">9월 (September)</div>
+            </div>
+
+            <!-- Matrix Rows (1주차 ~ 5주차) -->
+            <div class="space-y-3 font-body text-xs">
+
+              <!-- ROW 1: 1주차 -->
+              <div class="grid grid-cols-4 gap-3">
+                <div
+                  class="bg-paper-low border border-paper-high rounded-xl p-3 flex flex-col justify-center items-center text-center font-heading font-bold text-forest">
+                  <span>1주차</span>
+                  <span class="text-[10px] text-gray-400 font-label">1일 ~ 7일</span>
+                </div>
+                <!-- 7월 1주차 -->
+                <div
+                  class="bg-gray-50 p-3 rounded-xl border border-dashed border-gray-200 text-gray-400 text-center flex items-center justify-center">
+                  <span>등록된 일정 없음</span>
+                </div>
+                <!-- 8월 1주차 -->
+                <div
+                  class="bg-gray-50 p-3 rounded-xl border border-dashed border-gray-200 text-gray-400 text-center flex items-center justify-center">
+                  <span>등록된 일정 없음</span>
+                </div>
+                <!-- 9월 1주차 -->
+                <div
+                  class="bg-gray-50 p-3 rounded-xl border border-dashed border-gray-200 text-gray-400 text-center flex items-center justify-center">
+                  <span>등록된 일정 없음</span>
+                </div>
+              </div>
+
+              <!-- ROW 2: 2주차 -->
+              <div class="grid grid-cols-4 gap-3">
+                <div
+                  class="bg-paper-low border border-paper-high rounded-xl p-3 flex flex-col justify-center items-center text-center font-heading font-bold text-forest">
+                  <span>2주차</span>
+                  <span class="text-[10px] text-gray-400 font-label">8일 ~ 14일</span>
+                </div>
+                <!-- 7월 2주차 -->
+                <div
+                  class="bg-gray-50 p-3 rounded-xl border border-dashed border-gray-200 text-gray-400 text-center flex items-center justify-center">
+                  <span>등록된 일정 없음</span>
+                </div>
+                <!-- 8월 2주차 -->
+                <div
+                  class="bg-gray-50 p-3 rounded-xl border border-dashed border-gray-200 text-gray-400 text-center flex items-center justify-center">
+                  <span>등록된 일정 없음</span>
+                </div>
+                <!-- 9월 2주차 (설악산 공룡능선) -->
+                <div onclick="openScheduleModal('🏃 한강 나이트 러닝 10K')"
+                  class="bg-amber-50 p-3.5 rounded-xl border-2 border-amber-500 text-forest cursor-pointer hover:shadow-md transition flex flex-col justify-between space-y-2">
+                  <div class="flex justify-between items-center">
+                    <span class="font-label text-[10px] font-bold text-amber-900">9월 12일 (토)</span>
+                    <span
+                      class="bg-amber-500 text-white text-[9px] px-2 py-0.5 rounded font-label font-bold">마감임박</span>
+                  </div>
+                  <div>
+                    <h5 class="font-heading font-extrabold text-sm text-amber-950">🦖 설악산 공룡능선</h5>
+                    <p class="text-[11px] text-gray-600">03:00 AM • 9/10명 신청</p>
+                  </div>
+                  <span class="text-[9px] font-label text-amber-800 underline">일정표 보기 (UC7) &rarr;</span>
+                </div>
+              </div>
+
+              <!-- ROW 3: 3주차 -->
+              <div class="grid grid-cols-4 gap-3">
+                <div
+                  class="bg-paper-low border border-paper-high rounded-xl p-3 flex flex-col justify-center items-center text-center font-heading font-bold text-forest">
+                  <span>3주차</span>
+                  <span class="text-[10px] text-gray-400 font-label">15일 ~ 21일</span>
+                </div>
+                <!-- 7월 3주차 (북한산 야간산행) -->
+                <div onclick="openCompletedDiaryModal('초여름 관악산 암릉 코스 정복기', '⛰️ 북한산 백운대')"
+                  class="bg-emerald-50 p-3.5 rounded-xl border-2 border-emerald-500 text-forest cursor-pointer hover:shadow-md transition flex flex-col justify-between space-y-2">
+                  <div class="flex justify-between items-center">
+                    <span class="font-label text-[10px] font-bold text-emerald-900">7월 20일 (토)</span>
+                    <span
+                      class="bg-emerald-600 text-white text-[9px] px-2 py-0.5 rounded font-label font-bold">완등</span>
+                  </div>
+                  <div>
+                    <h5 class="font-heading font-extrabold text-sm text-emerald-950">⛰️ 북한산 백운대</h5>
+                    <p class="text-[11px] text-gray-600">04:00 AM • 10명 완료</p>
+                  </div>
+                  <span class="text-[9px] font-label text-emerald-800 underline">교환일기 팝업 보기 &rarr;</span>
+                </div>
+                <!-- 8월 3주차 (지리산 천왕봉) -->
+                <div onclick="openCompletedDiaryModal('한강 나이트 러닝 10K 에세이 모음집', '🏔️ 지리산 천왕봉')"
+                  class="bg-emerald-50 p-3.5 rounded-xl border-2 border-emerald-500 text-forest cursor-pointer hover:shadow-md transition flex flex-col justify-between space-y-2">
+                  <div class="flex justify-between items-center">
+                    <span class="font-label text-[10px] font-bold text-emerald-900">8월 15일 (토) 🇰🇷</span>
+                    <span
+                      class="bg-emerald-600 text-white text-[9px] px-2 py-0.5 rounded font-label font-bold">완등</span>
+                  </div>
+                  <div>
+                    <h5 class="font-heading font-extrabold text-sm text-emerald-950">🏔️ 지리산 천왕봉</h5>
+                    <p class="text-[11px] text-gray-600">04:00 AM • 8명 완료</p>
+                  </div>
+                  <span class="text-[9px] font-label text-emerald-800 underline">교환일기 팝업 보기 &rarr;</span>
+                </div>
+                <!-- 9월 3주차 -->
+                <div
+                  class="bg-gray-50 p-3 rounded-xl border border-dashed border-gray-200 text-gray-400 text-center flex items-center justify-center">
+                  <span>등록된 일정 없음</span>
+                </div>
+              </div>
+
+              <!-- ROW 4: 4주차 -->
+              <div class="grid grid-cols-4 gap-3">
+                <div
+                  class="bg-paper-low border border-paper-high rounded-xl p-3 flex flex-col justify-center items-center text-center font-heading font-bold text-forest">
+                  <span>4주차</span>
+                  <span class="text-[10px] text-gray-400 font-label">22일 ~ 28일</span>
+                </div>
+                <!-- 7월 4주차 -->
+                <div
+                  class="bg-gray-50 p-3 rounded-xl border border-dashed border-gray-200 text-gray-400 text-center flex items-center justify-center">
+                  <span>등록된 일정 없음</span>
+                </div>
+                <!-- 8월 4주차 (관악산 연주대) -->
+                <div onclick="openCompletedDiaryModal('7월 덕유산 여름 야생화 트래킹 기록', '🌲 관악산 연주대')"
+                  class="bg-emerald-50 p-3.5 rounded-xl border-2 border-emerald-500 text-forest cursor-pointer hover:shadow-md transition flex flex-col justify-between space-y-2">
+                  <div class="flex justify-between items-center">
+                    <span class="font-label text-[10px] font-bold text-emerald-900">8월 22일 (토)</span>
+                    <span
+                      class="bg-emerald-600 text-white text-[9px] px-2 py-0.5 rounded font-label font-bold">완등</span>
+                  </div>
+                  <div>
+                    <h5 class="font-heading font-extrabold text-sm text-emerald-950">🌲 관악산 연주대</h5>
+                    <p class="text-[11px] text-gray-600">08:00 AM • 12명 완료</p>
+                  </div>
+                  <span class="text-[9px] font-label text-emerald-800 underline">교환일기 팝업 보기 &rarr;</span>
+                </div>
+                <!-- 9월 4주차 -->
+                <div
+                  class="bg-gray-50 p-3 rounded-xl border border-dashed border-gray-200 text-gray-400 text-center flex items-center justify-center">
+                  <span>등록된 일정 없음</span>
+                </div>
+              </div>
+
+              <!-- ROW 5: 5주차 -->
+              <div class="grid grid-cols-4 gap-3">
+                <div
+                  class="bg-paper-low border border-paper-high rounded-xl p-3 flex flex-col justify-center items-center text-center font-heading font-bold text-forest">
+                  <span>5주차</span>
+                  <span class="text-[10px] text-gray-400 font-label">29일 ~ 31일</span>
+                </div>
+                <!-- 7월 5주차 -->
+                <div
+                  class="bg-gray-50 p-3 rounded-xl border border-dashed border-gray-200 text-gray-400 text-center flex items-center justify-center">
+                  <span>등록된 일정 없음</span>
+                </div>
+                <!-- 8월 5주차 (북한산 백운대 모집중) -->
+                <div onclick="openScheduleModal('북한산 백운대 야간 산행 & 일출')"
+                  class="bg-terracotta/10 p-3.5 rounded-xl border-2 border-terracotta text-forest cursor-pointer hover:shadow-md transition flex flex-col justify-between space-y-2">
+                  <div class="flex justify-between items-center">
+                    <span class="font-label text-[10px] font-bold text-terracotta-dark">8월 29일 (토)</span>
+                    <span
+                      class="bg-terracotta text-white text-[9px] px-2 py-0.5 rounded font-label font-bold">모집중</span>
+                  </div>
+                  <div>
+                    <h5 class="font-heading font-extrabold text-sm text-terracotta-dark">🌙 북한산 백운대</h5>
+                    <p class="text-[11px] text-gray-600">04:00 AM • 6/10명</p>
+                  </div>
+                  <span class="text-[9px] font-label text-terracotta-dark underline">일정표 보기 (UC7) &rarr;</span>
+                </div>
+                <!-- 9월 5주차 -->
+                <div
+                  class="bg-gray-50 p-3 rounded-xl border border-dashed border-gray-200 text-gray-400 text-center flex items-center justify-center">
+                  <span>등록된 일정 없음</span>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- 3. UC3 크루에피소드 & UC8/10/11 일기/에피소드 SECTION -->
+    <!-- ================================================================= -->
+    <section id="sec-diaries" class="space-y-6 hidden">
+      <div
+        class="bg-forest text-paper p-6 rounded-2xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4 border-2 border-forest-container">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span
+              class="bg-terracotta text-white text-[11px] font-label font-bold px-3 py-1 rounded-full uppercase">Digital
+              Scrapbook Archive</span>
+            <span class="uc-tag">UC3 include UC8 (UC9+UC10)</span>
+          </div>
+          <h2 class="font-heading font-extrabold text-2xl mt-2">📖 크루에피소드 & 교환일기 단행본 서가</h2>
+          <p class="text-xs text-paper/80 font-body mt-1">우리 동호회가 함께 쓴 교환일기와 에피소드가 월별 디지털 하드커버 단행본으로 서가에 보관됩니다.</p>
+        </div>
+        <div
+          class="bg-paper-low/10 border border-sand/30 px-4 py-2 rounded-xl text-[11px] font-label text-sand flex items-center space-x-1.5">
+          <span>💡 서가에 놓인 책 표지를 클릭하면 단위 에피소드 (UC8)로 이동합니다.</span>
+        </div>
+      </div>
+
+      <!-- UC3/UC8 우드 서가(Bookshelf) 목록 뷰 -->
+      <div id="uc8-shelf-view" class="space-y-6">
+
+        <!-- Real Wooden Bookshelf Container (원목 서가 프레임) -->
+        <div
+          class="bg-[#2a170a] p-6 sm:p-8 rounded-3xl border-4 border-[#1a0e05] shadow-2xl space-y-6 relative overflow-hidden">
+          <!-- Bookshelf Top Brass Header -->
+          <div class="flex justify-between items-center border-b-2 border-[#5c3718] pb-4">
+            <div class="flex items-center space-x-3">
+              <div
+                class="w-8 h-8 rounded-full bg-amber-700/60 border border-amber-400/40 text-amber-200 flex items-center justify-center font-heading font-bold text-sm shadow">
+                🏛️</div>
+              <div>
+                <h3 class="font-heading font-extrabold text-lg text-amber-100 tracking-wide">국립공원 산악회 • 아카이빙 서가 (Library
+                  Shelf)</h3>
+                <p class="text-[10px] text-amber-300/70 font-label">총 12권의 단행본 보관중 • 하드커버 양장본 아카이브</p>
+              </div>
+            </div>
+            <span
+              class="bg-amber-950/80 text-amber-300 border border-amber-600/50 font-label text-[10px] font-bold px-3 py-1 rounded-full shadow">
+              📚 2026 Season Archives
+            </span>
+          </div>
+
+          <!-- 3D Books Grid Standing on Shelf -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4 pb-2">
+
+            <!-- Hardcover Book 1 (Emerald Leather Cover - Vol 12) -->
+            <div onclick="openDiaryDetailPage('한강 나이트 러닝 10K 에피소드 모음집')"
+              class="hardcover-book bg-gradient-to-br from-[#0a3a27] via-[#012d1d] to-[#001c12] p-6 text-paper flex flex-col justify-between h-80 group">
+              <div class="space-y-3">
+                <div class="flex justify-between items-center border-b border-sand/30 pb-2">
+                  <span
+                    class="font-label text-xs text-amber-300 font-bold bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-500/40 shadow-sm">VOL.12
+                    • 2026.08</span>
+                  <span class="text-xs text-amber-200">👑 양장본</span>
+                </div>
+                <div class="pt-2">
+                  <span class="text-[10px] font-label text-sand/70 block uppercase tracking-wider">Scrapbook
+                    Hardcover</span>
+                  <h3
+                    class="font-heading font-extrabold text-xl text-amber-100 group-hover:text-white transition mt-1 leading-snug">
+                    지리산 능선에서의<br>여름날 교환일기
+                  </h3>
+                  <p class="text-[11px] text-sand/80 font-body mt-2">에피소드 12편 • 사진 148장 포함</p>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <div
+                  class="p-2.5 bg-black/30 rounded-xl border border-sand/20 text-[10px] text-amber-100/90 font-body line-clamp-2 italic">
+                  "새벽 4시 장터목 대피소 라면과 운해 일출..."
+                </div>
+                <div
+                  class="pt-2 border-t border-sand/20 flex justify-between items-center text-[10px] font-label text-amber-300">
+                  <span class="font-bold">한강 나이트 러닝 10K</span>
+                  <span
+                    class="bg-amber-400 text-amber-950 font-extrabold px-2 py-0.5 rounded-full shadow text-[9px] group-hover:bg-white transition">책
+                    펼치기 &rarr;</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hardcover Book 2 (Terracotta Leather Cover - Vol 11) -->
+            <div onclick="openDiaryDetailPage('7월 덕유산 여름 야생화 트래킹 기록')"
+              class="hardcover-book bg-gradient-to-br from-[#802410] via-[#500c00] to-[#360600] p-6 text-paper flex flex-col justify-between h-80 group">
+              <div class="space-y-3">
+                <div class="flex justify-between items-center border-b border-sand/30 pb-2">
+                  <span
+                    class="font-label text-xs text-amber-300 font-bold bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-500/40 shadow-sm">VOL.11
+                    • 2026.07</span>
+                  <span class="text-xs text-amber-200">🌸 화보집</span>
+                </div>
+                <div class="pt-2">
+                  <span class="text-[10px] font-label text-sand/70 block uppercase tracking-wider">Scrapbook
+                    Hardcover</span>
+                  <h3
+                    class="font-heading font-extrabold text-xl text-amber-100 group-hover:text-white transition mt-1 leading-snug">
+                    덕유산 향적봉<br>야생화 탐방기
+                  </h3>
+                  <p class="text-[11px] text-sand/80 font-body mt-2">에피소드 8편 • 사진 92장 포함</p>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <div
+                  class="p-2.5 bg-black/30 rounded-xl border border-sand/20 text-[10px] text-amber-100/90 font-body line-clamp-2 italic">
+                  "원추리 꽃밭이 펼쳐진 향적봉 단체사진..."
+                </div>
+                <div
+                  class="pt-2 border-t border-sand/20 flex justify-between items-center text-[10px] font-label text-amber-300">
+                  <span class="font-bold">덕유산 야생화 트래킹</span>
+                  <span
+                    class="bg-amber-400 text-amber-950 font-extrabold px-2 py-0.5 rounded-full shadow text-[9px] group-hover:bg-white transition">책
+                    펼치기 &rarr;</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hardcover Book 3 (Mahogany Oak Cover - Vol 10) -->
+            <div onclick="openDiaryDetailPage('초여름 관악산 암릉 코스 정복기')"
+              class="hardcover-book bg-gradient-to-br from-[#2d3a2f] via-[#152417] to-[#0a140b] p-6 text-paper flex flex-col justify-between h-80 group">
+              <div class="space-y-3">
+                <div class="flex justify-between items-center border-b border-sand/30 pb-2">
+                  <span
+                    class="font-label text-xs text-amber-300 font-bold bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-500/40 shadow-sm">VOL.10
+                    • 2026.06</span>
+                  <span class="text-xs text-amber-200">🧗 암릉기록</span>
+                </div>
+                <div class="pt-2">
+                  <span class="text-[10px] font-label text-sand/70 block uppercase tracking-wider">Scrapbook
+                    Hardcover</span>
+                  <h3
+                    class="font-heading font-extrabold text-xl text-amber-100 group-hover:text-white transition mt-1 leading-snug">
+                    관악산 연주대<br>암릉 모임 추억
+                  </h3>
+                  <p class="text-[11px] text-sand/80 font-body mt-2">에피소드 15편 • 사진 210장 포함</p>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <div
+                  class="p-2.5 bg-black/30 rounded-xl border border-sand/20 text-[10px] text-amber-100/90 font-body line-clamp-2 italic">
+                  "바위 밧줄 구간의 아찔함과 연주대 막걸리..."
+                </div>
+                <div
+                  class="pt-2 border-t border-sand/20 flex justify-between items-center text-[10px] font-label text-amber-300">
+                  <span class="font-bold">관악산 암릉 코스</span>
+                  <span
+                    class="bg-amber-400 text-amber-950 font-extrabold px-2 py-0.5 rounded-full shadow text-[9px] group-hover:bg-white transition">책
+                    펼치기 &rarr;</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Realistic 3D Wooden Shelf Ledge Bar (책들이 올려진 원목 선반 받침대) -->
+          <div class="wooden-shelf-ledge h-10 w-full rounded-xl flex items-center justify-between px-6 shadow-inner">
+            <span class="font-label text-[10px] text-amber-200/80 font-bold">🪵 OAK WOODEN SHELF NO. 01</span>
+            <span class="font-label text-[10px] text-amber-200/80">CLICK BOOK COVER TO OPEN DIARY (UC8)</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- UC8 액티비티일기 독립 상세 페이지 뷰 (독립 페이지 형태, 팝업 아님!) -->
+      <div id="uc8-detail-page-view"
+        class="hidden space-y-6 bg-white p-8 rounded-3xl border-2 border-forest-container shadow-xl">
+        <div class="flex items-center justify-between border-b border-paper-high pb-4">
+          <div class="flex items-center space-x-3">
+            <button onclick="closeDiaryDetailPage()"
+              class="bg-paper-high hover:bg-forest hover:text-white text-forest font-heading font-bold text-xs px-4 py-2 rounded-full transition flex items-center space-x-1">
+              <span>← UC3 서가 목록으로 돌아가기</span>
+            </button>
+            <span class="uc-tag">UC8 액티비티일기 (독립 페이지 뷰)</span>
+          </div>
+          <span class="font-label text-xs text-gray-500">Google Shared Drive (`hikes/jirisan/`)</span>
+        </div>
+
+        <div class="space-y-6">
+          <div class="bg-forest text-paper p-6 rounded-2xl flex flex-col space-y-4 shadow-xl">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <span class="text-sand font-label text-xs font-bold">2026.08 VOL.12 • 디지털 단행본 아카이브</span>
+                <h2 id="uc8DetailTitle" class="font-heading font-extrabold text-2xl text-paper mt-1">한강 나이트 러닝 10K 에피소드
+                  모음집</h2>
+                <p class="text-xs text-paper/80 mt-1">작성일: 2026.08.15 • 지리산 국립공원 천왕봉 (1,915m)</p>
+              </div>
+              <div class="flex space-x-2">
+                <button onclick="openUploadModal()"
+                  class="bg-terracotta text-white font-heading font-bold text-xs px-4 py-2 rounded-full hover:bg-terracotta-dark shadow">
+                  + UC12 사진 올리기
+                </button>
+                <button onclick="openEssayWriteModal()"
+                  class="bg-sand text-forest font-heading font-bold text-xs px-4 py-2 rounded-full hover:bg-white shadow">
+                  + UC11 에피소드 작성
+                </button>
+              </div>
+            </div>
+
+            <!-- Participant Circular Avatar Row & Admin Badge Grant (UC6) -->
+            <div
+              class="pt-4 border-t border-forest-container flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+              <div class="flex items-center space-x-2">
+                <span class="font-heading font-bold text-xs text-sand flex items-center space-x-1">
+                  <span>👥</span>
+                  <span> 참가자 방명록</span>
+                </span>
+                <span class="uc-tag">동호회 관리자 뱃지 수여 (UC6)</span>
+              </div>
+
+              <!-- Circular Avatars -->
+              <div class="flex flex-wrap items-center gap-2.5">
+                <!-- Avatar 1 -->
+                <div onclick="openAdminBadgeGrantModal('김산길')"
+                  class="group cursor-pointer flex items-center space-x-2 bg-forest-container hover:bg-forest-light px-3 py-1.5 rounded-full border border-sand/30 transition shadow-sm"
+                  title="클릭하여 김산길 님에게 뱃지 수여">
+                  <div
+                    class="w-8 h-8 rounded-full bg-amber-500 text-white font-heading font-bold text-xs flex items-center justify-center border-2 border-sand group-hover:scale-110 transition">
+                    산길</div>
+                  <div class="text-left">
+                    <p class="font-heading font-bold text-xs text-paper">김산길 <span
+                        class="text-[9px] text-amber-300">👑</span></p>
+                    <p class="text-[9px] font-label text-sand flex items-center space-x-1">
+                      <span>🎖️ 뱃지 4개</span>
+                      <span class="text-emerald-300 font-bold group-hover:underline">🏅+수여</span>
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Avatar 2 -->
+                <div onclick="openAdminBadgeGrantModal('이등산')"
+                  class="group cursor-pointer flex items-center space-x-2 bg-forest-container hover:bg-forest-light px-3 py-1.5 rounded-full border border-sand/30 transition shadow-sm"
+                  title="클릭하여 이등산 님에게 뱃지 수여">
+                  <div
+                    class="w-8 h-8 rounded-full bg-emerald-600 text-white font-heading font-bold text-xs flex items-center justify-center border-2 border-emerald-400 group-hover:scale-110 transition">
+                    등산</div>
+                  <div class="text-left">
+                    <p class="font-heading font-bold text-xs text-paper">이등산</p>
+                    <p class="text-[9px] font-label text-sand flex items-center space-x-1">
+                      <span>🎖️ 뱃지 2개</span>
+                      <span class="text-emerald-300 font-bold group-hover:underline">🏅+수여</span>
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Avatar 3 -->
+                <div onclick="openAdminBadgeGrantModal('박트렉')"
+                  class="group cursor-pointer flex items-center space-x-2 bg-forest-container hover:bg-forest-light px-3 py-1.5 rounded-full border border-sand/30 transition shadow-sm"
+                  title="클릭하여 박트렉 님에게 뱃지 수여">
+                  <div
+                    class="w-8 h-8 rounded-full bg-sky-600 text-white font-heading font-bold text-xs flex items-center justify-center border-2 border-sky-400 group-hover:scale-110 transition">
+                    트렉</div>
+                  <div class="text-left">
+                    <p class="font-heading font-bold text-xs text-paper">박트렉</p>
+                    <p class="text-[9px] font-label text-sand flex items-center space-x-1">
+                      <span>🎖️ 뱃지 3개</span>
+                      <span class="text-emerald-300 font-bold group-hover:underline">🏅+수여</span>
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Avatar 4 -->
+                <div onclick="openAdminBadgeGrantModal('정구름')"
+                  class="group cursor-pointer flex items-center space-x-2 bg-forest-container hover:bg-forest-light px-3 py-1.5 rounded-full border border-sand/30 transition shadow-sm"
+                  title="클릭하여 정구름 님에게 뱃지 수여">
+                  <div
+                    class="w-8 h-8 rounded-full bg-purple-600 text-white font-heading font-bold text-xs flex items-center justify-center border-2 border-purple-400 group-hover:scale-110 transition">
+                    구름</div>
+                  <div class="text-left">
+                    <p class="font-heading font-bold text-xs text-paper">정구름</p>
+                    <p class="text-[9px] font-label text-sand flex items-center space-x-1">
+                      <span>🎖️ 뱃지 1개</span>
+                      <span class="text-emerald-300 font-bold group-hover:underline">🏅+수여</span>
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Avatar 5 -->
+                <div onclick="openAdminBadgeGrantModal('최바위')"
+                  class="group cursor-pointer flex items-center space-x-2 bg-forest-container hover:bg-forest-light px-3 py-1.5 rounded-full border border-sand/30 transition shadow-sm"
+                  title="클릭하여 최바위 님에게 뱃지 수여">
+                  <div
+                    class="w-8 h-8 rounded-full bg-rose-600 text-white font-heading font-bold text-xs flex items-center justify-center border-2 border-rose-400 group-hover:scale-110 transition">
+                    바위</div>
+                  <div class="text-left">
+                    <p class="font-heading font-bold text-xs text-paper">최바위</p>
+                    <p class="text-[9px] font-label text-sand flex items-center space-x-1">
+                      <span>🎖️ 뱃지 5개</span>
+                      <span class="text-emerald-300 font-bold group-hover:underline">🏅+수여</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1. Polaroid Photo Gallery Carousel (UC9) (가로/세로 사진 혼합 메이슨리 갤러리) -->
+          <div class="space-y-4">
+            <div
+              class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-paper-high pb-3">
+              <div class="flex items-center space-x-2">
+                <h3 class="font-heading font-bold text-xl text-forest flex items-center space-x-2">
+                  <span>📸</span>
+                  <span>구글 공유 드라이브 화보 (UC9 사진첩)</span>
+                </h3>
+                <span class="uc-tag">가로/세로 혼합 메이슨리 갤러리 (제목 없음)</span>
+              </div>
+              <div class="flex items-center space-x-3">
+                <button onclick="changePhotoPage(-1)"
+                  class="bg-paper-high hover:bg-forest hover:text-white text-forest text-xs font-heading font-bold px-3.5 py-1.5 rounded-full transition flex items-center space-x-1 shadow-sm">
+                  <span>◀ 이전 8장</span>
+                </button>
+                <span id="photoPageIndicator"
+                  class="font-label text-xs text-forest font-bold bg-paper-low px-3 py-1 rounded-full border border-paper-high">
+                  PAGE 1 / 2 (사진 1-8 / 16)
+                </span>
+                <button onclick="changePhotoPage(1)"
+                  class="bg-paper-high hover:bg-forest hover:text-white text-forest text-xs font-heading font-bold px-3.5 py-1.5 rounded-full transition flex items-center space-x-1 shadow-sm">
+                  <span>다음 8장 ▶</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Page 1 Masonry Columns (Mixed Horizontal & Vertical Photos, Titleless) -->
+            <div id="photoPage1" class="columns-2 md:columns-4 gap-4 space-y-4">
+              <!-- Item 1: Horizontal 16:9 -->
+              <div class="break-inside-avoid polaroid-card group relative cursor-pointer">
+                <div class="washi-tape"></div>
+                <div class="overflow-hidden rounded-lg bg-gray-100">
+                  <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600"
+                    class="w-full h-auto object-cover group-hover:scale-105 transition duration-300">
+                </div>
+                <div class="pt-2 flex items-center justify-between text-[10px] font-label text-gray-500">
+                  <div class="flex items-center space-x-1">
+                    <div
+                      class="w-4 h-4 rounded-full bg-amber-500 text-white font-bold text-[8px] flex items-center justify-center">
+                      산</div>
+                    <span class="font-heading font-bold text-gray-700">김산길</span>
+                  </div>
+                  <span>08.15 05:40 AM</span>
+                </div>
+              </div>
+
+              <!-- Item 2: Vertical 3:4 Portrait -->
+              <div class="break-inside-avoid polaroid-card group relative cursor-pointer">
+                <div class="washi-tape" style="background-color: rgba(1, 45, 29, 0.35)"></div>
+                <div class="overflow-hidden rounded-lg bg-gray-100">
+                  <img src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600"
+                    class="w-full h-auto object-cover group-hover:scale-105 transition duration-300">
+                </div>
+                <div class="pt-2 flex items-center justify-between text-[10px] font-label text-gray-500">
+                  <div class="flex items-center space-x-1">
+                    <div
+                      class="w-4 h-4 rounded-full bg-emerald-600 text-white font-bold text-[8px] flex items-center justify-center">
+                      등</div>
+                    <span class="font-heading font-bold text-gray-700">이등산</span>
+                  </div>
+                  <span>08.15 06:15 AM</span>
+                </div>
+              </div>
+
+              <!-- Item 3: Square 1:1 -->
+              <div class="break-inside-avoid polaroid-card group relative cursor-pointer">
+                <div class="washi-tape" style="background-color: rgba(255, 202, 152, 0.7)"></div>
+                <div class="overflow-hidden rounded-lg bg-gray-100">
+                  <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600"
+                    class="w-full h-auto object-cover group-hover:scale-105 transition duration-300">
+                </div>
+                <div class="pt-2 flex items-center justify-between text-[10px] font-label text-gray-500">
+                  <div class="flex items-center space-x-1">
+                    <div
+                      class="w-4 h-4 rounded-full bg-sky-600 text-white font-bold text-[8px] flex items-center justify-center">
+                      트</div>
+                    <span class="font-heading font-bold text-gray-700">박트렉</span>
+                  </div>
+                  <span>08.15 07:05 AM</span>
+                </div>
+              </div>
+
+              <!-- Item 4: Vertical 9:16 Portrait -->
+              <div class="break-inside-avoid polaroid-card group relative cursor-pointer">
+                <div class="washi-tape"></div>
+                <div class="overflow-hidden rounded-lg bg-gray-100">
+                  <img src="https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?w=600"
+                    class="w-full h-auto object-cover group-hover:scale-105 transition duration-300">
+                </div>
+                <div class="pt-2 flex items-center justify-between text-[10px] font-label text-gray-500">
+                  <div class="flex items-center space-x-1">
+                    <div
+                      class="w-4 h-4 rounded-full bg-purple-600 text-white font-bold text-[8px] flex items-center justify-center">
+                      구</div>
+                    <span class="font-heading font-bold text-gray-700">정구름</span>
+                  </div>
+                  <span>08.15 07:40 AM</span>
+                </div>
+              </div>
+
+              <!-- Item 5: B-Side Vertical Photo -->
+              <div class="break-inside-avoid polaroid-card group relative cursor-pointer">
+                <div class="washi-tape" style="background-color: rgba(116, 27, 4, 0.35)"></div>
+                <div class="overflow-hidden rounded-lg bg-gray-100 relative">
+                  <span
+                    class="absolute top-2 right-2 bg-terracotta text-white font-label text-[9px] font-bold px-2 py-0.5 rounded shadow z-10">🤪
+                    B컷</span>
+                  <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600"
+                    class="w-full h-auto object-cover group-hover:scale-105 transition duration-300">
+                </div>
+                <div class="pt-2 flex items-center justify-between text-[10px] font-label text-gray-500">
+                  <div class="flex items-center space-x-1">
+                    <div
+                      class="w-4 h-4 rounded-full bg-rose-600 text-white font-bold text-[8px] flex items-center justify-center">
+                      바</div>
+                    <span class="font-heading font-bold text-gray-700">최바위</span>
+                  </div>
+                  <span>08.15 08:10 AM</span>
+                </div>
+              </div>
+
+              <!-- Item 6: Horizontal 16:9 -->
+              <div class="break-inside-avoid polaroid-card group relative cursor-pointer">
+                <div class="washi-tape"></div>
+                <div class="overflow-hidden rounded-lg bg-gray-100">
+                  <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600"
+                    class="w-full h-auto object-cover group-hover:scale-105 transition duration-300">
+                </div>
+                <div class="pt-2 flex items-center justify-between text-[10px] font-label text-gray-500">
+                  <div class="flex items-center space-x-1">
+                    <div
+                      class="w-4 h-4 rounded-full bg-amber-500 text-white font-bold text-[8px] flex items-center justify-center">
+                      산</div>
+                    <span class="font-heading font-bold text-gray-700">김산길</span>
+                  </div>
+                  <span>08.15 08:45 AM</span>
+                </div>
+              </div>
+
+              <!-- Item 7: Vertical 3:4 Portrait -->
+              <div class="break-inside-avoid polaroid-card group relative cursor-pointer">
+                <div class="washi-tape" style="background-color: rgba(255, 202, 152, 0.7)"></div>
+                <div class="overflow-hidden rounded-lg bg-gray-100">
+                  <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600"
+                    class="w-full h-auto object-cover group-hover:scale-105 transition duration-300">
+                </div>
+                <div class="pt-2 flex items-center justify-between text-[10px] font-label text-gray-500">
+                  <div class="flex items-center space-x-1">
+                    <div
+                      class="w-4 h-4 rounded-full bg-emerald-600 text-white font-bold text-[8px] flex items-center justify-center">
+                      등</div>
+                    <span class="font-heading font-bold text-gray-700">이등산</span>
+                  </div>
+                  <span>08.15 09:20 AM</span>
+                </div>
+              </div>
+
+              <!-- Item 8: B-Side Horizontal Photo -->
+              <div class="break-inside-avoid polaroid-card group relative cursor-pointer">
+                <div class="washi-tape"></div>
+                <div class="overflow-hidden rounded-lg bg-gray-100 relative">
+                  <span
+                    class="absolute top-2 right-2 bg-terracotta text-white font-label text-[9px] font-bold px-2 py-0.5 rounded shadow z-10">🤪
+                    B컷</span>
+                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600"
+                    class="w-full h-auto object-cover group-hover:scale-105 transition duration-300">
+                </div>
+                <div class="pt-2 flex items-center justify-between text-[10px] font-label text-gray-500">
+                  <div class="flex items-center space-x-1">
+                    <div
+                      class="w-4 h-4 rounded-full bg-sky-600 text-white font-bold text-[8px] flex items-center justify-center">
+                      트</div>
+                    <span class="font-heading font-bold text-gray-700">박트렉</span>
+                  </div>
+                  <span>08.15 10:05 AM</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Page 2 Masonry Columns (Hidden) -->
+            <div id="photoPage2" class="columns-2 md:columns-4 gap-4 space-y-4 hidden">
+              <!-- Item 9: Vertical 3:4 -->
+              <div class="break-inside-avoid polaroid-card group relative cursor-pointer">
+                <div class="washi-tape"></div>
+                <div class="overflow-hidden rounded-lg bg-gray-100">
+                  <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600"
+                    class="w-full h-auto object-cover group-hover:scale-105 transition duration-300">
+                </div>
+                <div class="pt-2 flex items-center justify-between text-[10px] font-label text-gray-500">
+                  <div class="flex items-center space-x-1">
+                    <div
+                      class="w-4 h-4 rounded-full bg-purple-600 text-white font-bold text-[8px] flex items-center justify-center">
+                      구</div>
+                    <span class="font-heading font-bold text-gray-700">정구름</span>
+                  </div>
+                  <span>08.15 11:15 AM</span>
+                </div>
+              </div>
+
+              <!-- Item 10: Horizontal 16:9 -->
+              <div class="break-inside-avoid polaroid-card group relative cursor-pointer">
+                <div class="washi-tape" style="background-color: rgba(1, 45, 29, 0.35)"></div>
+                <div class="overflow-hidden rounded-lg bg-gray-100">
+                  <img src="https://images.unsplash.com/photo-1511497584788-8767611136f6?w=600"
+                    class="w-full h-auto object-cover group-hover:scale-105 transition duration-300">
+                </div>
+                <div class="pt-2 flex items-center justify-between text-[10px] font-label text-gray-500">
+                  <div class="flex items-center space-x-1">
+                    <div
+                      class="w-4 h-4 rounded-full bg-rose-600 text-white font-bold text-[8px] flex items-center justify-center">
+                      바</div>
+                    <span class="font-heading font-bold text-gray-700">최바위</span>
+                  </div>
+                  <span>08.15 11:50 AM</span>
+                </div>
+              </div>
+
+              <!-- Item 11: Vertical 9:16 -->
+              <div class="break-inside-avoid polaroid-card group relative cursor-pointer">
+                <div class="washi-tape"></div>
+                <div class="overflow-hidden rounded-lg bg-gray-100">
+                  <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=600"
+                    class="w-full h-auto object-cover group-hover:scale-105 transition duration-300">
+                </div>
+                <div class="pt-2 flex items-center justify-between text-[10px] font-label text-gray-500">
+                  <div class="flex items-center space-x-1">
+                    <div
+                      class="w-4 h-4 rounded-full bg-amber-500 text-white font-bold text-[8px] flex items-center justify-center">
+                      산</div>
+                    <span class="font-heading font-bold text-gray-700">김산길</span>
+                  </div>
+                  <span>08.15 12:30 PM</span>
+                </div>
+              </div>
+
+              <!-- Item 12: Square 1:1 -->
+              <div class="break-inside-avoid polaroid-card group relative cursor-pointer">
+                <div class="washi-tape" style="background-color: rgba(255, 202, 152, 0.7)"></div>
+                <div class="overflow-hidden rounded-lg bg-gray-100">
+                  <img src="https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=600"
+                    class="w-full h-auto object-cover group-hover:scale-105 transition duration-300">
+                </div>
+                <div class="pt-2 flex items-center justify-between text-[10px] font-label text-gray-500">
+                  <div class="flex items-center space-x-1">
+                    <div
+                      class="w-4 h-4 rounded-full bg-emerald-600 text-white font-bold text-[8px] flex items-center justify-center">
+                      등</div>
+                    <span class="font-heading font-bold text-gray-700">이등산</span>
+                  </div>
+                  <span>08.15 01:10 PM</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Full Episode Section (UC10) (하단 세로 수직 스크롤 에피소드 섹션) -->
+          <div class="space-y-6 pt-4 border-t-2 border-paper-high">
+            <div
+              class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-paper-low p-4 rounded-2xl border border-paper-high">
+              <div class="flex items-center space-x-2">
+                <h3 class="font-heading font-bold text-xl text-forest flex items-center space-x-2">
+                  <span>✍️</span>
+                  <span>함께 쓴 에피소드 & 교환일기 (UC10)</span>
+                </h3>
+                <span class="uc-tag">하단 세로 스크롤 열람</span>
+              </div>
+              <button onclick="openEssayWriteModal()"
+                class="bg-terracotta text-white font-heading font-bold text-xs px-5 py-2 rounded-full hover:bg-terracotta-dark shadow transition">
+                + ✍️ 이 일기에 에피소드 작성 (UC11)
+              </button>
+            </div>
+
+            <!-- 2-Column Grid Episode Feed Stream (2열 배치 & 글 5줄 말줄임 & 상세보기 팝업) -->
+            <div id="episodeFeedStream" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+              <!-- Episode Entry 1 (2-Column Grid Item) -->
+              <div
+                class="bg-white rounded-2xl p-5 border border-paper-high shadow-md hover:shadow-lg transition flex flex-col justify-between space-y-3">
+                <div>
+                  <div class="flex justify-between items-center border-b border-gray-100 pb-2.5 mb-3">
+                    <div class="flex items-center space-x-2.5">
+                      <div
+                        class="w-7 h-7 rounded-full bg-amber-500 text-white font-heading font-bold text-xs flex items-center justify-center">
+                        산길</div>
+                      <div>
+                        <h4 class="font-heading font-bold text-xs text-forest line-clamp-1">지리산 천왕봉 정상을 밟으며</h4>
+                        <p class="text-[9px] text-gray-400 font-label">김산길 • 2026.08.15 09:30 AM</p>
+                      </div>
+                    </div>
+                    <span
+                      class="bg-emerald-100 text-emerald-800 text-[9px] font-label font-bold px-2 py-0.5 rounded-full">주최자
+                      감상</span>
+                  </div>
+
+                  <!-- Small Aesthetic Photo & 5-Line Clamped Text Content -->
+                  <div class="flex space-x-3 items-start">
+                    <div
+                      class="shrink-0 w-24 h-24 rounded-xl overflow-hidden border border-sand shadow-sm relative group bg-gray-100">
+                      <div class="washi-tape-sm"></div>
+                      <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400"
+                        class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+                    </div>
+                    <div class="text-[11px] text-gray-700 leading-relaxed font-body line-clamp-5">
+                      새벽 4시, 장터목 대피소의 차가운 바람을 뚫고 오른 천왕봉 정상. 붉게 물드는 운해를 바라보며 모임원들과 함께 끓여 마신 따뜻한 차 한 잔의 기쁨은 그 무엇과도 바꿀 수
+                      없었다. 암릉 구간을 오를 때는 아찔했지만 서로 손을 잡아끌어주며 완등에 성공했다. 하산길에 찍은 폴라로이드 사진 속에 담긴 모임원들의 미소는 평생 기억될 모임 추억으로 남을
+                      것이다.
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pt-2 border-t border-gray-100 flex justify-between items-center">
+                  <span class="text-[9px] font-label text-gray-400">📷 사진 1장 첨부</span>
+                  <button
+                    onclick="openEpisodeDetailModal('지리산 천왕봉 정상을 밟으며', '김산길 (주최자)', '2026.08.15 09:30 AM', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900', '새벽 4시, 장터목 대피소의 차가운 바람을 뚫고 오른 천왕봉 정상. 붉게 물드는 운해를 바라보며 모임원들과 함께 끓여 마신 따뜻한 차 한 잔의 기쁨은 그 무엇과도 바꿀 수 없었다.\n\n암릉 구간을 오를 때는 아찔했지만 서로 손을 잡아끌어주며 완등에 성공했다. 하산길에 찍은 폴라로이드 사진 속에 담긴 모임원들의 미소는 평생 기억될 모임 추억으로 남을 것이다.')"
+                    class="bg-forest text-white font-heading font-bold text-[10px] px-3 py-1.5 rounded-full hover:bg-forest-container transition shadow-sm flex items-center space-x-1">
+                    <span>🔍 상세보기 (팝업)</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Episode Entry 2 (2-Column Grid Item) -->
+              <div
+                class="bg-white rounded-2xl p-5 border border-paper-high shadow-md hover:shadow-lg transition flex flex-col justify-between space-y-3">
+                <div>
+                  <div class="flex justify-between items-center border-b border-gray-100 pb-2.5 mb-3">
+                    <div class="flex items-center space-x-2.5">
+                      <div
+                        class="w-7 h-7 rounded-full bg-emerald-600 text-white font-heading font-bold text-xs flex items-center justify-center">
+                        등산</div>
+                      <div>
+                        <h4 class="font-heading font-bold text-xs text-forest line-clamp-1">처음 오른 1,915m 천왕봉 소회</h4>
+                        <p class="text-[9px] text-gray-400 font-label">이등산 • 2026.08.15 11:20 AM</p>
+                      </div>
+                    </div>
+                    <span class="bg-paper-high text-forest text-[9px] font-label font-bold px-2 py-0.5 rounded-full">완등
+                      멤버</span>
+                  </div>
+
+                  <!-- Small Aesthetic Photo & 5-Line Clamped Text Content -->
+                  <div class="flex space-x-3 items-start">
+                    <div
+                      class="shrink-0 w-24 h-24 rounded-xl overflow-hidden border border-sand shadow-sm relative group bg-gray-100">
+                      <div class="washi-tape-sm" style="background-color: rgba(1, 45, 29, 0.4)"></div>
+                      <img src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=400"
+                        class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+                    </div>
+                    <div class="text-[11px] text-gray-700 leading-relaxed font-body line-clamp-5">
+                      등산 초보자인 내가 지리산 천왕봉을 완등할 수 있을지 두려움이 컸지만, 동호회 분들의 따뜻한 페이스 조절과 응원 덕분에 포기하지 않고 정상을 밟을 수 있었습니다. 운해 위로
+                      솟아오른 태양을 보았을 때의 감동은 평생 잊을 수 없을 것입니다. 함께해 준 산악회 정회원 분들께 진심으로 감사드립니다.
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pt-2 border-t border-gray-100 flex justify-between items-center">
+                  <span class="text-[9px] font-label text-gray-400">📷 사진 1장 첨부</span>
+                  <button
+                    onclick="openEpisodeDetailModal('처음 오른 1,915m 천왕봉 소회', '이등산 (완등 멤버)', '2026.08.15 11:20 AM', 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=900', '등산 초보자인 내가 지리산 천왕봉을 완등할 수 있을지 두려움이 컸지만, 동호회 분들의 따뜻한 페이스 조절과 응원 덕분에 포기하지 않고 정상을 밟을 수 있었습니다.\n\n운해 위로 솟아오른 태양을 보았을 때의 감동은 평생 잊을 수 없을 것입니다. 함께해 준 산악회 정회원 분들께 진심으로 감사드립니다.')"
+                    class="bg-forest text-white font-heading font-bold text-[10px] px-3 py-1.5 rounded-full hover:bg-forest-container transition shadow-sm flex items-center space-x-1">
+                    <span>🔍 상세보기 (팝업)</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Episode Entry 3 (2-Column Grid Item) -->
+              <div
+                class="bg-white rounded-2xl p-5 border border-paper-high shadow-md hover:shadow-lg transition flex flex-col justify-between space-y-3">
+                <div>
+                  <div class="flex justify-between items-center border-b border-gray-100 pb-2.5 mb-3">
+                    <div class="flex items-center space-x-2.5">
+                      <div
+                        class="w-7 h-7 rounded-full bg-sky-600 text-white font-heading font-bold text-xs flex items-center justify-center">
+                        트렉</div>
+                      <div>
+                        <h4 class="font-heading font-bold text-xs text-forest line-clamp-1">하산길 파전과 동동주, 그리고 추억</h4>
+                        <p class="text-[9px] text-gray-400 font-label">박트렉 • 2026.08.15 02:40 PM</p>
+                      </div>
+                    </div>
+                    <span class="bg-paper-high text-forest text-[9px] font-label font-bold px-2 py-0.5 rounded-full">완등
+                      멤버</span>
+                  </div>
+
+                  <!-- Small Aesthetic Photo & 5-Line Clamped Text Content -->
+                  <div class="flex space-x-3 items-start">
+                    <div
+                      class="shrink-0 w-24 h-24 rounded-xl overflow-hidden border border-sand shadow-sm relative group bg-gray-100">
+                      <div class="washi-tape-sm" style="background-color: rgba(231, 111, 81, 0.6)"></div>
+                      <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400"
+                        class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+                    </div>
+                    <div class="text-[11px] text-gray-700 leading-relaxed font-body line-clamp-5">
+                      중산리 하산 완료 후 동호회원들과 함께 나눈 파전과 시원한 동동주 한 잔! 힘든 등산 뒤에 찾아오는 이 아날로그 감성이 바로 우리가 계속산을 찾는 이유인 것 같습니다. 다음
+                      9월 설악산 공룡능선 트래킹에서도 모두 건강한 모습으로 다시 만나요!
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pt-2 border-t border-gray-100 flex justify-between items-center">
+                  <span class="text-[9px] font-label text-gray-400">📷 사진 1장 첨부</span>
+                  <button
+                    onclick="openEpisodeDetailModal('하산길 파전과 동동주, 그리고 추억', '박트렉 (완등 멤버)', '2026.08.15 02:40 PM', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900', '중산리 하산 완료 후 동호회원들과 함께 나눈 파전과 시원한 동동주 한 잔! 힘든 등산 뒤에 찾아오는 이 아날로그 감성이 바로 우리가 계속산을 찾는 이유인 것 같습니다.\n\n다음 9월 설악산 공룡능선 트래킹에서도 모두 건강한 모습으로 다시 만나요!')"
+                    class="bg-forest text-white font-heading font-bold text-[10px] px-3 py-1.5 rounded-full hover:bg-forest-container transition shadow-sm flex items-center space-x-1">
+                    <span>🔍 상세보기 (팝업)</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- 4. UC9 사진첩 & UC12 사진등록 SECTION -->
+    <!-- ================================================================= -->
+    <section id="sec-gallery" class="space-y-6 hidden">
+      <div
+        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-md border border-paper-high">
+        <div>
+          <div class="flex items-center space-x-2">
+            <h2 class="font-heading font-extrabold text-2xl text-forest">📷 구글 공유 드라이브 사진첩 & B컷 갤러리</h2>
+            <span class="uc-tag">UC9 include UC12</span>
+          </div>
+          <p class="text-xs text-gray-600 font-body mt-1">Service Account API로 동기화된 `hikes/{hike_id}/` 원본 고화질 사진 및 B컷
+            갤러리입니다.</p>
+        </div>
+        <button onclick="openUploadModal()"
+          class="bg-forest text-white font-heading font-bold text-xs px-5 py-2.5 rounded-full hover:bg-forest-container transition shadow">
+          📤 Google Drive 사진등록 (UC12)
+        </button>
+      </div>
+
+      <!-- Filter Chips -->
+      <div class="flex space-x-2 text-xs font-label">
+        <button class="bg-forest text-white px-3.5 py-1.5 rounded-full font-bold">전체 사진 (148)</button>
+        <button
+          class="bg-white text-forest border border-paper-high px-3.5 py-1.5 rounded-full hover:bg-paper-low font-bold">A컷
+          대표사진 (85)</button>
+        <button class="bg-terracotta text-white px-3.5 py-1.5 rounded-full font-bold">🤪 B컷 & 비하인드 (63)</button>
+      </div>
+
+      <!-- Gallery Masonry Columns (가로/세로 사진 혼합, 제목 없음) -->
+      <div class="columns-2 md:columns-4 gap-4 space-y-4">
+        <!-- Item 1: Horizontal Landscape 16:9 -->
+        <div class="break-inside-avoid polaroid-card group relative cursor-pointer">
+          <div class="washi-tape"></div>
+          <div class="overflow-hidden rounded-lg bg-gray-100">
+            <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600"
+              class="w-full h-auto object-cover group-hover:scale-105 transition duration-300" alt="Photo">
+          </div>
+          <div class="pt-2 flex items-center justify-between text-[10px] font-label text-gray-500">
+            <div class="flex items-center space-x-1">
+              <div
+                class="w-4 h-4 rounded-full bg-amber-500 text-white font-bold text-[8px] flex items-center justify-center">
+                산</div>
+              <span class="font-heading font-bold text-gray-700">김산길</span>
+            </div>
+            <span>Drive `file_091248`</span>
+          </div>
+        </div>
+
+        <!-- Item 2: Vertical Portrait 3:4 -->
+        <div class="break-inside-avoid polaroid-card group relative cursor-pointer">
+          <div class="washi-tape" style="background-color: rgba(1, 45, 29, 0.4)"></div>
+          <div class="overflow-hidden rounded-lg bg-gray-100">
+            <img src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600"
+              class="w-full h-auto object-cover group-hover:scale-105 transition duration-300" alt="Photo">
+          </div>
+          <div class="pt-2 flex items-center justify-between text-[10px] font-label text-gray-500">
+            <div class="flex items-center space-x-1">
+              <div
+                class="w-4 h-4 rounded-full bg-emerald-600 text-white font-bold text-[8px] flex items-center justify-center">
+                등</div>
+              <span class="font-heading font-bold text-gray-700">이등산</span>
+            </div>
+            <span>Drive `file_091249`</span>
+          </div>
+        </div>
+
+        <!-- Item 3: B-Side Vertical 9:16 Portrait -->
+        <div class="break-inside-avoid polaroid-card group relative cursor-pointer">
+          <div class="washi-tape" style="background-color: rgba(231, 111, 81, 0.6)"></div>
+          <div class="overflow-hidden rounded-lg bg-gray-100 relative">
+            <span
+              class="absolute top-2 right-2 bg-terracotta text-white font-label text-[9px] font-bold px-2 py-0.5 rounded shadow z-10">🤪
+              B컷</span>
+            <img src="https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?w=600"
+              class="w-full h-auto object-cover group-hover:scale-105 transition duration-300" alt="Photo">
+          </div>
+          <div class="pt-2 flex items-center justify-between text-[10px] font-label text-gray-500">
+            <div class="flex items-center space-x-1">
+              <div
+                class="w-4 h-4 rounded-full bg-sky-600 text-white font-bold text-[8px] flex items-center justify-center">
+                트</div>
+              <span class="font-heading font-bold text-gray-700">박트렉</span>
+            </div>
+            <span>Drive `file_091250`</span>
+          </div>
+        </div>
+
+        <!-- Item 4: Square 1:1 -->
+        <div class="break-inside-avoid polaroid-card group relative cursor-pointer">
+          <div class="washi-tape"></div>
+          <div class="overflow-hidden rounded-lg bg-gray-100">
+            <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600"
+              class="w-full h-auto object-cover group-hover:scale-105 transition duration-300" alt="Photo">
+          </div>
+          <div class="pt-2 flex items-center justify-between text-[10px] font-label text-gray-500">
+            <div class="flex items-center space-x-1">
+              <div
+                class="w-4 h-4 rounded-full bg-purple-600 text-white font-bold text-[8px] flex items-center justify-center">
+                구</div>
+              <span class="font-heading font-bold text-gray-700">정구름</span>
+            </div>
+            <span>Drive `file_091251`</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- 5. UC4 마이 크루 라이프, UC5 해냄뱃지, UC6 해냄뱃지부여, UC13 활동기록 SECTION -->
+    <!-- ================================================================= -->
+    <section id="sec-my" class="space-y-6 hidden">
+      <div
+        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-md border border-paper-high">
+        <div>
+          <div class="flex items-center space-x-2">
+            <h2 class="font-heading font-extrabold text-2xl text-forest">🎖️ 마이 크루 라이프 & 해냄뱃지 갤러리</h2>
+            <span class="uc-tag">UC4 include UC5, UC13</span>
+          </div>
+          <p class="text-xs text-gray-600 font-body mt-1">개인 등산 활동 이력과 동호회 관리자가 부여한 스탬프 뱃지 현황입니다.</p>
+        </div>
+        <div
+          class="bg-paper-low border border-sand/40 px-4 py-2 rounded-xl text-xs font-label text-forest font-bold flex items-center space-x-2">
+          <span>🎖️ 보유 뱃지 4개</span>
+          <span>•</span>
+          <span>해냄 스탬프 18개</span>
+        </div>
+      </div>
+
+      <!-- Activity Grid (UC13 활동기록 - 3열 그리드 & 획득 뱃지 표시) -->
+      <div class="bg-white rounded-2xl p-6 shadow-md border border-paper-high space-y-4">
+        <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+          <div class="flex items-center space-x-2">
+            <h3 class="font-heading font-bold text-lg text-forest">🏃 나의 활동 기록 (3열 카드 그리드)</h3>
+            <span class="uc-tag">UC13 활동기록</span>
+          </div>
+          <span class="font-label text-xs text-gray-500">총 18회 산행 완료 • 획득 뱃지 동기화</span>
+        </div>
+
+        <!-- 3-Column Activity Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+          <!-- Activity Card 1 -->
+          <div
+            class="p-5 bg-paper-low rounded-2xl border-2 border-forest/20 shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-3">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span
+                  class="bg-forest text-white text-[10px] font-label font-bold px-2.5 py-0.5 rounded-full">2026.08.15
+                  완등</span>
+                <span class="text-xs font-label text-gray-400">14.2km</span>
+              </div>
+              <h4 class="font-heading font-extrabold text-base text-forest flex items-center space-x-1.5">
+                <span>🏔️</span>
+                <span>한강 나이트 러닝 10K</span>
+              </h4>
+              <p class="text-xs text-gray-500 font-body mt-1">반포대교 왕복 코스 • 페이스 530</p>
+            </div>
+
+            <!-- Earned Badge Badge Display -->
+            <div class="pt-3 border-t border-gray-200/70 flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <div
+                  class="w-8 h-8 rounded-full bg-terracotta text-white flex items-center justify-center font-heading font-bold text-xs shadow-sm">
+                  🏔️</div>
+                <div>
+                  <span class="font-heading font-bold text-xs text-terracotta block">10K 완주 해냄뱃지뱃지</span>
+                  <span class="text-[9px] font-label text-gray-400 block">granted_by: 김산길</span>
+                </div>
+              </div>
+              <span class="bg-emerald-100 text-emerald-800 text-[9px] font-label font-bold px-2 py-0.5 rounded-full">뱃지
+                수여됨</span>
+            </div>
+          </div>
+
+          <!-- Activity Card 2 -->
+          <div
+            class="p-5 bg-paper-low rounded-2xl border-2 border-forest/20 shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-3">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span
+                  class="bg-forest text-white text-[10px] font-label font-bold px-2.5 py-0.5 rounded-full">2026.07.20
+                  완등</span>
+                <span class="text-xs font-label text-gray-400">6.8km</span>
+              </div>
+              <h4 class="font-heading font-extrabold text-base text-forest flex items-center space-x-1.5">
+                <span>⛰️</span>
+                <span>북한산 백운대 야간 트래킹</span>
+              </h4>
+              <p class="text-xs text-gray-500 font-body mt-1">최고 고도 836m • 백운대 야간 등반 & 일출</p>
+            </div>
+
+            <!-- Earned Badge Badge Display -->
+            <div class="pt-3 border-t border-gray-200/70 flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <div
+                  class="w-8 h-8 rounded-full bg-forest text-white flex items-center justify-center font-heading font-bold text-xs shadow-sm">
+                  ⛰️</div>
+                <div>
+                  <span class="font-heading font-bold text-xs text-forest block">소믈리에 꿈나무 뱃지</span>
+                  <span class="text-[9px] font-label text-gray-400 block">granted_by: 이정상</span>
+                </div>
+              </div>
+              <span class="bg-emerald-100 text-emerald-800 text-[9px] font-label font-bold px-2 py-0.5 rounded-full">뱃지
+                수여됨</span>
+            </div>
+          </div>
+
+          <!-- Activity Card 3 -->
+          <div
+            class="p-5 bg-paper-low rounded-2xl border-2 border-forest/20 shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-3">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span
+                  class="bg-forest text-white text-[10px] font-label font-bold px-2.5 py-0.5 rounded-full">2026.06.11
+                  완등</span>
+                <span class="text-xs font-label text-gray-400">9.5km</span>
+              </div>
+              <h4 class="font-heading font-extrabold text-base text-forest flex items-center space-x-1.5">
+                <span>🌸</span>
+                <span>덕유산 향적봉 야생화 탐방</span>
+              </h4>
+              <p class="text-xs text-gray-500 font-body mt-1">최고 고도 1,614m • 원추리 꽃밭 탐방</p>
+            </div>
+
+            <!-- Earned Badge Badge Display -->
+            <div class="pt-3 border-t border-gray-200/70 flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <div
+                  class="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center font-heading font-bold text-xs shadow-sm">
+                  🌸</div>
+                <div>
+                  <span class="font-heading font-bold text-xs text-forest block">향적봉 정복 뱃지</span>
+                  <span class="text-[9px] font-label text-gray-400 block">granted_by: 김산길</span>
+                </div>
+              </div>
+              <span class="bg-emerald-100 text-emerald-800 text-[9px] font-label font-bold px-2 py-0.5 rounded-full">뱃지
+                수여됨</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Badge Stamp Grid (UC5 해냄뱃지) -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <h3 class="font-heading font-bold text-xl text-forest">🏆 나의 해냄뱃지 (UC5)</h3>
+            <span class="uc-tag">UC5 해냄뱃지</span>
+          </div>
+          <span class="font-label text-xs text-gray-500">수집률: 3 / 6 (50%)</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+
+          <!-- Badge Item 1 (Earned) -->
+          <div
+            class="bg-white p-4 rounded-2xl border border-paper-high text-center flex flex-col items-center shadow-sm hover:shadow-md transition">
+            <div class="w-20 h-20 rubber-stamp mb-3">
+              <span class="text-xl">👟</span>
+              <span class="text-[9px] font-bold mt-0.5">Mountain</span>
+            </div>
+            <h4 class="font-heading font-bold text-xs text-forest">지리산 완등</h4>
+            <p class="text-[10px] text-gray-400 font-label mt-0.5">2026.08.15 획득</p>
+            <span class="text-[9px] bg-paper-high text-forest font-label px-2 py-0.5 rounded-full mt-2">granted_by:
+              김산길</span>
+          </div>
+
+          <!-- Badge Item 2 (Earned) -->
+          <div
+            class="bg-white p-4 rounded-2xl border border-paper-high text-center flex flex-col items-center shadow-sm hover:shadow-md transition">
+            <div class="w-20 h-20 rubber-stamp mb-3" style="border-color: #012d1d; color: #012d1d;">
+              <span class="text-xl">🍷</span>
+              <span class="text-[9px] font-bold mt-0.5">Sunrise</span>
+            </div>
+            <h4 class="font-heading font-bold text-xs text-forest">북한산 일출</h4>
+            <p class="text-[10px] text-gray-400 font-label mt-0.5">2026.07.20 획득</p>
+            <span class="text-[9px] bg-paper-high text-forest font-label px-2 py-0.5 rounded-full mt-2">granted_by:
+              이정상</span>
+          </div>
+
+          <!-- Badge Item 3 (Earned) -->
+          <div
+            class="bg-white p-4 rounded-2xl border border-paper-high text-center flex flex-col items-center shadow-sm hover:shadow-md transition">
+            <div class="w-20 h-20 rubber-stamp mb-3" style="border-color: #e76f51; color: #e76f51;">
+              <span class="text-xl">⚡</span>
+              <span class="text-[9px] font-bold mt-0.5">Fast</span>
+            </div>
+            <h4 class="font-heading font-bold text-xs text-forest">스피드 러너</h4>
+            <p class="text-[10px] text-gray-400 font-label mt-0.5">2026.06.11 획득</p>
+            <span class="text-[9px] bg-paper-high text-forest font-label px-2 py-0.5 rounded-full mt-2">granted_by:
+              김산길</span>
+          </div>
+
+          <!-- Badge Item 4 (Locked) -->
+          <div
+            class="bg-white/60 p-4 rounded-2xl border border-dashed border-gray-300 text-center flex flex-col items-center">
+            <div class="w-20 h-20 rubber-stamp locked mb-3">
+              <span class="text-xl">🔒</span>
+              <span class="text-[9px] font-bold mt-0.5">한라산</span>
+            </div>
+            <h4 class="font-heading font-bold text-xs text-gray-400">백록담 완등</h4>
+            <p class="text-[10px] text-gray-400 font-label mt-0.5">미획득 뱃지</p>
+          </div>
+
+          <!-- Badge Item 5 (Locked) -->
+          <div
+            class="bg-white/60 p-4 rounded-2xl border border-dashed border-gray-300 text-center flex flex-col items-center">
+            <div class="w-20 h-20 rubber-stamp locked mb-3">
+              <span class="text-xl">🔒</span>
+              <span class="text-[9px] font-bold mt-0.5">설악산</span>
+            </div>
+            <h4 class="font-heading font-bold text-xs text-gray-400">공룡능선 종주</h4>
+            <p class="text-[10px] text-gray-400 font-label mt-0.5">미획득 뱃지</p>
+          </div>
+
+          <!-- Badge Item 6 (Locked) -->
+          <div
+            class="bg-white/60 p-4 rounded-2xl border border-dashed border-gray-300 text-center flex flex-col items-center">
+            <div class="w-20 h-20 rubber-stamp locked mb-3">
+              <span class="text-xl">🔒</span>
+              <span class="text-[9px] font-bold mt-0.5">태백산</span>
+            </div>
+            <h4 class="font-heading font-bold text-xs text-gray-400">천제단 완등</h4>
+            <p class="text-[10px] text-gray-400 font-label mt-0.5">미획득 뱃지</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- My Written Episodes List (UC10/UC11 - 내가 작성한 에피소드 목록) -->
+      <div class="bg-white rounded-2xl p-6 shadow-md border border-paper-high space-y-5">
+        <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+          <div class="flex items-center space-x-2">
+            <h3 class="font-heading font-bold text-lg text-forest">✍️ 내가 작성한 에피소드 목록</h3>
+            <span class="uc-tag">UC10 include UC11</span>
+          </div>
+          <span class="font-label text-xs text-gray-500">총 3편의 에피소드 작성 완료 (`author_id: 88a-231`)</span>
+        </div>
+
+        <!-- Episodes 2-Column Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <!-- Written Episode Card 1 -->
+          <div
+            class="bg-paper-low rounded-2xl p-5 border-2 border-forest/20 shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-3">
+            <div>
+              <div class="flex justify-between items-center border-b border-gray-200/70 pb-2 mb-3">
+                <div class="flex items-center space-x-2">
+                  <span class="bg-forest text-white font-label text-[9px] font-bold px-2 py-0.5 rounded-full">한강 나이트 러닝
+                    10K</span>
+                  <span class="text-[10px] text-gray-400 font-label">2026.08.15</span>
+                </div>
+                <span
+                  class="bg-emerald-100 text-emerald-800 text-[9px] font-label font-bold px-2 py-0.5 rounded-full">게시
+                  완료</span>
+              </div>
+              <h4 class="font-heading font-bold text-sm text-forest mb-2">지리산 천왕봉 정상을 밟으며</h4>
+
+              <div class="flex space-x-3 items-start">
+                <div
+                  class="shrink-0 w-20 h-20 rounded-xl overflow-hidden border border-sand shadow-sm bg-gray-100 relative">
+                  <div class="washi-tape-sm"></div>
+                  <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600"
+                    class="w-full h-full object-cover">
+                </div>
+                <p class="text-xs text-gray-600 font-body line-clamp-3 leading-relaxed">
+                  새벽 4시, 장터목 대피소의 차가운 바람을 뚫고 오른 천왕봉 정상. 붉게 물드는 운해를 바라보며 모임원들과 함께 끓여 마신 따뜻한 차 한 잔의 기쁨은 그 무엇과도 바꿀 수 없었다.
+                </p>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-gray-200/70 flex items-center justify-between">
+              <span class="text-[9px] font-label text-gray-400">❤️ 12개 • 💬 4개</span>
+              <button
+                onclick="openEpisodeDetailModal('지리산 천왕봉 정상을 밟으며', '김산길 (나)', '2026.08.15 09:30 AM', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900', '새벽 4시, 장터목 대피소의 차가운 바람을 뚫고 오른 천왕봉 정상. 붉게 물드는 운해를 바라보며 모임원들과 함께 끓여 마신 따뜻한 차 한 잔의 기쁨은 그 무엇과도 바꿀 수 없었다.\n\n암릉 구간을 오를 때는 아찔했지만 서로 손을 잡아끌어주며 완등에 성공했다.')"
+                class="bg-forest text-white font-heading font-bold text-[10px] px-3 py-1.5 rounded-full hover:bg-forest-container transition shadow-sm">
+                🔍 상세보기 (팝업)
+              </button>
+            </div>
+          </div>
+
+          <!-- Written Episode Card 2 -->
+          <div
+            class="bg-paper-low rounded-2xl p-5 border-2 border-forest/20 shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-3">
+            <div>
+              <div class="flex justify-between items-center border-b border-gray-200/70 pb-2 mb-3">
+                <div class="flex items-center space-x-2">
+                  <span class="bg-forest text-white font-label text-[9px] font-bold px-2 py-0.5 rounded-full">한강 나이트 러닝
+                    10K</span>
+                  <span class="text-[10px] text-gray-400 font-label">2026.08.15</span>
+                </div>
+                <span
+                  class="bg-emerald-100 text-emerald-800 text-[9px] font-label font-bold px-2 py-0.5 rounded-full">게시
+                  완료</span>
+              </div>
+              <h4 class="font-heading font-bold text-sm text-forest mb-2">장터목 대피소의 별빛과 추억</h4>
+
+              <div class="flex space-x-3 items-start">
+                <div
+                  class="shrink-0 w-20 h-20 rounded-xl overflow-hidden border border-sand shadow-sm bg-gray-100 relative">
+                  <div class="washi-tape-sm"></div>
+                  <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600"
+                    class="w-full h-full object-cover">
+                </div>
+                <p class="text-xs text-gray-600 font-body line-clamp-3 leading-relaxed">
+                  장터목 대피소에 모여 나누었던 온기... 지리산의 차가운 밤바람도 따뜻한 차 한 잔과 모임원들의 웃음소리 앞에서는 사르르 녹아내렸습니다.
+                </p>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-gray-200/70 flex items-center justify-between">
+              <span class="text-[9px] font-label text-gray-400">❤️ 8개 • 💬 2개</span>
+              <button
+                onclick="openEpisodeDetailModal('장터목 대피소의 별빛과 추억', '김산길 (나)', '2026.08.15 08:15 PM', 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=900', '장터목 대피소에 모여 나누었던 온기... 선택한 공유 드라이브 사진과 함께 추억을 간직합니다. 지리산의 차가운 밤바람도 따뜻한 차 한 잔과 모임원들의 웃음소리 앞에서는 사르르 녹아내렸습니다.')"
+                class="bg-forest text-white font-heading font-bold text-[10px] px-3 py-1.5 rounded-full hover:bg-forest-container transition shadow-sm">
+                🔍 상세보기 (팝업)
+              </button>
+            </div>
+          </div>
+
+          <!-- Written Episode Card 3 -->
+          <div
+            class="bg-paper-low rounded-2xl p-5 border-2 border-forest/20 shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-3">
+            <div>
+              <div class="flex justify-between items-center border-b border-gray-200/70 pb-2 mb-3">
+                <div class="flex items-center space-x-2">
+                  <span class="bg-forest text-white font-label text-[9px] font-bold px-2 py-0.5 rounded-full">덕유산 야생화
+                    탐방</span>
+                  <span class="text-[10px] text-gray-400 font-label">2026.06.11</span>
+                </div>
+                <span
+                  class="bg-emerald-100 text-emerald-800 text-[9px] font-label font-bold px-2 py-0.5 rounded-full">게시
+                  완료</span>
+              </div>
+              <h4 class="font-heading font-bold text-sm text-forest mb-2">덕유산 향적봉의 원추리 꽃밭</h4>
+
+              <div class="flex space-x-3 items-start">
+                <div
+                  class="shrink-0 w-20 h-20 rounded-xl overflow-hidden border border-sand shadow-sm bg-gray-100 relative">
+                  <div class="washi-tape-sm"></div>
+                  <img src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600"
+                    class="w-full h-full object-cover">
+                </div>
+                <p class="text-xs text-gray-600 font-body line-clamp-3 leading-relaxed">
+                  원추리 꽃밭이 광활하게 물든 향적봉 능선을 넘으며 담은 계절의 향기. 파란 하늘과 대비되는 노란 꽃물결이 환상적이었습니다.
+                </p>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-gray-200/70 flex items-center justify-between">
+              <span class="text-[9px] font-label text-gray-400">❤️ 15개 • 💬 5개</span>
+              <button
+                onclick="openEpisodeDetailModal('덕유산 향적봉의 원추리 꽃밭', '김산길 (나)', '2026.06.11 02:20 PM', 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=900', '원추리 꽃밭이 광활하게 물든 향적봉 능선을 넘으며 담은 계절의 향기. 파란 하늘과 대비되는 노란 꽃물결이 환상적이었습니다.')"
+                class="bg-forest text-white font-heading font-bold text-[10px] px-3 py-1.5 rounded-full hover:bg-forest-container transition shadow-sm">
+                🔍 상세보기 (팝업)
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- 6. UC14 동호회현황 & UC15 동호회개설 SECTION -->
+    <!-- ================================================================= -->
+    <section id="sec-clubs" class="space-y-6 hidden">
+      <div
+        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-md border border-paper-high">
+        <div>
+          <div class="flex items-center space-x-2">
+            <h2 class="font-heading font-extrabold text-2xl text-forest">🏘️ 동호회 현황 & 개설 신청 센터</h2>
+            <span class="uc-tag">UC14 include UC15</span>
+          </div>
+          <p class="text-xs text-gray-600 font-body mt-1">새로운 액티비티 동호회를 개설 신청(UC15)하거나, 초청 링크를 통해 유입된 회원 가입을 개설자가
+            승인(UC14)합니다.</p>
+        </div>
+        <button onclick="openClubCreateModal()"
+          class="bg-terracotta text-white font-heading font-bold text-xs px-5 py-2.5 rounded-full hover:bg-terracotta-dark transition shadow-md flex items-center space-x-1.5">
+          <span>➕ 신규 동호회 개설 신청 (UC15)</span>
+        </button>
+      </div>
+
+      <!-- Club Cards Grid (UC14 동호회현황) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Club Card 1 -->
+        <div
+          class="bg-white rounded-2xl p-6 shadow-md border border-paper-high flex flex-col justify-between space-y-4">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="bg-forest text-white font-label text-[10px] px-2.5 py-1 rounded-full font-bold">카테고리:
+                등산/hiking</span>
+              <span class="bg-emerald-100 text-emerald-800 font-label text-[10px] px-2 py-0.5 rounded font-bold">👑 개설자
+                (Owner)</span>
+            </div>
+            <h3 class="font-heading font-extrabold text-xl text-forest">🌲 국립공원 산악회</h3>
+            <p class="text-xs text-gray-500 font-body mt-1">"전국 22개 국립공원 종주 및 사진 아카이빙을 목표로 하는 모임입니다."</p>
+          </div>
+
+          <div class="space-y-2 pt-3 border-t border-gray-100 text-xs font-body">
+            <div class="flex justify-between text-gray-600">
+              <span class="font-label font-bold text-gray-400">개설자 (Owner)</span>
+              <span class="font-bold text-forest">김산길 님</span>
+            </div>
+            <div class="flex justify-between text-gray-600">
+              <span class="font-label font-bold text-gray-400">현재 회원수</span>
+              <span>24명</span>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <button onclick="openClubAdminModal('국립공원 산악회')"
+              class="w-full bg-terracotta text-white font-heading font-bold text-xs py-2 rounded-xl hover:bg-terracotta-dark transition shadow flex items-center justify-center space-x-1.5">
+              <span>⚙️ 동호회 종합 관리 (UC15)</span>
+            </button>
+            <button onclick="alert('초청 링크가 복사되었습니다!\nhttps://tracking-diary.com/clubs/invite?token=club_01')"
+              class="w-full bg-forest-container text-white font-heading font-bold text-xs py-2 rounded-xl hover:bg-forest transition flex items-center justify-center space-x-1">
+              <span>🔗 멤버 초청 링크 복사</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Club Card 2 -->
+        <div
+          class="bg-white rounded-2xl p-6 shadow-md border border-paper-high flex flex-col justify-between space-y-4">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="bg-forest text-white font-label text-[10px] px-2.5 py-1 rounded-full font-bold">카테고리:
+                러닝/running</span>
+              <span class="bg-amber-100 text-amber-800 font-label text-[10px] px-2 py-0.5 rounded font-bold">승인 대기중
+                (pending)</span>
+            </div>
+            <h3 class="font-heading font-extrabold text-xl text-forest">🏃 Weekend Runners Club</h3>
+            <p class="text-xs text-gray-500 font-body mt-1">"주말 아침 한강변 로드 러닝 및 트레일 러닝 크루입니다."</p>
+          </div>
+
+          <div class="space-y-2 pt-3 border-t border-gray-100 text-xs font-body">
+            <div class="flex justify-between text-gray-600">
+              <span class="font-label font-bold text-gray-400">개설자 (Owner)</span>
+              <span>박러너 님</span>
+            </div>
+            <div class="flex justify-between text-gray-600">
+              <span class="font-label font-bold text-gray-400">현재 회원수</span>
+              <span>18명</span>
+            </div>
+          </div>
+
+          <button onclick="alert('초청 링크 가입 승인 대기 중입니다. (개설자 승인 필요)')"
+            class="w-full bg-paper-high text-gray-600 font-heading font-bold text-xs py-2.5 rounded-xl cursor-not-allowed">
+            ⏳ 개설자 승인 대기중 (pending)
+          </button>
+        </div>
+
+        <!-- Club Card 3 -->
+        <div
+          class="bg-white rounded-2xl p-6 shadow-md border border-paper-high flex flex-col justify-between space-y-4">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="bg-forest text-white font-label text-[10px] px-2.5 py-1 rounded-full font-bold">카테고리:
+                트래킹/tracking</span>
+              <span class="bg-gray-100 text-gray-500 font-label text-[10px] px-2 py-0.5 rounded font-bold">초청 링크
+                필요</span>
+            </div>
+            <h3 class="font-heading font-extrabold text-xl text-forest">🚵 릿지 & 클라이밍 모임</h3>
+            <p class="text-xs text-gray-500 font-body mt-1">"암릉 산행과 전국 릿지 코스를 하이킹하는 매니아 동호회입니다."</p>
+          </div>
+
+          <div class="space-y-2 pt-3 border-t border-gray-100 text-xs font-body">
+            <div class="flex justify-between text-gray-600">
+              <span class="font-label font-bold text-gray-400">개설자 (Owner)</span>
+              <span>이암벽 님</span>
+            </div>
+            <div class="flex justify-between text-gray-600">
+              <span class="font-label font-bold text-gray-400">현재 회원수</span>
+              <span>12명</span>
+            </div>
+          </div>
+
+          <button onclick="openInviteJoinModal('릿지 & 클라이밍 모임', '이암벽')"
+            class="w-full bg-terracotta text-white font-heading font-bold text-xs py-2.5 rounded-xl hover:bg-terracotta-dark transition shadow">
+            🔗 초청 링크로 가입 신청 (개설자 승인)
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Admin Member Approval Section (UC14 개설자/관리자 승인) -->
+      <div class="bg-white rounded-2xl border border-paper-high overflow-hidden shadow-md space-y-0">
+        <div class="px-6 py-4 border-b border-paper-high bg-paper-low flex justify-between items-center">
+          <div class="flex items-center space-x-2">
+            <h3 class="font-heading font-bold text-sm text-forest">🔐 [동호회 개설자/관리자 전용] 초청 링크 가입 승인 대기자 관리 (UC14)</h3>
+            <span class="uc-tag">status = 'pending' (초청 링크 유입)</span>
+          </div>
+          <span class="font-label text-xs text-terracotta font-bold">승인 대기 1건</span>
+        </div>
+
+        <div class="divide-y divide-gray-100">
+          <div class="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center space-x-4">
+              <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120" alt="Avatar"
+                class="w-12 h-12 rounded-full object-cover border border-sand">
+              <div>
+                <div class="flex items-center space-x-2">
+                  <h4 class="font-heading font-bold text-base text-forest">박하늘 님</h4>
+                  <span class="bg-forest/10 text-forest text-[10px] font-label font-bold px-2 py-0.5 rounded">🔗 초청 링크
+                    유입</span>
+                </div>
+                <p class="text-xs text-gray-500 font-body mt-0.5">신청일: 2026.08.19 • 등산 경력 3년차 ("지리산/설악산 코스 좋아합니다!")</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="alert('박하늘 님의 초청 가입이 승인되었습니다! (club_members status = approved)')"
+                class="bg-forest text-white font-heading font-bold text-xs px-4 py-2 rounded-full hover:bg-forest-container transition shadow-sm">
+                ✓ 개설자 승인하기
+              </button>
+              <button onclick="alert('가입 신청을 거절했습니다.')"
+                class="bg-gray-100 text-gray-600 font-heading font-bold text-xs px-4 py-2 rounded-full hover:bg-gray-200 transition">
+                ✕ 거절
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================================================================= -->
+  <!-- INTERACTIVE MODALS FOR ALL USE CASES -->
+  <!-- ================================================================= -->
+
+  <!-- 1. UC7 일정표 상세 모달 -->
+  <div id="scheduleModal"
+    class="fixed inset-0 bg-forest/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border-2 border-forest-container space-y-4">
+      <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+        <div>
+          <span class="uc-tag">UC7 일정표 상세</span>
+          <h3 id="scheduleModalTitle" class="font-heading font-extrabold text-xl text-forest mt-1">산행 상세 일정표</h3>
+        </div>
+        <button onclick="closeScheduleModal()" class="text-gray-400 hover:text-gray-700 text-lg font-bold">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs font-body">
+        <div id="scheduleModalBody" class="p-3 bg-paper-low rounded-xl border border-paper-high">
+          <p class="font-heading font-bold text-forest text-sm">📍 코스 개요 & 타임라인</p>
+          <ul class="mt-2 space-y-1.5 text-gray-600">
+            <li>• <strong>04:00 AM</strong> - 북한산우이역 집결 및 안전점검</li>
+            <li>• 05:30 AM - 하루재 통과 및 등반 개시</li>
+            <li>• 06:40 AM - 백운대 피크 도착 및 일출 감상 🌅</li>
+            <li>• 08:30 AM - 하산 완료 및 해장국 조식</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flex justify-end">
+        <button onclick="closeScheduleModal()"
+          class="bg-forest text-white font-heading font-bold text-xs px-5 py-2 rounded-full">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLETED DIARY POPUP MODAL (UC16 산행일기 팝업 - 일정표 완등 클릭 시 노출) -->
+  <div id="completedDiaryModal"
+    class="fixed inset-0 bg-forest/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div
+      class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border-2 border-forest-container space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+        <div>
+          <span class="uc-tag">UC16 산행일기</span>
+          <h3 id="completedDiaryModalTitle" class="font-heading font-extrabold text-xl text-forest mt-1">🏔️ 지리산 천왕봉
+            산행일기</h3>
+        </div>
+        <button onclick="closeCompletedDiaryModal()"
+          class="text-gray-400 hover:text-gray-700 text-lg font-bold">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs font-body">
+        <!-- 1. 참가자 동그란 사인과 이름 섹션 -->
+        <div class="p-3.5 bg-paper-low rounded-2xl border border-paper-high space-y-2">
+          <div class="flex justify-between items-center">
+            <h4 class="font-heading font-bold text-xs text-forest flex items-center space-x-1.5">
+              <span>✍️</span>
+              <span>산행 참가자 방명록 & 동그란 사인</span>
+            </h4>
+            <span class="font-label text-[10px] text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full font-bold">총 5명
+              완등 참여</span>
+          </div>
+          <div class="flex flex-wrap gap-2.5 pt-1" id="completedDiarySignatures">
+            <!-- Dynamic circular sign badges -->
+            <div
+              class="flex items-center space-x-1.5 bg-white px-2.5 py-1 rounded-full border-2 border-amber-400 shadow-sm">
+              <div
+                class="w-6 h-6 rounded-full bg-amber-500 text-white font-heading font-extrabold text-[10px] flex items-center justify-center border border-amber-600">
+                산길</div>
+              <span class="font-heading font-bold text-gray-800 text-[11px]">김산길</span>
+              <span class="text-[9px] font-label text-amber-700 bg-amber-50 px-1 rounded border border-amber-200">✍️
+                사인</span>
+            </div>
+            <div
+              class="flex items-center space-x-1.5 bg-white px-2.5 py-1 rounded-full border-2 border-emerald-400 shadow-sm">
+              <div
+                class="w-6 h-6 rounded-full bg-emerald-600 text-white font-heading font-extrabold text-[10px] flex items-center justify-center border border-emerald-700">
+                등산</div>
+              <span class="font-heading font-bold text-gray-800 text-[11px]">이등산</span>
+              <span
+                class="text-[9px] font-label text-emerald-700 bg-emerald-50 px-1 rounded border border-emerald-200">✍️
+                사인</span>
+            </div>
+            <div
+              class="flex items-center space-x-1.5 bg-white px-2.5 py-1 rounded-full border-2 border-sky-400 shadow-sm">
+              <div
+                class="w-6 h-6 rounded-full bg-sky-600 text-white font-heading font-extrabold text-[10px] flex items-center justify-center border border-sky-700">
+                트렉</div>
+              <span class="font-heading font-bold text-gray-800 text-[11px]">박트렉</span>
+              <span class="text-[9px] font-label text-sky-700 bg-sky-50 px-1 rounded border border-sky-200">✍️ 사인</span>
+            </div>
+            <div
+              class="flex items-center space-x-1.5 bg-white px-2.5 py-1 rounded-full border-2 border-purple-400 shadow-sm">
+              <div
+                class="w-6 h-6 rounded-full bg-purple-600 text-white font-heading font-extrabold text-[10px] flex items-center justify-center border border-purple-700">
+                구름</div>
+              <span class="font-heading font-bold text-gray-800 text-[11px]">정구름</span>
+              <span class="text-[9px] font-label text-purple-700 bg-purple-50 px-1 rounded border border-purple-200">✍️
+                사인</span>
+            </div>
+            <div
+              class="flex items-center space-x-1.5 bg-white px-2.5 py-1 rounded-full border-2 border-rose-400 shadow-sm">
+              <div
+                class="w-6 h-6 rounded-full bg-rose-600 text-white font-heading font-extrabold text-[10px] flex items-center justify-center border border-rose-700">
+                바위</div>
+              <span class="font-heading font-bold text-gray-800 text-[11px]">최바위</span>
+              <span class="text-[9px] font-label text-rose-700 bg-rose-50 px-1 rounded border border-rose-200">✍️
+                사인</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. 사진 갤러리 섹션 (Photos) -->
+        <div class="space-y-2">
+          <div class="flex justify-between items-center">
+            <h4 class="font-heading font-bold text-xs text-forest flex items-center space-x-1">
+              <span>📸</span>
+              <span>산행 사진들 (UC9 사진첩 연동)</span>
+            </h4>
+            <button onclick="closeCompletedDiaryModal(); openUploadModal();"
+              class="text-terracotta hover:underline font-heading font-bold text-[11px]">
+              + 사진 올리기 (UC12)
+            </button>
+          </div>
+          <div class="grid grid-cols-2 gap-2.5">
+            <div class="polaroid-card">
+              <img id="completedDiaryImage" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600"
+                class="w-full h-32 object-cover rounded mb-1">
+              <p id="completedDiarySubTitle" class="font-heading font-bold text-forest text-[11px] text-center">정상 완등
+                표지석 기념사진</p>
+            </div>
+            <div class="polaroid-card">
+              <img src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600"
+                class="w-full h-32 object-cover rounded mb-1">
+              <p class="font-heading font-bold text-forest text-[11px] text-center">능선 쉼터 현장 컷</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. 산행 에피소드 섹션 (Episode) -->
+        <div class="p-3.5 bg-paper-low rounded-2xl border border-paper-high space-y-1.5">
+          <div class="flex justify-between items-center">
+            <h4 class="font-heading font-bold text-xs text-forest flex items-center space-x-1">
+              <span>✍️</span>
+              <span>산행 에피소드 (UC10 에피소드 연동)</span>
+            </h4>
+            <span class="text-gray-400 font-label text-[10px]">※ 에피소드 작성(UC11)은 단위 산행일기(UC8) 내에서 가능</span>
+          </div>
+          <p id="completedDiaryExcerpt" class="text-gray-600 leading-relaxed pt-1">"새벽 4시, 장터목 대피소의 차가운 바람을 뚫고 오른 천왕봉
+            정상. 붉게 물드는 운해를 바라보며 모임원들과 함께 작성한 교환일기..."</p>
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-gray-100">
+        <div class="flex space-x-2">
+          <button onclick="closeCompletedDiaryModal(); openUploadModal();"
+            class="bg-forest/10 text-forest font-heading font-bold text-xs px-3.5 py-2 rounded-full hover:bg-forest/20 flex items-center space-x-1">
+            <span>📷 사진 올리기 (UC12)</span>
+          </button>
+        </div>
+
+        <button onclick="navigateToFullDiary()"
+          class="bg-terracotta text-white font-heading font-bold text-xs px-4 py-2 rounded-full hover:bg-terracotta-dark shadow flex items-center space-x-1">
+          <span>📖 상세보기 (UC8 서가 이동 후 에피소드 작성) &rarr;</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- 3. UC11 에피소드등록 작성 모달 -->
+  <!-- 3.1 UC10 에피소드 상세보기 팝업 모달 (큰 화면 & 전체 글 보기 & 고화질 사진) -->
+  <div id="episodeDetailModal"
+    class="fixed inset-0 bg-forest/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div
+      class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border-2 border-forest-container space-y-5 max-h-[90vh] overflow-y-auto relative animate-fade-in">
+      <button onclick="closeEpisodeDetailModal()"
+        class="absolute top-5 right-5 text-gray-400 hover:text-gray-700 text-xl font-bold bg-paper-low w-8 h-8 rounded-full flex items-center justify-center border border-paper-high">✕</button>
+
+      <!-- Header -->
+      <div class="border-b border-gray-100 pb-4 space-y-1.5">
+        <div class="flex items-center space-x-2">
+          <span class="uc-tag">UC10 에피소드 상세보기 팝업</span>
+          <span id="epModalBadge"
+            class="bg-emerald-100 text-emerald-800 text-[10px] font-label font-bold px-2.5 py-0.5 rounded-full">주최자
+            감상</span>
+        </div>
+        <h3 id="epModalTitle" class="font-heading font-extrabold text-2xl text-forest">지리산 천왕봉 정상을 밟으며</h3>
+        <p id="epModalMeta" class="text-xs text-gray-500 font-label">작성자: 김산길 (author_id: 88a-231) • 2026.08.15 09:30 AM
+        </p>
+      </div>
+
+      <!-- Large Image View -->
+      <div class="rounded-2xl overflow-hidden border border-paper-high shadow-md relative group">
+        <img id="epModalImage" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900"
+          class="w-full h-72 sm:h-80 object-cover">
+        <div
+          class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-white font-label text-xs px-3 py-1 rounded-full">
+          📷 Google Shared Drive 고화질 첨부 원본
+        </div>
+      </div>
+
+      <!-- Full Unclamped Content Story -->
+      <div id="epModalContent"
+        class="text-xs sm:text-sm text-gray-700 leading-relaxed space-y-3 font-body whitespace-pre-line bg-paper-low/60 p-5 rounded-2xl border border-paper-high">
+        새벽 4시, 장터목 대피소의 차가운 바람을 뚫고 오른 천왕봉 정상. 붉게 물드는 운해를 바라보며 모임원들과 함께 끓여 마신 따뜻한 차 한 잔의 기쁨은 그 무엇과도 바꿀 수 없었다.
+
+        암릉 구간을 오를 때는 아찔했지만 서로 손을 잡아끌어주며 완등에 성공했다. 하산길에 찍은 폴라로이드 사진 속에 담긴 모임원들의 미소는 평생 기억될 모임 추억으로 남을 것이다.
+      </div>
+
+      <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+        <div class="flex items-center space-x-2 text-xs font-label text-forest font-bold">
+          <span>❤️ 좋아요 12개</span>
+          <span>•</span>
+          <span>💬 댓글 4개</span>
+        </div>
+        <button onclick="closeEpisodeDetailModal()"
+          class="bg-forest text-white font-heading font-bold text-xs px-6 py-2.5 rounded-full shadow hover:bg-forest-container transition">
+          닫기
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="essayWriteModal"
+    class="fixed inset-0 bg-forest/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div
+      class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border-2 border-forest-container space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+        <div>
+          <span class="uc-tag">UC11 에피소드등록 & 사진배치</span>
+          <h3 class="font-heading font-extrabold text-xl text-forest mt-1">✍️ 액티비티 에피소드 작성 & 사진 배치</h3>
+        </div>
+        <button onclick="closeEssayWriteModal()" class="text-gray-400 hover:text-gray-700 text-lg font-bold">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs font-body">
+        <div>
+          <label class="block font-heading font-bold text-gray-700 mb-1">에피소드 제목</label>
+          <input id="episodeInputTitle" type="text" placeholder="예: 장터목 대피소의 별빛과 따뜻한 유자차"
+            class="w-full bg-paper-low border border-paper-high rounded-xl p-2.5">
+        </div>
+
+        <!-- 📸 Step 1: Select Attached Photos from Hike's Shared Drive -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="font-heading font-bold text-gray-700 flex items-center space-x-1">
+              <span>📸</span>
+              <span>해당 다이어리 사진 선택 (구글 드라이브 동기화 photo_id)</span>
+            </label>
+            <span class="text-[10px] text-forest font-label font-bold">클릭하여 선택/해제</span>
+          </div>
+
+          <div class="grid grid-cols-4 gap-2">
+            <!-- Photo Pick Option 1 -->
+            <div
+              onclick="togglePhotoSelection(this, 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600')"
+              class="photo-pick-item relative cursor-pointer rounded-xl overflow-hidden border-2 border-transparent hover:border-forest transition group shadow-sm bg-gray-100">
+              <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300"
+                class="w-full h-20 object-cover">
+              <div
+                class="check-badge absolute top-1 right-1 bg-emerald-600 text-white rounded-full w-4 h-4 text-[9px] font-bold flex items-center justify-center hidden">
+                ✓</div>
+              <span
+                class="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[8px] text-center py-0.5 truncate font-label">천왕봉
+                운해</span>
+            </div>
+            <!-- Photo Pick Option 2 -->
+            <div
+              onclick="togglePhotoSelection(this, 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600')"
+              class="photo-pick-item relative cursor-pointer rounded-xl overflow-hidden border-2 border-transparent hover:border-forest transition group shadow-sm bg-gray-100">
+              <img src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=300"
+                class="w-full h-20 object-cover">
+              <div
+                class="check-badge absolute top-1 right-1 bg-emerald-600 text-white rounded-full w-4 h-4 text-[9px] font-bold flex items-center justify-center hidden">
+                ✓</div>
+              <span
+                class="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[8px] text-center py-0.5 truncate font-label">능선
+                쉼터</span>
+            </div>
+            <!-- Photo Pick Option 3 -->
+            <div
+              onclick="togglePhotoSelection(this, 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600')"
+              class="photo-pick-item relative cursor-pointer rounded-xl overflow-hidden border-2 border-transparent hover:border-forest transition group shadow-sm bg-gray-100">
+              <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=300"
+                class="w-full h-20 object-cover">
+              <div
+                class="check-badge absolute top-1 right-1 bg-emerald-600 text-white rounded-full w-4 h-4 text-[9px] font-bold flex items-center justify-center hidden">
+                ✓</div>
+              <span
+                class="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[8px] text-center py-0.5 truncate font-label">장터목
+                수다</span>
+            </div>
+            <!-- Photo Pick Option 4 -->
+            <div
+              onclick="togglePhotoSelection(this, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600')"
+              class="photo-pick-item relative cursor-pointer rounded-xl overflow-hidden border-2 border-transparent hover:border-forest transition group shadow-sm bg-gray-100">
+              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300"
+                class="w-full h-20 object-cover">
+              <div
+                class="check-badge absolute top-1 right-1 bg-emerald-600 text-white rounded-full w-4 h-4 text-[9px] font-bold flex items-center justify-center hidden">
+                ✓</div>
+              <span
+                class="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[8px] text-center py-0.5 truncate font-label">막걸리
+                축배</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 📐 Step 2: Photo Layout Placement Options -->
+        <div>
+          <label class="block font-heading font-bold text-gray-700 mb-1">📐 컨텐츠 뷰 사진 배치 선택</label>
+          <div class="grid grid-cols-3 gap-2 font-label">
+            <label
+              class="cursor-pointer border border-paper-high bg-paper-low p-2 rounded-xl text-center hover:bg-forest/5 flex flex-col items-center">
+              <input type="radio" name="photoLayoutPos" value="top" checked class="accent-forest mb-1">
+              <span class="font-bold text-[11px] text-forest">🖼️ 본문 상단 배너</span>
+              <span class="text-[9px] text-gray-400">대표 사진 스타일</span>
+            </label>
+            <label
+              class="cursor-pointer border border-paper-high bg-paper-low p-2 rounded-xl text-center hover:bg-forest/5 flex flex-col items-center">
+              <input type="radio" name="photoLayoutPos" value="inline" class="accent-forest mb-1">
+              <span class="font-bold text-[11px] text-forest">📰 좌측 본문 카드</span>
+              <span class="text-[9px] text-gray-400">텍스트+사진 혼합</span>
+            </label>
+            <label
+              class="cursor-pointer border border-paper-high bg-paper-low p-2 rounded-xl text-center hover:bg-forest/5 flex flex-col items-center">
+              <input type="radio" name="photoLayoutPos" value="bottom" class="accent-forest mb-1">
+              <span class="font-bold text-[11px] text-forest">📸 하단 폴라로이드</span>
+              <span class="text-[9px] text-gray-400">글 아래 감성배치</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-heading font-bold text-gray-700 mb-1">에피소드 본문 내용</label>
+          <textarea id="episodeInputContent" rows="4" placeholder="액티비티 중 느낀 감상과 추억을 자유롭게 적어주세요."
+            class="w-full bg-paper-low border border-paper-high rounded-xl p-2.5"></textarea>
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-2">
+        <button onclick="closeEssayWriteModal()"
+          class="bg-gray-100 text-gray-600 font-heading font-bold text-xs px-4 py-2 rounded-full">취소</button>
+        <button onclick="submitNewEpisodeWithPhotos()"
+          class="bg-terracotta text-white font-heading font-bold text-xs px-5 py-2 rounded-full shadow">
+          ✍️ 에피소드 & 사진배치 최종 등록
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. UC12 사진등록 (Google Shared Drive) 업로드 모달 -->
+  <div id="uploadModal"
+    class="fixed inset-0 bg-forest/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-forest-container space-y-4">
+      <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+        <div>
+          <span class="uc-tag">UC12 사진등록</span>
+          <h3 class="font-heading font-extrabold text-xl text-forest mt-1">📤 Google Drive 사진 업로드</h3>
+        </div>
+        <button onclick="closeUploadModal()" class="text-gray-400 hover:text-gray-700 text-lg font-bold">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs font-body">
+        <div class="border-2 border-dashed border-forest-surface bg-paper-low p-6 rounded-2xl text-center space-y-2">
+          <span class="text-3xl">📁</span>
+          <p class="font-heading font-bold text-forest">사진 드래그 & 드롭 또는 파일 선택</p>
+          <p class="text-[11px] text-gray-500">Google Shared Drive (`hikes/{hike_id}/`)로 자동 업로드됩니다.</p>
+        </div>
+
+        <label class="flex items-center space-x-2 cursor-pointer pt-2">
+          <input type="checkbox" class="rounded accent-terracotta">
+          <span class="font-heading font-bold text-terracotta">B컷 & 비하인드 컷으로 태그 지정하기</span>
+        </label>
+      </div>
+
+      <div class="flex justify-end space-x-2">
+        <button onclick="closeUploadModal()"
+          class="bg-gray-100 text-gray-600 font-heading font-bold text-xs px-4 py-2 rounded-full">취소</button>
+        <button onclick="alert('Google Shared Drive 업로드 성공! photos 메타데이터 테이블에 기록되었습니다.'); closeUploadModal();"
+          class="bg-forest text-white font-heading font-bold text-xs px-5 py-2 rounded-full shadow">
+          Drive 업로드 실행
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. UC6 해냄뱃지부여 (관리자 전용) 모달 -->
+  <div id="badgeModal"
+    class="fixed inset-0 bg-forest/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border-2 border-forest-container space-y-4">
+      <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+        <div>
+          <span class="uc-tag">UC6 해냄뱃지부여 (UC8 관리자 액션)</span>
+          <h3 id="grantBadgeMemberBadgeNotice" class="font-heading font-extrabold text-xl text-forest mt-1">👑 참가자 해냄뱃지
+            수여하기</h3>
+        </div>
+        <button onclick="closeBadgeModal()" class="text-gray-400 hover:text-gray-700 text-lg font-bold">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs font-body">
+        <div class="bg-paper-low p-3 rounded-xl border border-paper-high">
+          <p class="font-heading font-bold text-forest text-xs">📍 수여 대상 산행</p>
+          <p class="text-gray-600 mt-0.5">한강 나이트 러닝 10K 에피소드 모음집 (2026.08.15 완등)</p>
+        </div>
+
+        <div>
+          <label class="block font-heading font-bold text-gray-700 mb-1.5">1. 수여할 스탬프 / 뱃지 선택</label>
+          <div class="grid grid-cols-3 gap-2">
+            <label
+              class="border-2 border-terracotta bg-terracotta/5 rounded-xl p-2.5 text-center cursor-pointer block shadow-sm">
+              <input type="radio" name="badge_type" checked class="hidden">
+              <span class="text-2xl block">🏔️</span>
+              <span class="font-heading font-bold text-xs text-forest block mt-1">10K 완주 해냄뱃지뱃지</span>
+              <span class="text-[9px] font-label text-terracotta font-bold block">공식 스탬프</span>
+            </label>
+            <label
+              class="border border-paper-high rounded-xl p-2.5 text-center cursor-pointer block hover:bg-paper-low">
+              <input type="radio" name="badge_type" class="hidden">
+              <span class="text-2xl block">🏃</span>
+              <span class="font-heading font-bold text-xs text-forest block mt-1">종주 열정상</span>
+              <span class="text-[9px] font-label text-gray-400 block">특별 기여</span>
+            </label>
+            <label
+              class="border border-paper-high rounded-xl p-2.5 text-center cursor-pointer block hover:bg-paper-low">
+              <input type="radio" name="badge_type" class="hidden">
+              <span class="text-2xl block">📸</span>
+              <span class="font-heading font-bold text-xs text-forest block mt-1">포토제닉 뱃지</span>
+              <span class="text-[9px] font-label text-gray-400 block">B컷 화보상</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-heading font-bold text-gray-700 mb-1">2. 수여 대상 확인 (`user_badges` DB 연동)</label>
+          <div class="p-3 bg-forest/5 rounded-xl border border-forest/20 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span
+                class="w-7 h-7 rounded-full bg-forest text-white font-heading font-bold text-xs flex items-center justify-center">🎯</span>
+              <span id="targetMemberBadgeText" class="font-heading font-bold text-forest text-xs">선택된 완등 멤버</span>
+            </div>
+            <span class="bg-emerald-100 text-emerald-800 text-[10px] font-label font-bold px-2 py-0.5 rounded-full">승인
+              완료</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end space-x-2 pt-2 border-t border-gray-100">
+        <button onclick="closeBadgeModal()"
+          class="bg-gray-100 text-gray-600 font-heading font-bold text-xs px-4 py-2 rounded-full">취소</button>
+        <button onclick="alert('뱃지 수여 완료! user_badges 테이블에 기록되었습니다.'); closeBadgeModal();"
+          class="bg-terracotta text-white font-heading font-bold text-xs px-5 py-2 rounded-full shadow">
+          뱃지 수여 확정 (UC6 완료)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5.5 UC15 동호회 종합 관리 센터 (회원 승인, 일정 등록, 뱃지 생성, API 키 등록) 모달 -->
+  <div id="clubAdminModal"
+    class="fixed inset-0 bg-forest/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div
+      class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border-2 border-forest-container space-y-5 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+        <div>
+          <span class="uc-tag">UC15 동호회 종합 관리 센터</span>
+          <h3 id="clubAdminModalTitle" class="font-heading font-extrabold text-xl text-forest mt-1">⚙️ '국립공원 산악회' 종합 관리
+          </h3>
+        </div>
+        <button onclick="closeClubAdminModal()" class="text-gray-400 hover:text-gray-700 text-lg font-bold">✕</button>
+      </div>
+
+      <!-- Tab Buttons for Admin Sections -->
+      <div class="flex border-b border-gray-200 text-xs font-heading font-bold space-x-1">
+        <button onclick="switchAdminTab('keys')" id="tabBtnAdminKeys"
+          class="px-3.5 py-2 border-b-2 border-forest text-forest bg-forest/5 rounded-t-lg">🔑 API 키 & 구글 드라이브</button>
+        <button onclick="switchAdminTab('members')" id="tabBtnAdminMembers"
+          class="px-3.5 py-2 text-gray-500 hover:text-forest">👥 회원 가입 승인</button>
+        <button onclick="switchAdminTab('hikes')" id="tabBtnAdminHikes"
+          class="px-3.5 py-2 text-gray-500 hover:text-forest">📅 일정 신규 등록</button>
+        <button onclick="switchAdminTab('badges')" id="tabBtnAdminBadges"
+          class="px-3.5 py-2 text-gray-500 hover:text-forest">🏅 뱃지 신규 생성</button>
+      </div>
+
+      <!-- Tab 1: Google Drive & Gemini AI API Key Settings -->
+      <div id="adminTabKeys" class="space-y-3.5 text-xs font-body">
+        <div class="p-3 bg-forest/5 rounded-xl border border-forest/20 flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <span class="text-lg">🔐</span>
+            <div>
+              <p class="font-heading font-bold text-forest text-xs">동호회 전용 API 키 & 구글 드라이브 연동 상태</p>
+              <p class="text-[10px] text-gray-500">동호회의 사진 업로드(UC12) 및 에피소드 AI 윤색(UC11) 시 등록된 전용 키가 사용됩니다.</p>
+            </div>
+          </div>
+          <span class="bg-emerald-100 text-emerald-800 text-[10px] font-label font-bold px-2 py-0.5 rounded-full">✅ 연동
+            활성화</span>
+        </div>
+
+        <div>
+          <label class="block font-heading font-bold text-gray-700 mb-1">1. Google Shared Drive 폴더 ID
+            (`google_drive_folder_id`)</label>
+          <input type="text" value="folder_hikes_0815_national_park" placeholder="예: 1A2b3C4d5E6f7G8h9I0j"
+            class="w-full bg-paper-low border border-paper-high rounded-xl p-2.5 font-label">
+        </div>
+
+        <div>
+          <label class="block font-heading font-bold text-gray-700 mb-1">2. Google Shared Drive 서비스 계정 JSON
+            (`google_drive_credentials_json`)</label>
+          <textarea rows="3"
+            placeholder='{"type": "service_account", "project_id": "tracking-diary", "private_key": "..."}'
+            class="w-full bg-paper-low border border-paper-high rounded-xl p-2.5 font-mono text-[10px]">{
+  "type": "service_account",
+  "project_id": "tracking-diary-arch",
+  "client_email": "drive-sa@tracking-diary.iam.gserviceaccount.com"
+}</textarea>
+        </div>
+
+        <div>
+          <label class="block font-heading font-bold text-gray-700 mb-1">3. Gemini AI API Key (`gemini_api_key`)</label>
+          <input type="password" value="AIzaSyD_gemini_key_registered_99a88b" placeholder="AIzaSyD..."
+            class="w-full bg-paper-low border border-paper-high rounded-xl p-2.5 font-mono text-[10px]">
+        </div>
+
+        <button onclick="alert('🔑 동호회 전용 구글 공유 드라이브 키 및 Gemini AI Key가 성공적으로 업데이트되었습니다! (clubs Table 업데이트 완료)');"
+          class="w-full bg-forest text-white font-heading font-bold text-xs py-2.5 rounded-xl hover:bg-forest-container transition shadow">
+          💾 API 키 & 드라이브 연동 저장 (`clubs` Table 업데이트)
+        </button>
+      </div>
+
+      <!-- Tab 2: Member Approvals -->
+      <div id="adminTabMembers" class="space-y-3.5 text-xs font-body hidden">
+        <p class="font-heading font-bold text-forest text-xs">👥 초청 링크 가입 승인 대기 목록 (status = 'pending')</p>
+        <div class="p-4 bg-paper-low rounded-xl border border-paper-high flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120"
+              class="w-10 h-10 rounded-full border border-sand">
+            <div>
+              <p class="font-heading font-bold text-forest text-sm">박하늘 님 <span
+                  class="text-[9px] bg-forest/10 text-forest font-label px-1.5 py-0.5 rounded">🔗 초청유입</span></p>
+              <p class="text-[10px] text-gray-500 font-label">신청일: 2026.08.19 • 등산 경력 3년차</p>
+            </div>
+          </div>
+          <div class="flex space-x-1.5">
+            <button onclick="alert('박하늘 님의 가입을 승인했습니다!');"
+              class="bg-forest text-white font-heading font-bold text-[10px] px-3 py-1.5 rounded-full">✓ 승인</button>
+            <button onclick="alert('거절 처리되었습니다.');"
+              class="bg-gray-100 text-gray-600 font-heading font-bold text-[10px] px-3 py-1.5 rounded-full">✕
+              거절</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Hike Schedule Creation -->
+      <div id="adminTabHikes" class="space-y-3.5 text-xs font-body hidden">
+        <div>
+          <label class="block font-heading font-bold text-gray-700 mb-1">액티비티 일정 제목</label>
+          <input type="text" placeholder="예: [9월 정기 산행] 설악산 공룡능선 종주"
+            class="w-full bg-paper-low border border-paper-high rounded-xl p-2.5">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-heading font-bold text-gray-700 mb-1">대상 산 이름</label>
+            <input type="text" placeholder="예: 설악산 대청봉"
+              class="w-full bg-paper-low border border-paper-high rounded-xl p-2.5">
+          </div>
+          <div>
+            <label class="block font-heading font-bold text-gray-700 mb-1">난이도</label>
+            <select class="w-full bg-paper-low border border-paper-high rounded-xl p-2.5">
+              <option value="easy">쉬움 (Easy)</option>
+              <option value="medium">보통 (Medium)</option>
+              <option value="hard" selected>상급 (Hard)</option>
+              <option value="expert">전문가 (Expert)</option>
+            </select>
+          </div>
+        </div>
+        <button onclick="alert('신규 액티비티 일정이 성공적으로 등록되어 모집 목록(UC2/UC7)에 게시되었습니다!'); closeClubAdminModal();"
+          class="w-full bg-terracotta text-white font-heading font-bold text-xs py-2.5 rounded-xl hover:bg-terracotta-dark transition shadow">
+          🚀 신규 액티비티 일정 등록 (`hikes` Table 생성)
+        </button>
+      </div>
+
+      <!-- Tab 4: Badge Creation -->
+      <div id="adminTabBadges" class="space-y-3.5 text-xs font-body hidden">
+        <div>
+          <label class="block font-heading font-bold text-gray-700 mb-1">신규 뱃지 이름</label>
+          <input type="text" placeholder="예: 공룡능선 종주 열정 뱃지"
+            class="w-full bg-paper-low border border-paper-high rounded-xl p-2.5">
+        </div>
+        <div>
+          <label class="block font-heading font-bold text-gray-700 mb-1">스탬프 아이콘 선택</label>
+          <select class="w-full bg-paper-low border border-paper-high rounded-xl p-2.5">
+            <option value="mountain">🏔️ 산봉우리 스탬프</option>
+            <option value="dinosaur">🦖 공룡능선 스탬프</option>
+            <option value="sunrise">🌅 일출 감상 스탬프</option>
+            <option value="flower">🌸 야생화 스탬프</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-heading font-bold text-gray-700 mb-1">뱃지 획득 조건 / 설명</label>
+          <textarea rows="2" placeholder="설악산 공룡능선 코스를 완주한 멤버에게 수여하는 특별 뱃지입니다."
+            class="w-full bg-paper-low border border-paper-high rounded-xl p-2.5"></textarea>
+        </div>
+        <button onclick="alert('동호회 전용 신규 스탬프 뱃지가 생성되었습니다! (badges Table 생성)'); closeClubAdminModal();"
+          class="w-full bg-terracotta text-white font-heading font-bold text-xs py-2.5 rounded-xl hover:bg-terracotta-dark transition shadow">
+          ✨ 신규 스탬프 뱃지 생성 (`badges` Table 생성)
+        </button>
+      </div>
+
+      <div class="flex justify-end border-t border-gray-100 pt-3">
+        <button onclick="closeClubAdminModal()"
+          class="bg-gray-100 text-gray-600 font-heading font-bold text-xs px-5 py-2 rounded-full">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. UC17 동호회개설 신청 모달 -->
+  <div id="clubCreateModal"
+    class="fixed inset-0 bg-forest/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-forest-container space-y-4">
+      <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+        <div>
+          <span class="uc-tag">UC17 동호회개설</span>
+          <h3 class="font-heading font-extrabold text-xl text-forest mt-1">➕ 신규 동호회 개설 신청</h3>
+        </div>
+        <button onclick="closeClubCreateModal()" class="text-gray-400 hover:text-gray-700 text-lg font-bold">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs font-body">
+        <div>
+          <label class="block font-heading font-bold text-gray-700 mb-1">동호회 명칭</label>
+          <input type="text" placeholder="예: 한라산 백록담 종주 클럽"
+            class="w-full bg-paper-low border border-paper-high rounded-xl p-2.5">
+        </div>
+        <div>
+          <label class="block font-heading font-bold text-gray-700 mb-1">카테고리</label>
+          <select class="w-full bg-paper-low border border-paper-high rounded-xl p-2.5">
+            <option value="hiking">등산 (Hiking)</option>
+            <option value="tracking">트래킹 (Tracking)</option>
+            <option value="running">러닝 (Running)</option>
+            <option value="cycling">사이클링 (Cycling)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-heading font-bold text-gray-700 mb-1">개설 목적 및 소개글</label>
+          <textarea rows="3" placeholder="모임의 개설 목적, 활동 지역, 주된 등산 코스를 소개해주세요."
+            class="w-full bg-paper-low border border-paper-high rounded-xl p-2.5"></textarea>
+        </div>
+        <div class="p-3 bg-paper-low rounded-xl border border-sand/40">
+          <p class="font-heading font-bold text-forest text-xs">👑 개설자 (Owner) 권한 지정</p>
+          <p class="text-[11px] text-gray-500 mt-0.5">개설 신청 승인 시 개설자(Owner) 권한이 부여되며 초청 링크를 통한 회원 가입 승인권을 갖게 됩니다.</p>
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-2">
+        <button onclick="closeClubCreateModal()"
+          class="bg-gray-100 text-gray-600 font-heading font-bold text-xs px-4 py-2 rounded-full">취소</button>
+        <button onclick="alert('신규 동호회 개설 신청 완료! (clubs Table 생성)'); closeClubCreateModal();"
+          class="bg-terracotta text-white font-heading font-bold text-xs px-5 py-2 rounded-full shadow">
+          동호회 개설 신청 제출
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. 초청 링크 가입 신청 모달 (개설자 승인 방식) -->
+  <div id="inviteJoinModal"
+    class="fixed inset-0 bg-forest/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-forest-container space-y-4">
+      <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+        <div>
+          <span class="uc-tag">🔗 초청 링크 가입</span>
+          <h3 id="inviteJoinModalTitle" class="font-heading font-extrabold text-xl text-forest mt-1">초청 링크 가입 신청</h3>
+        </div>
+        <button onclick="closeInviteJoinModal()" class="text-gray-400 hover:text-gray-700 text-lg font-bold">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs font-body">
+        <div class="p-3 bg-forest/5 rounded-xl border border-forest/20">
+          <p id="inviteJoinModalOwnerInfo" class="font-heading font-bold text-forest text-xs">개설자(Owner): 이암벽 님</p>
+          <p class="text-gray-500 text-[11px] mt-0.5">초청 링크를 통하여 진입하였습니다. 개설자의 승인을 거쳐 최종 정회원으로 가입됩니다.</p>
+        </div>
+        <div>
+          <label class="block font-heading font-bold text-gray-700 mb-1">개설자에게 보낼 한줄 인사</label>
+          <textarea rows="3" placeholder="안녕하세요! 초청 링크로 가입 신청합니다. 열심히 참여하겠습니다."
+            class="w-full bg-paper-low border border-paper-high rounded-xl p-2.5"></textarea>
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-2">
+        <button onclick="closeInviteJoinModal()"
+          class="bg-gray-100 text-gray-600 font-heading font-bold text-xs px-4 py-2 rounded-full">취소</button>
+        <button onclick="alert('개설자에게 가입 신청서가 전달되었습니다! (club_members status: pending)'); closeInviteJoinModal();"
+          class="bg-terracotta text-white font-heading font-bold text-xs px-5 py-2 rounded-full shadow">
+          📝 개설자에게 가입 신청 전송
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-forest text-paper/70 text-xs py-8 border-t border-forest-container">
+    <div class="max-w-7xl mx-auto px-4 text-center space-y-2 font-body">
+      <p class="font-heading font-bold text-sm text-paper">함께쓰는 크루 일기 (CrewLog) • Shared Crew Activity Archive</p>
+      <p class="text-paper/50">Stitch "산행추억 아카이브" 디자인 시스템 (Bricolage Grotesque & Be Vietnam Pro & Space Grotesk)</p>
+      <p class="font-label text-[11px] text-sand">UC1~UC15 포함 관계 반영 완성형 대화형 HTML 프로토타입</p>
+    </div>
+  </footer>
+
+  <!-- Script for Tab Switching & Modals -->
+  <script>
+    function switchTab(tabId) {
+      const sections = ['dashboard', 'hikes', 'diaries', 'gallery', 'my', 'clubs'];
+      sections.forEach(id => {
+        const sec = document.getElementById('sec-' + id);
+        if (sec) sec.classList.add('hidden');
+        const btn = document.getElementById('tab-' + id);
+        if (btn) {
+          btn.classList.remove('bg-terracotta', 'text-white');
+          btn.classList.add('text-paper/80');
+        }
+      });
+
+      const activeSec = document.getElementById('sec-' + tabId);
+      if (activeSec) activeSec.classList.remove('hidden');
+      const activeBtn = document.getElementById('tab-' + tabId);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-terracotta', 'text-white');
+        activeBtn.classList.remove('text-paper/80');
+      }
+    }
+
+    // Modal Helpers
+    function openScheduleModal(title) {
+      document.getElementById('scheduleModalTitle').innerText = title + ' - 일정표';
+      const bodyEl = document.getElementById('scheduleModalBody');
+      if (bodyEl) {
+        if (title.includes('지리산')) {
+          bodyEl.innerHTML = `
+            <p class="font-heading font-bold text-forest text-sm">📍 코스 개요 & 타임라인 (지리산 천왕봉 코스)</p>
+            <ul class="mt-2 space-y-1.5 text-gray-600">
+              <li>• <strong>04:00 AM</strong> - 중산리 탐방지원센터 집결</li>
+              <li>• 06:30 AM - 장터목 대피소 도착 및 조식</li>
+              <li>• 07:30 AM - 천왕봉 정상 (1,915m) 완등 🏔️</li>
+              <li>• 12:00 PM - 중산리 하산 완료 및 동호회 회식</li>
+            </ul>`;
+        } else if (title.includes('설악산')) {
+          bodyEl.innerHTML = `
+            <p class="font-heading font-bold text-forest text-sm">📍 코스 개요 & 타임라인 (설악산 공룡능선 코스)</p>
+            <ul class="mt-2 space-y-1.5 text-gray-600">
+              <li>• <strong>03:00 AM</strong> - 반포 한강공원 달빛광장 집결</li>
+              <li>• 06:00 AM - 마등령 진입 및 공룡능선 종주 개시 🦖</li>
+              <li>• 12:30 PM - 희운각 대피소 휴식 및 행동식</li>
+              <li>• 17:00 PM - 천불동 계곡 하산 완료</li>
+            </ul>`;
+        } else if (title.includes('관악산')) {
+          bodyEl.innerHTML = `
+            <p class="font-heading font-bold text-forest text-sm">📍 코스 개요 & 타임라인 (관악산 연주대 코스)</p>
+            <ul class="mt-2 space-y-1.5 text-gray-600">
+              <li>• <strong>08:00 AM</strong> - 서울대입구 관악산 입구 집결</li>
+              <li>• 10:00 AM - 깔딱고개 및 암릉 밧줄 구간 통과</li>
+              <li>• 11:00 AM - 연주대 정상 (629m) 도착 및 단체 포토 🌲</li>
+              <li>• 13:00 PM - 하산 후 막걸리 조풀 축배</li>
+            </ul>`;
+        } else {
+          bodyEl.innerHTML = `
+            <p class="font-heading font-bold text-forest text-sm">📍 코스 개요 & 타임라인 (북한산 백운대 코스)</p>
+            <ul class="mt-2 space-y-1.5 text-gray-600">
+              <li>• <strong>04:00 AM</strong> - 북한산우이역 2번 출구 집결 및 안전점검</li>
+              <li>• 05:30 AM - 하루재 통과 및 등반 개시</li>
+              <li>• 06:40 AM - 백운대 피크 도착 및 일출 감상 🌅</li>
+              <li>• 08:30 AM - 하산 완료 및 해장국 조식</li>
+            </ul>`;
+        }
+      }
+      document.getElementById('scheduleModal').classList.remove('hidden');
+    }
+    function closeScheduleModal() { document.getElementById('scheduleModal').classList.add('hidden'); }
+
+    // Completed Hike Diary Popup Modal Logic
+    let currentSelectedDiaryTitle = '한강 나이트 러닝 10K 에세이 모음집';
+
+    function openCompletedDiaryModal(diaryTitle, hikeName) {
+      currentSelectedDiaryTitle = diaryTitle;
+      document.getElementById('completedDiaryModalTitle').innerText = hikeName + ' 교환일기 팝업';
+
+      if (hikeName.includes('지리산')) {
+        document.getElementById('completedDiaryImage').src = "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600";
+        document.getElementById('completedDiarySubTitle').innerText = "천왕봉 운해와 교환일기";
+        document.getElementById('completedDiaryExcerpt').innerText = '"새벽 4시, 장터목 대피소의 차가운 바람을 뚫고 오른 천왕봉 정상. 붉게 물드는 운해를 바라보며 모임원들과 함께 작성한 교환일기..."';
+      } else if (hikeName.includes('관악산')) {
+        document.getElementById('completedDiaryImage').src = "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600";
+        document.getElementById('completedDiarySubTitle').innerText = "연주대 암릉 정복 추억";
+        document.getElementById('completedDiaryExcerpt').innerText = '"바위를 짚으며 오르던 밧줄 구간에서의 아찔했던 순간과 정상 연주대에서 펼쳐진 시원한 전경..."';
+      } else {
+        document.getElementById('completedDiaryImage').src = "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600";
+        document.getElementById('completedDiarySubTitle').innerText = "백운대 야간 일출 아카이브";
+        document.getElementById('completedDiaryExcerpt').innerText = '"헤드랜턴을 밝히며 수놓았던 야간 등반. 백운대 피크에서 바라본 서울 야경과 찬란한 일출..."';
+      }
+
+      document.getElementById('completedDiaryModal').classList.remove('hidden');
+    }
+
+    function closeCompletedDiaryModal() {
+      document.getElementById('completedDiaryModal').classList.add('hidden');
+    }
+
+    function openDiaryDetailPage(title) {
+      switchTab('diaries');
+      document.getElementById('uc8-shelf-view').classList.add('hidden');
+      const detailView = document.getElementById('uc8-detail-page-view');
+      detailView.classList.remove('hidden');
+      document.getElementById('uc8DetailTitle').innerText = title;
+      window.scrollTo({ top: detailView.offsetTop - 80, behavior: 'smooth' });
+    }
+
+    function closeDiaryDetailPage() {
+      document.getElementById('uc8-detail-page-view').classList.add('hidden');
+      document.getElementById('uc8-shelf-view').classList.remove('hidden');
+    }
+
+    function navigateToFullDiary() {
+      closeCompletedDiaryModal();
+      openDiaryDetailPage(currentSelectedDiaryTitle);
+    }
+
+    // Photo Carousel 2x4 Pagination Logic
+    let currentPhotoPage = 1;
+    const totalPhotoPages = 2;
+
+    function changePhotoPage(dir) {
+      currentPhotoPage += dir;
+      if (currentPhotoPage < 1) currentPhotoPage = totalPhotoPages;
+      if (currentPhotoPage > totalPhotoPages) currentPhotoPage = 1;
+
+      for (let i = 1; i <= totalPhotoPages; i++) {
+        const pageEl = document.getElementById('photoPage' + i);
+        if (pageEl) {
+          if (i === currentPhotoPage) pageEl.classList.remove('hidden');
+          else pageEl.classList.add('hidden');
+        }
+      }
+
+      const indicator = document.getElementById('photoPageIndicator');
+      if (indicator) {
+        const startIdx = (currentPhotoPage - 1) * 8 + 1;
+        const endIdx = currentPhotoPage * 8;
+        indicator.innerText = `PAGE ${currentPhotoPage} / ${totalPhotoPages} (사진 ${startIdx}-${endIdx} / 16)`;
+      }
+    }
+
+    function openEssayWriteModal() { document.getElementById('essayWriteModal').classList.remove('hidden'); }
+    function closeEssayWriteModal() { document.getElementById('essayWriteModal').classList.add('hidden'); }
+
+    function openUploadModal() { document.getElementById('uploadModal').classList.remove('hidden'); }
+    function closeUploadModal() { document.getElementById('uploadModal').classList.add('hidden'); }
+
+    function openBadgeModal() { document.getElementById('badgeModal').classList.remove('hidden'); }
+    function closeBadgeModal() { document.getElementById('badgeModal').classList.add('hidden'); }
+
+    function openAdminBadgeGrantModal(userName) {
+      const name = userName || '김산길';
+      const notice = document.getElementById('grantBadgeMemberBadgeNotice');
+      const text = document.getElementById('targetMemberBadgeText');
+      if (notice) notice.innerText = `👑 ${name} 님 해냄뱃지 수여 (UC6)`;
+      if (text) text.innerText = `수여 대상: ${name} 님 (지리산 완등 멤버)`;
+      openBadgeModal();
+    }
+
+    function openClubCreateModal() {
+      document.getElementById('clubCreateModal').classList.remove('hidden');
+    }
+    function closeClubCreateModal() {
+      document.getElementById('clubCreateModal').classList.add('hidden');
+    }
+
+    function openInviteJoinModal(clubName, ownerName) {
+      const owner = ownerName || '이암벽';
+      document.getElementById('inviteJoinModalTitle').innerText = clubName + ' - 초청 링크 가입';
+      document.getElementById('inviteJoinModalOwnerInfo').innerText = `개설자(Owner): ${owner} 님`;
+      document.getElementById('inviteJoinModal').classList.remove('hidden');
+    }
+    // Photo Picker & Episode Submission with Photo Layout
+    let selectedPhotoUrls = [];
+
+    function togglePhotoSelection(itemEl, photoUrl) {
+      const badge = itemEl.querySelector('.check-badge');
+      if (selectedPhotoUrls.includes(photoUrl)) {
+        selectedPhotoUrls = selectedPhotoUrls.filter(u => u !== photoUrl);
+        itemEl.classList.remove('border-forest');
+        itemEl.classList.add('border-transparent');
+        if (badge) badge.classList.add('hidden');
+      } else {
+        selectedPhotoUrls.push(photoUrl);
+        itemEl.classList.remove('border-transparent');
+        itemEl.classList.add('border-forest');
+        if (badge) badge.classList.remove('hidden');
+      }
+    }
+
+    function openEpisodeDetailModal(title, author, date, photoUrl, fullContent) {
+      document.getElementById('epModalTitle').innerText = title;
+      document.getElementById('epModalMeta').innerText = `작성자: ${author} • ${date}`;
+      document.getElementById('epModalImage').src = photoUrl;
+      document.getElementById('epModalContent').innerText = fullContent;
+      document.getElementById('episodeDetailModal').classList.remove('hidden');
+    }
+
+    function closeEpisodeDetailModal() {
+      document.getElementById('episodeDetailModal').classList.add('hidden');
+    }
+
+    function submitNewEpisodeWithPhotos() {
+      const title = document.getElementById('episodeInputTitle').value || '장터목 대피소의 별빛과 추억';
+      const content = document.getElementById('episodeInputContent').value || '장터목 대피소에 모여 나누었던 온기... 선택한 공유 드라이브 사진과 함께 추억을 간직합니다. 지리산의 차가운 밤바람도 따뜻한 차 한 잔과 모임원들의 웃음소리 앞에서는 사르르 녹아내렸습니다. 등산이라는 취미로 모여 서로를 위해 끌어주고 밀어주며 정상을 향했던 그 순간은 언제 떠올려도 가슴 뭉클한 감동으로 다가옵니다.';
+
+      const feedStream = document.getElementById('episodeFeedStream');
+      if (!feedStream) return;
+
+      const photoUrl = selectedPhotoUrls[0] || 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600';
+      const nowStr = '2026.08.23 ' + new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+
+      const newEntry = document.createElement('div');
+      newEntry.className = "bg-white rounded-2xl p-5 border-2 border-forest/30 shadow-md hover:shadow-lg transition flex flex-col justify-between space-y-3 animate-fade-in";
+
+      // Escape quotes for inline onclick
+      const safeTitle = title.replace(/'/g, "\\'");
+      const safeContent = content.replace(/'/g, "\\'").replace(/\n/g, "\\n");
+
+      newEntry.innerHTML = `
+        <div>
+          <div class="flex justify-between items-center border-b border-gray-100 pb-2.5 mb-3">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-7 h-7 rounded-full bg-amber-500 text-white font-heading font-bold text-xs flex items-center justify-center border-2 border-sand">산길</div>
+              <div>
+                <h4 class="font-heading font-bold text-xs text-forest line-clamp-1">${title}</h4>
+                <p class="text-[9px] text-gray-400 font-label">김산길 • ${nowStr}</p>
+              </div>
+            </div>
+            <span class="bg-terracotta text-white text-[9px] font-label font-bold px-2 py-0.5 rounded-full">신규 작성</span>
+          </div>
+
+          <!-- Small Aesthetic Photo & 5-Line Clamped Text Content -->
+          <div class="flex space-x-3 items-start">
+            <div class="shrink-0 w-24 h-24 rounded-xl overflow-hidden border border-sand shadow-sm relative group bg-gray-100">
+              <div class="washi-tape-sm"></div>
+              <img src="${photoUrl}" class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+            </div>
+            <div class="text-[11px] text-gray-700 leading-relaxed font-body line-clamp-5">
+              ${content}
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-gray-100 flex justify-between items-center">
+          <span class="text-[9px] font-label text-gray-400">📷 사진 선택 첨부</span>
+          <button onclick="openEpisodeDetailModal('${safeTitle}', '김산길 (주최자)', '${nowStr}', '${photoUrl}', '${safeContent}')" class="bg-forest text-white font-heading font-bold text-[10px] px-3 py-1.5 rounded-full hover:bg-forest-container transition shadow-sm flex items-center space-x-1">
+            <span>🔍 상세보기 (팝업)</span>
+          </button>
+        </div>
+      `;
+
+      feedStream.insertBefore(newEntry, feedStream.firstChild);
+      alert('📸 2열 그리드와 글 5줄 말줄임(line-clamp-5)이 적용된 신규 에피소드가 게시되었습니다! (상세보기 팝업 지원)');
+      closeEssayWriteModal();
+    }
+
+    // UC15 Club Admin Modal JS Logic
+    function openClubAdminModal(clubName) {
+      const titleEl = document.getElementById('clubAdminModalTitle');
+      if (titleEl) titleEl.innerText = `⚙️ '${clubName}' 종합 관리 센터 (UC15)`;
+      document.getElementById('clubAdminModal').classList.remove('hidden');
+      switchAdminTab('keys');
+    }
+
+    function closeClubAdminModal() {
+      document.getElementById('clubAdminModal').classList.add('hidden');
+    }
+
+    function switchAdminTab(tabName) {
+      const tabs = ['keys', 'members', 'hikes', 'badges'];
+      tabs.forEach(t => {
+        const tabEl = document.getElementById('adminTab' + t.charAt(0).toUpperCase() + t.slice(1));
+        const btnEl = document.getElementById('tabBtnAdmin' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (tabEl) {
+          if (t === tabName) tabEl.classList.remove('hidden');
+          else tabEl.classList.add('hidden');
+        }
+        if (btnEl) {
+          if (t === tabName) {
+            btnEl.className = "px-3.5 py-2 border-b-2 border-forest text-forest bg-forest/5 rounded-t-lg font-bold";
+          } else {
+            btnEl.className = "px-3.5 py-2 text-gray-500 hover:text-forest font-bold";
+          }
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>
