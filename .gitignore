@@ -2,3 +2,9 @@
 .next/
 .env*
 .DS_Store
+.vercel
+
+*.ps1
+*.py
+test_*.js
+supabase/.temp/

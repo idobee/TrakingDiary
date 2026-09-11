@@ -116,7 +116,7 @@ export function useTranslation(): I18nContextValue {
   if (!context) {
     throw new Error(
       'useTranslation() must be used within an <I18nProvider>. ' +
-        'Ensure <I18nProvider> wraps your component tree in layout.tsx.',
+      'Ensure <I18nProvider> wraps your component tree in layout.tsx.',
     )
   }
   return context
@@ -139,14 +139,18 @@ export const LanguageSwitcher: React.FC = () => {
   return (
     <button
       onClick={toggleLocale}
-      className="flex items-center space-x-1.5 bg-forest-container hover:bg-forest-surface px-3 py-1.5 rounded-full border border-sand/30 transition shadow-sm text-xs font-label font-bold text-paper"
+      className="relative flex items-center bg-forest-container hover:bg-forest-surface rounded-full border border-sand/30 transition shadow-inner overflow-hidden"
+      style={{ width: '56px', height: '28px' }}
       aria-label="Switch language"
       title={locale === 'ko' ? 'Switch to English' : '한국어로 전환'}
     >
-      <span className="text-sm">{locale === 'ko' ? '🇰🇷' : '🇺🇸'}</span>
-      <span>{locale === 'ko' ? '한국어' : 'English'}</span>
-      <span className="opacity-60">→</span>
-      <span className="text-sm">{locale === 'ko' ? '🇺🇸' : '🇰🇷'}</span>
+      <div className={`absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white shadow-sm transition-all duration-300 flex items-center justify-center overflow-hidden ${locale === 'ko' ? 'left-1' : 'left-[calc(100%-1.5rem-0.25rem)]'}`}>
+        <img 
+          src={locale === 'ko' ? 'https://flagcdn.com/kr.svg' : 'https://flagcdn.com/us.svg'} 
+          alt={locale === 'ko' ? 'Korean Flag' : 'US Flag'} 
+          className="w-full h-full object-cover" 
+        />
+      </div>
     </button>
   )
 }

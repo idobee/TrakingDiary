@@ -18,27 +18,27 @@
   },
   "header": {
     "appTitle": "Shared Club Diary",
-    "appSubtitle": "Shared Activity & Club Archive (Next.js 14+ App Router)",
+    "appSubtitle": "Shared Activity & Club Archive",
     "ucDashboardRoot": "UC1 Dashboard Root",
     "profileName": "San-gil Kim",
     "profileUc": "UC4 My Club",
     "profileLevel": "LV.4",
     "profileInitial": "S",
     "tabs": {
-      "dashboard": "📊 Dashboard",
-      "hikes": "🗓️ Activity Schedule",
-      "diaries": "📚 Club Album & Diary",
-      "gallery": "📷 Photo Gallery (Drive)",
-      "my": "🏅 My Club & Badges",
-      "clubs": "🏘️ Clubs & Membership"
+      "dashboard": "🏠 Home",
+      "hikes": "🗓️ Next MeetUp",
+      "diaries": "📚 Stories",
+      "gallery": "📷 Gallery",
+      "my": "🏅 My Footprints",
+      "clubs": "🏘️ Crew Lounge"
     },
     "tabUcCodes": {
-      "dashboard": "UC1",
-      "hikes": "UC2/UC7",
-      "diaries": "UC3/UC8/10",
-      "gallery": "UC9/UC12",
-      "my": "UC4/UC5/13",
-      "clubs": "UC14/15/17"
+      "dashboard": "",
+      "hikes": "",
+      "diaries": "",
+      "gallery": "",
+      "my": "",
+      "clubs": ""
     },
     "clubs": {
       "nationalPark": "🌲 National Park Alpine Club (Hiking Club)",
@@ -336,14 +336,14 @@
     "alerts": {
       "approveSuccess": "Membership has been approved.",
       "rejectSuccess": "Membership has been rejected.",
-      "badgeGrant": "Granting a club badge to {{name}} (UC6).",
-      "clubCreate": "Opening the new trekking club creation form (UC17)."
+      "badgeGrant": "Granting a club badge to {{name}}.",
+      "clubCreate": "Opening the new club creation form screen."
     },
     "demoData": {
       "hikeLeader": "Hike Leader (Kim San-gil)",
       "hikeDate": "2026.08.15",
       "hikeDesc": "Jirisan Cheonwangbong Traverse hiking recruitment schedule detail page.",
-      "hikesDetailDesc": "Trekking recruitment detailed schedule.",
+      "hikesDetailDesc": "New detailed schedule.",
       "diaryEditor": "National Park Alpine Club Editorial",
       "diaryVol": "2026.08 VOL.12",
       "diaryDesc": "4AM ramen at Jangteomok Shelter and Cheonwangbong sunrise... A hardcover bound edition containing 12 episodes written together by club members.",
@@ -353,11 +353,11 @@
     }
   },
   "language": {
-    "ko": "한국어",
-    "en": "English"
+    "ko": "KR",
+    "en": "EN"
   },
   "auth": {
-    "loginTitle": "Welcome to Shared Tracking Diary",
+    "loginTitle": "Welcome to Shared Club Diary",
     "loginSubtitle": "Sign in easily with your social account",
     "loginWithKakao": "Continue with Kakao",
     "loginWithGoogle": "Continue with Google",
@@ -368,5 +368,70 @@
     "socialOnlyNotice": "We only support social login.",
     "loggingIn": "Logging in...",
     "redirecting": "Redirecting..."
+  },
+  "intro": {
+    "heroTitle": "Shared Crew Diary",
+    "heroDesc": "Record and share every moment of your hikes with your crew like a single book.",
+    "feature1": {
+      "title": "🧑‍🤝‍🧑 A Secret Hideout Just For Our Crew!",
+      "desc1": "Record those high-tension moments sweating together with your crew.",
+      "desc2": "Create our own awesome club, send a quick invite link via messenger, and you're all set!",
+      "desc3": "Play it cool and approve when a friend applies. That's when our private memory sharing begins."
+    },
+    "feature2": {
+      "title": "📅 When's the Next Schedule? From Schedules to Fun Episodes!",
+      "desc1": "'Who's up for a hike this weekend?' Post a schedule and watch the crew gather.",
+      "desc2": "The trails we walked together, the coffee at the peak, and post-hike pancake photos are a must! Share those fun real-time episodes.",
+      "desc3": "'You carried us today!' The club owner can bestow limited-edition badges to the hardest working crew member.",
+      "desc4": "Our scattered day comes together into one wonderful digital book."
+    },
+    "feature3": {
+      "title": "☁️ Tired of Hoarding Photos? Let Google Drive Handle It!",
+      "desc1": "Exhausted from saving every photo in the group chat? Collect them all in your club's dedicated Google Drive.",
+      "desc2": "Link it just once, and don't worry about it—all future photos will be automatically and neatly archived.",
+      "desc3": "By default, it's a secret gallery just for our crew! But if you have an absolute 'legendary' shot, feel free to show it off to the world (public share)."
+    },
+    "feature4": {
+      "title": "🤖 Don't Worry About Your Writing Skills! Our AI Emotional Writer is Here",
+      "desc1": "'Ah~ It was so fun, but I'm blanking on how to write about it.' Don't worry!",
+      "desc2": "AI magically polishes your rough records into a wonderful essay brimming with emotion."
+    }
+  },
+  "hikes": {
+    "title": "Let's MeetUp!",
+    "subtitle": "Upcoming events for my joined clubs.",
+    "backToList": "Back to List",
+    "createNew": "⛰️ Create New Event",
+    "upcomingTitle": "Upcoming Events",
+    "loading": "Loading events...",
+    "emptyTitle": "No upcoming events available.",
+    "emptyDesc": "Wait for a new event to be posted in your clubs!",
+    "recruitingBadge": "Recruiting",
+    "myHostedHike": "👑 Event I Hosted",
+    "hostedHike": "👑 Hosted Event",
+    "cancelJoin": "Cancel Participation",
+    "join": "Join Event",
+    "details": "Details",
+    "noDetails": "No details provided.",
+    "participants": "Current Participants",
+    "noParticipants": "No participants yet. Be the first to join!",
+    "unknown": "Unknown",
+    "close": "Close",
+    "viewAlbum": "View Album",
+    "noSchedule": "No schedule.",
+    "calendarTitle": "{{month}}/{{year}} Schedule",
+    "weekNum": "Week {{week}}",
+    "days": "Sun,Mon,Tue,Wed,Thu,Fri,Sat",
+    "alertJoinFail": "Failed to join: ",
+    "alertJoinSuccess": "Successfully joined the event!",
+    "confirmLeave": "Are you sure you want to cancel your participation?",
+    "alertLeaveFail": "Failed to cancel: ",
+    "alertLeaveSuccess": "Successfully canceled participation.",
+    "hostPrefix": "Host:",
+    "difficulty": "Difficulty",
+    "diffEasy": "Easy",
+    "diffMedium": "Medium",
+    "diffHard": "Hard",
+    "diffExpert": "Expert"
   }
 }

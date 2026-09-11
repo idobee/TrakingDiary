@@ -28,11 +28,10 @@ export const Header: React.FC<HeaderProps> = ({
   const tabs = tabIds.map((id) => ({
     id,
     label: t(`header.tabs.${id}`),
-    uc: t(`header.tabUcCodes.${id}`),
   }))
 
   return (
-    <header className="bg-forest border-b border-forest-container sticky top-0 z-40 text-paper shadow-md">
+    <header className="bg-forest border-b border-forest-container sticky top-0 z-40 text-paper shadow-md print:hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           
@@ -46,7 +45,6 @@ export const Header: React.FC<HeaderProps> = ({
                 <h1 className="font-heading font-extrabold text-lg sm:text-xl tracking-tight text-paper leading-tight">
                   {t('header.appTitle')}
                 </h1>
-                <span className="uc-tag">{t('header.ucDashboardRoot')}</span>
               </div>
               <p className="font-label text-xs text-sand/80 font-medium">{t('header.appSubtitle')}</p>
             </div>
@@ -91,7 +89,6 @@ export const Header: React.FC<HeaderProps> = ({
                   <p className="font-heading font-bold text-xs text-paper leading-none">
                     {t('auth.greeting', { nickname: user.nickname || t('header.profileName') })}
                   </p>
-                  <p className="font-label text-[9px] text-sand leading-none mt-0.5">{t('header.profileUc')}</p>
                 </div>
                 <button
                   onClick={(e) => {
@@ -130,7 +127,6 @@ export const Header: React.FC<HeaderProps> = ({
                 }`}
               >
                 <span>{tab.label}</span>
-                <span className="text-[9px] opacity-75 font-label">{tab.uc}</span>
               </button>
             )
           })}

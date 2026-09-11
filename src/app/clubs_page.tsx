@@ -55,7 +55,6 @@ export const ClubsPage: React.FC<ClubsPageProps> = ({
         <div>
           <div className="flex items-center space-x-2">
             <h2 className="font-heading font-extrabold text-2xl text-forest">{t('clubs.sectionTitle')}</h2>
-            <span className="uc-tag">{t('clubs.ucTag')}</span>
           </div>
           <p className="text-xs text-gray-600 font-body mt-1">
             {t('clubs.sectionDesc')}

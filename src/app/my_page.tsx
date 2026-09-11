@@ -48,6 +48,18 @@ export const MyPage: React.FC<MyPageProps> = ({
     }
   }
 
+  const handleDeleteEpisode = async (id: number) => {
+    if (!confirm('정말 삭제하시겠습니까?')) return
+    try {
+      const { error } = await supabase.from('episodes').delete().eq('id', id)
+      if (error) throw error
+      refetch()
+    } catch (err) {
+      console.error(err)
+      alert('에피소드 삭제에 실패했습니다.')
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-20">
@@ -63,7 +75,6 @@ export const MyPage: React.FC<MyPageProps> = ({
         <div>
           <div className="flex items-center space-x-2">
             <h2 className="font-heading font-extrabold text-2xl text-forest">{t('my.sectionTitle')}</h2>
-            <span className="uc-tag">{t('my.ucTag')}</span>
           </div>
           <p className="text-xs text-gray-600 font-body mt-1">{t('my.sectionDesc')}</p>
         </div>
@@ -135,7 +146,7 @@ export const MyPage: React.FC<MyPageProps> = ({
           </div>
 
           {badges.length > 0 ? (
-            <div className="grid grid-cols-3 gap-3">
+            <div className="flex flex-wrap justify-center gap-x-[40px] gap-y-6 pt-4 pb-2">
               {badges.map((badge) => (
                 badge.isLocked ? (
                   <div key={badge.id} className="bg-gray-50 p-2 rounded-xl border border-dashed border-gray-300 text-center flex flex-col items-center">
@@ -168,9 +179,8 @@ export const MyPage: React.FC<MyPageProps> = ({
         <div className="flex items-center justify-between border-b border-gray-100 pb-3">
           <div className="flex items-center space-x-2">
             <h3 className="font-heading font-bold text-lg text-forest">{t('my.episodesTitle')}</h3>
-            <span className="uc-tag">{t('my.episodesUcTag')}</span>
           </div>
-          <span className="font-label text-xs text-gray-500">{t('my.episodesMeta')}</span>
+          <span className="font-label text-xs text-gray-500">{t('my.episodesMeta', { count: episodes.length })}</span>
         </div>
 
         {episodes.length > 0 ? (
@@ -183,16 +193,24 @@ export const MyPage: React.FC<MyPageProps> = ({
                       <span className="bg-forest text-white font-label text-[9px] font-bold px-2 py-0.5 rounded-full">{ep.hikeName}</span>
                       <span className="text-[10px] text-gray-400 font-label">{new Date(ep.createdAt).toLocaleDateString()}</span>
                     </div>
-                    <button 
-                      onClick={() => {
-                        setEditTitle(ep.title)
-                        setEditContent(ep.content)
-                        setEditingEpisode(ep)
-                      }}
-                      className="text-[10px] font-bold text-gray-400 hover:text-forest transition"
-                    >
-                      수정
-                    </button>
+                    <div className="flex items-center space-x-3">
+                      <button 
+                        onClick={() => {
+                          setEditTitle(ep.title)
+                          setEditContent(ep.content)
+                          setEditingEpisode(ep)
+                        }}
+                        className="text-[10px] font-bold text-gray-400 hover:text-forest transition"
+                      >
+                        수정
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteEpisode(ep.id)}
+                        className="text-[10px] font-bold text-gray-400 hover:text-red-500 transition"
+                      >
+                        삭제
+                      </button>
+                    </div>
                   </div>
                   <h4 
                     className="font-heading font-bold text-sm text-forest mb-2 cursor-pointer hover:underline flex items-center space-x-1.5"

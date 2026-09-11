@@ -23,7 +23,7 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
   const fetchHikesAndPermissions = async () => {
     setIsLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
-    
+
     if (!user) {
       setIsLoading(false)
       return
@@ -58,7 +58,7 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
         `)
         .in('club_id', clubIds)
         .eq('status', 'recruiting')
-        .order('hike_date', { ascending: true })
+        .order('hike_date', { ascending: false })
 
       if (hikesData) {
         setHikes(hikesData)
@@ -80,7 +80,7 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
     } else {
       setHikes([])
     }
-    
+
     setIsLoading(false)
   }
 
@@ -96,7 +96,7 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
           .select('role, users!hike_members_user_id_fkey(nickname, avatar_url)')
           .eq('hike_id', selectedHikeToJoin.id)
           .eq('status', 'approved')
-        
+
         if (data) {
           setParticipants(data)
         }
@@ -114,7 +114,7 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
 
   const handleJoinHike = async (hikeId: number) => {
     if (!currentUserId) return
-    
+
     const { error } = await (supabase.from('hike_members') as any).insert({
       hike_id: hikeId,
       user_id: currentUserId,
@@ -123,9 +123,9 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
     })
 
     if (error) {
-      alert('참여 신청에 실패했습니다: ' + error.message)
+      alert(t('hikes.alertJoinFail') + error.message)
     } else {
-      alert('성공적으로 참여 신청되었습니다!')
+      alert(t('hikes.alertJoinSuccess'))
       setSelectedHikeToJoin(null)
       fetchHikesAndPermissions()
     }
@@ -133,8 +133,8 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
 
   const handleLeaveHike = async (hikeId: number) => {
     if (!currentUserId) return
-    
-    if (!window.confirm('정말 참여를 취소하시겠습니까?')) return
+
+    if (!window.confirm(t('hikes.confirmLeave'))) return
 
     const { error } = await supabase
       .from('hike_members')
@@ -143,9 +143,9 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
       .eq('user_id', currentUserId)
 
     if (error) {
-      alert('참여 취소에 실패했습니다: ' + error.message)
+      alert(t('hikes.alertLeaveFail') + error.message)
     } else {
-      alert('참여가 취소되었습니다.')
+      alert(t('hikes.alertLeaveSuccess'))
       setSelectedHikeToJoin(null)
       fetchHikesAndPermissions()
     }
@@ -157,32 +157,32 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
   }
 
   const getDayOfWeek = (dateString: string) => {
-    const days = ['일', '월', '화', '수', '목', '금', '토']
+    const days = t('hikes.days').split(',')
     return days[new Date(dateString).getDay()]
   }
 
   const getWeeksOfMonth = () => {
     const year = calendarDate.getFullYear()
     const month = calendarDate.getMonth()
-    
+
     const firstDay = new Date(year, month, 1)
     const lastDay = new Date(year, month + 1, 0)
-    
+
     const weeks = []
     let currentStart = new Date(firstDay)
     let weekNum = 1
-    
+
     while (currentStart <= lastDay && weekNum <= 5) {
       const currentEnd = new Date(currentStart)
       currentEnd.setDate(currentStart.getDate() + 6)
       const end = currentEnd > lastDay ? lastDay : currentEnd
-      
+
       weeks.push({
         weekNum,
         start: new Date(currentStart),
         end: new Date(end)
       })
-      
+
       currentStart.setDate(currentStart.getDate() + 7)
       weekNum++
     }
@@ -212,15 +212,15 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
     <div className="space-y-6">
       <div className="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
         <div>
-          <h2 className="font-heading font-extrabold text-2xl text-forest">트레킹 모집</h2>
-          <p className="text-gray-500 text-sm mt-1">내가 가입한 동호회의 모집 중인 일정입니다.</p>
+          <h2 className="font-heading font-extrabold text-2xl text-forest">{t('hikes.title')}</h2>
+          <p className="text-gray-500 text-sm mt-1">{t('hikes.subtitle')}</p>
         </div>
         {isAdmin && (
-          <button 
+          <button
             onClick={() => setShowNewForm(!showNewForm)}
             className="bg-terracotta hover:bg-orange-600 text-white px-5 py-2.5 rounded-full font-bold text-sm transition shadow-md"
           >
-            {showNewForm ? '목록으로 돌아가기' : '⛰️ 트레킹 일정 등록'}
+            {showNewForm ? t('hikes.backToList') : t('hikes.createNew')}
           </button>
         )}
       </div>
@@ -236,83 +236,84 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
             <div className="md:col-span-2 space-y-6">
               <div className="flex justify-between items-end">
                 <div>
-                  <h2 className="font-heading font-bold text-xl text-gray-800">다가오는 트레킹 일정</h2>
-                  <p className="text-gray-500 text-sm mt-1">내가 가입한 동호회의 모집 중인 일정입니다.</p>
+                  <h2 className="font-heading font-bold text-xl text-gray-800">{t('hikes.upcomingTitle')}</h2>
+                  <p className="text-gray-500 text-sm mt-1">{t('hikes.subtitle')}</p>
                 </div>
               </div>
 
               {isLoading ? (
                 <div className="py-20 text-center">
-                  <p className="text-gray-400 font-bold animate-pulse">일정을 불러오는 중...</p>
+                  <p className="text-gray-400 font-bold animate-pulse">{t('hikes.loading')}</p>
                 </div>
               ) : hikes.length === 0 ? (
                 <div className="bg-white rounded-3xl p-12 text-center shadow-sm border border-gray-100">
                   <span className="text-5xl mb-4 block">🏔️</span>
-                  <p className="text-gray-600 font-bold text-lg">참여 가능한 모집 일정이 없습니다.</p>
-                  <p className="text-gray-400 text-sm mt-2">동호회에 새로운 일정이 등록되기를 기다려주세요!</p>
+                  <p className="text-gray-600 font-bold text-lg">{t('hikes.emptyTitle')}</p>
+                  <p className="text-gray-400 text-sm mt-2">{t('hikes.emptyDesc')}</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {hikes.map(hike => {
-                  const isOrganizer = hike.organizer_id === currentUserId
-                  const isJoined = joinedHikeIds.has(hike.id)
+                  {hikes.map(hike => {
+                    const isOrganizer = hike.organizer_id === currentUserId
+                    const isJoined = joinedHikeIds.has(hike.id)
 
-                  return (
-                    <div key={hike.id} className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md transition border border-gray-100 flex flex-col justify-between">
-                      <div>
-                        <div className="flex justify-between items-start mb-4">
-                          <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">
-                            모집중
-                          </span>
-                          <span className={`px-2 py-1 rounded-md text-[10px] font-bold ${
-                            hike.difficulty === 'easy' ? 'bg-blue-50 text-blue-600' :
-                            hike.difficulty === 'medium' ? 'bg-yellow-50 text-yellow-600' :
-                            hike.difficulty === 'hard' ? 'bg-orange-50 text-orange-600' : 'bg-red-50 text-red-600'
-                          }`}>
-                            {hike.difficulty === 'easy' ? '하' : hike.difficulty === 'medium' ? '중' : hike.difficulty === 'hard' ? '상' : '최상'}
-                          </span>
-                        </div>
-                        
-                        <button 
-                          onClick={() => setSelectedHikeToJoin(hike)}
-                          className="font-heading font-bold text-xl text-forest hover:text-forest-light text-left mb-2 line-clamp-2 transition hover:underline"
-                        >
-                          {hike.title}
-                        </button>
-                        
-                        <div className="space-y-2 mt-4 text-sm text-gray-600">
-                          <p className="flex items-center"><span className="w-5">📍</span> {hike.mountain_name}</p>
-                          <p className="flex items-center"><span className="w-5">🗓️</span> {new Date(hike.hike_date).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-                          <p className="flex items-center"><span className="w-5">👥</span> 주최: {hike.users?.nickname || 'Unknown'} {hike.clubs?.name ? `(${hike.clubs.name})` : ''}</p>
-                        </div>
-                      </div>
-
-                      <div className="mt-6 flex flex-col space-y-2">
-                        {isOrganizer ? (
-                          <div className="text-center py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-500 font-bold text-sm">
-                            👑 내가 주최한 일정
+                    return (
+                      <div key={hike.id} className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md transition border border-gray-100 flex flex-col justify-between">
+                        <div>
+                          <div className="flex justify-between items-start mb-4">
+                            {new Date(hike.hike_date) >= new Date(new Date().setHours(0,0,0,0)) && (
+                              <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">
+                                {t('hikes.recruitingBadge')}
+                              </span>
+                            )}
+                            <span className={`px-2 py-1 rounded-md text-[10px] font-bold ${hike.difficulty === 'easy' ? 'bg-blue-50 text-blue-600' :
+                                hike.difficulty === 'medium' ? 'bg-yellow-50 text-yellow-600' :
+                                  hike.difficulty === 'hard' ? 'bg-orange-50 text-orange-600' : 'bg-red-50 text-red-600'
+                              }`}>
+                              {t('hikes.difficulty')}: {hike.difficulty === 'easy' ? t('hikes.diffEasy') : hike.difficulty === 'medium' ? t('hikes.diffMedium') : hike.difficulty === 'hard' ? t('hikes.diffHard') : t('hikes.diffExpert')}
+                            </span>
                           </div>
-                        ) : isJoined ? (
-                          <button 
-                            onClick={() => handleLeaveHike(hike.id)}
-                            className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3 rounded-xl transition border border-red-200"
-                          >
-                            참여 취소하기
-                          </button>
-                        ) : (
-                          <button 
+
+                          <button
                             onClick={() => setSelectedHikeToJoin(hike)}
-                            className="w-full bg-forest hover:bg-forest-light text-white font-bold py-3 rounded-xl transition shadow-md"
+                            className="font-heading font-bold text-xl text-forest hover:text-forest-light text-left mb-2 line-clamp-2 transition hover:underline"
                           >
-                            참여 신청하기
+                            {hike.title}
                           </button>
-                        )}
+
+                          <div className="space-y-2 mt-4 text-sm text-gray-600">
+                            <p className="flex items-center"><span className="w-5">📍</span> {hike.mountain_name}</p>
+                            <p className="flex items-center"><span className="w-5">🗓️</span> {new Date(hike.hike_date).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                            <p className="flex items-center"><span className="w-5">👥</span> {t('hikes.hostPrefix')} {hike.users?.nickname || t('hikes.unknown')} {hike.clubs?.name ? `(${hike.clubs.name})` : ''}</p>
+                          </div>
+                        </div>
+
+                        <div className="mt-6 flex flex-col space-y-2">
+                          {isOrganizer ? (
+                            <div className="text-center py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-500 font-bold text-sm">
+                              {t('hikes.myHostedHike')}
+                            </div>
+                          ) : isJoined ? (
+                            <button
+                              onClick={() => handleLeaveHike(hike.id)}
+                              className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3 rounded-xl transition border border-red-200"
+                            >
+                              {t('hikes.cancelJoin')}
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => setSelectedHikeToJoin(hike)}
+                              className="w-full bg-forest hover:bg-forest-light text-white font-bold py-3 rounded-xl transition shadow-md"
+                            >
+                              {t('hikes.join')}
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+                    )
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Right Column: Weekly Schedule Calendar */}
@@ -323,7 +324,7 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                   </button>
                   <h3 className="font-heading font-extrabold text-lg text-forest">
-                    {calendarDate.getFullYear()}년 {calendarDate.getMonth() + 1}월 일정
+                    {t('hikes.calendarTitle', { year: calendarDate.getFullYear(), month: calendarDate.getMonth() + 1 })}
                   </h3>
                   <button onClick={handleNextMonth} className="p-2 hover:bg-gray-100 rounded-full transition text-gray-500">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
@@ -333,7 +334,7 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
                   {monthWeeks.map((week, index) => (
                     <div key={index} className="border-b border-gray-100 pb-5 last:border-0 last:pb-0">
                       <div className="text-xs font-bold text-gray-500 mb-3 bg-gray-50 p-2 rounded-lg inline-block">
-                        {week.weekNum}주차 <span className="font-normal text-gray-400 ml-1">({formatDateMMDD(week.start)} ~ {formatDateMMDD(week.end)})</span>
+                        {t('hikes.weekNum', { week: week.weekNum })} <span className="font-normal text-gray-400 ml-1">({formatDateMMDD(week.start)} ~ {formatDateMMDD(week.end)})</span>
                       </div>
                       {week.hikes.length > 0 ? (
                         <ul className="space-y-3">
@@ -342,8 +343,8 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
                               <span className="font-bold text-forest bg-forest/10 px-2 py-0.5 rounded text-[10px] mt-0.5 mr-2 shrink-0">
                                 {getDayOfWeek(hike.hike_date)}
                               </span>
-                              <button 
-                                onClick={() => setSelectedHikeToJoin(hike)} 
+                              <button
+                                onClick={() => setSelectedHikeToJoin(hike)}
                                 className="hover:underline hover:text-forest transition text-left text-gray-700 font-bold leading-tight"
                               >
                                 {hike.title}
@@ -352,7 +353,7 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
                           ))}
                         </ul>
                       ) : (
-                        <p className="text-xs text-gray-400 pl-1">일정이 없습니다.</p>
+                        <p className="text-xs text-gray-400 pl-1">{t('hikes.noSchedule')}</p>
                       )}
                     </div>
                   ))}
@@ -368,9 +369,9 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in fade-in zoom-in duration-200 max-h-[90vh] flex flex-col overflow-hidden">
             <div className="h-48 w-full bg-gray-200 relative shrink-0">
-              <img 
-                src={selectedHikeToJoin.cover_image_url || 'https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1000&auto=format&fit=crop'} 
-                alt="Hike cover" 
+              <img
+                src={selectedHikeToJoin.cover_image_url || 'https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1000&auto=format&fit=crop'}
+                alt="Hike cover"
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
@@ -381,24 +382,24 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
             </div>
             <div className="p-6 overflow-y-auto flex-1">
               <div className="mb-6">
-                <h4 className="font-bold text-gray-700 mb-2">상세 설명</h4>
+                <h4 className="font-bold text-gray-700 mb-2">{t('hikes.details')}</h4>
                 <div className="bg-gray-50 p-4 rounded-xl text-sm text-gray-600 min-h-[80px]">
                   {selectedHikeToJoin.description ? selectedHikeToJoin.description.split('\n').map((line: string, i: number) => (
-                    <span key={i}>{line}<br/></span>
-                  )) : '상세 설명이 없습니다.'}
+                    <span key={i}>{line}<br /></span>
+                  )) : t('hikes.noDetails')}
                 </div>
               </div>
 
               <div className="mb-6">
-                <h4 className="font-bold text-gray-700 mb-2">현재 참여자</h4>
+                <h4 className="font-bold text-gray-700 mb-2">{t('hikes.participants')}</h4>
                 {participants.length === 0 ? (
-                  <p className="text-sm text-gray-400">아직 참여자가 없습니다. 첫 번째로 참여해보세요!</p>
+                  <p className="text-sm text-gray-400">{t('hikes.noParticipants')}</p>
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     {participants.map((p, idx) => (
                       <span key={idx} className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-bold border border-blue-100 flex items-center">
                         {p.role === 'organizer' && '👑 '}
-                        {p.users?.nickname || '알 수 없음'}
+                        {p.users?.nickname || t('hikes.unknown')}
                       </span>
                     ))}
                   </div>
@@ -406,39 +407,39 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
               </div>
 
               <div className="flex space-x-3 pt-2">
-                <button 
+                <button
                   onClick={() => setSelectedHikeToJoin(null)}
                   className="flex-1 py-3 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition"
                 >
-                  닫기
+                  {t('hikes.close')}
                 </button>
                 {selectedHikeToJoin.status === 'completed' || new Date(selectedHikeToJoin.hike_date) < new Date() ? (
-                  <button 
+                  <button
                     onClick={() => {
                       setSelectedHikeToJoin(null)
                       if (onNavigateTab) onNavigateTab('diaries')
                     }}
                     className="flex-1 py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-md"
                   >
-                    추억앨범 보기
+                    {t('hikes.viewAlbum')}
                   </button>
                 ) : selectedHikeToJoin.organizer_id === currentUserId ? (
                   <div className="flex-1 py-3 rounded-xl font-bold text-gray-500 bg-gray-50 border border-gray-200 text-center flex items-center justify-center">
-                    👑 주최한 일정
+                    {t('hikes.hostedHike')}
                   </div>
                 ) : joinedHikeIds.has(selectedHikeToJoin.id) ? (
-                  <button 
+                  <button
                     onClick={() => handleLeaveHike(selectedHikeToJoin.id)}
                     className="flex-1 py-3 rounded-xl font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition shadow-sm"
                   >
-                    참여 취소하기
+                    {t('hikes.cancelJoin')}
                   </button>
                 ) : (
-                  <button 
+                  <button
                     onClick={() => handleJoinHike(selectedHikeToJoin.id)}
                     className="flex-1 py-3 rounded-xl font-bold text-white bg-forest hover:bg-forest-light transition shadow-md"
                   >
-                    참여하기
+                    {t('hikes.join')}
                   </button>
                 )}
               </div>

@@ -79,14 +79,44 @@ export default function Home() {
   }, [activeTab])
 
   React.useEffect(() => {
-    if (typeof window !== 'undefined') {
+    async function processInvite() {
+      if (typeof window === 'undefined') return
+      
       const params = new URLSearchParams(window.location.search)
-      const clubId = params.get('invite_club_id')
+      const clubIdStr = params.get('invite_club_id')
       const role = params.get('invite_role')
-      if (clubId) setInviteClubId(parseInt(clubId, 10))
-      if (role) setInviteRole(role)
+      
+      if (clubIdStr) {
+        const clubIdNum = parseInt(clubIdStr, 10)
+        setInviteClubId(clubIdNum)
+        if (role) setInviteRole(role)
+
+        // If user is already logged in, process the invite directly
+        if (user && !isNaN(clubIdNum)) {
+          const { data: existingMember } = await supabase
+            .from('club_members')
+            .select('*')
+            .eq('club_id', clubIdNum)
+            .eq('user_id', user.id)
+            .single()
+
+          if (!existingMember) {
+            await supabase.from('club_members').insert({
+              club_id: clubIdNum,
+              user_id: user.id,
+              role: role || 'member',
+              status: 'pending'
+            })
+            alert('동호회 가입 신청이 완료되었습니다. 관리자 승인을 기다려주세요.')
+          }
+          
+          // Remove query params to avoid re-triggering and clean up URL
+          window.history.replaceState({}, document.title, window.location.pathname)
+        }
+      }
     }
-  }, [])
+    processInvite()
+  }, [user])
 
   React.useEffect(() => {
     if (clubs.length > 0 && selectedClubId === null) {
@@ -137,8 +167,8 @@ export default function Home() {
     )
   }
 
-  // Dashboard is public, but other tabs require login.
-  if (!user && activeTab !== 'dashboard') {
+  // Dashboard and intro are public, but other tabs require login.
+  if (!user && activeTab !== 'dashboard' && activeTab !== 'intro') {
     return <LoginPage inviteClubId={inviteClubId} inviteRole={inviteRole} />
   }
 
@@ -186,7 +216,7 @@ export default function Home() {
           )}
 
           {activeTab === 'intro' && (
-            <IntroPage />
+            <IntroPage onNavigateTab={(tab) => setActiveTab(tab)} />
           )}
 
           {activeTab === 'diaries' && (
@@ -302,7 +332,6 @@ export default function Home() {
             <div className="flex justify-between items-start border-b border-gray-200 pb-4">
               <div>
                 <div className="flex items-center space-x-2">
-                  <span className="bg-forest text-white font-label text-[10px] px-2.5 py-0.5 rounded-full font-bold">{t('modal.admin.ucTag')}</span>
                   <span className="bg-emerald-100 text-emerald-800 font-label text-[10px] px-2 py-0.5 rounded font-bold">{t('modal.admin.ownerBadge')}</span>
                 </div>
                 <h3 className="font-heading font-extrabold text-2xl text-forest mt-1">{t('modal.admin.title', { clubName: clubs.find(c => c.id === selectedClubId)?.name || '' })}</h3>

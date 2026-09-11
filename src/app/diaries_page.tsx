@@ -31,7 +31,6 @@ export const DiariesPage: React.FC<DiariesPageProps> = ({ clubId, clubName, onOp
         <div>
           <div className="flex items-center space-x-2">
             <span className="bg-terracotta text-white text-[11px] font-label font-bold px-3 py-1 rounded-full uppercase">{t('diaries.badgeLabel')}</span>
-            <span className="uc-tag">{t('diaries.ucTag')}</span>
           </div>
           <h2 className="font-heading font-extrabold text-2xl mt-2">{t('diaries.sectionTitle')}</h2>
           <p className="text-xs text-paper/80 font-body mt-1">{t('diaries.sectionDesc')}</p>

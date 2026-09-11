@@ -18,27 +18,27 @@
   },
   "header": {
     "appTitle": "함께쓰는 클럽 다이어리",
-    "appSubtitle": "Shared Activity & Club Archive (Next.js 14+ App Router)",
+    "appSubtitle": "Shared Activity & Club Archive",
     "ucDashboardRoot": "UC1 대시보드 Root",
     "profileName": "김산길 님",
     "profileUc": "UC4 마이클럽",
     "profileLevel": "LV.4",
     "profileInitial": "산",
     "tabs": {
-      "dashboard": "📊 대시보드",
-      "hikes": "🗓️ 활동모집 & 일정표",
-      "diaries": "📚 클럽앨범 & 일기",
-      "gallery": "📷 사진첩 (Drive)",
-      "my": "🏅 마이클럽 & 뱃지",
-      "clubs": "🏘️ 동호회현황 & 신청"
+      "dashboard": "🏠 홈 ",
+      "hikes": "🗓️ 다음 일정",
+      "diaries": "📚 기억의 서가",
+      "gallery": "📷 사진첩",
+      "my": "🏅 나의 발자취",
+      "clubs": "🏘️ 크루 라운지"
     },
     "tabUcCodes": {
-      "dashboard": "UC1",
-      "hikes": "UC2/UC7",
-      "diaries": "UC3/UC8/10",
-      "gallery": "UC9/UC12",
-      "my": "UC4/UC5/13",
-      "clubs": "UC14/15/17"
+      "dashboard": "",
+      "hikes": "",
+      "diaries": "",
+      "gallery": "",
+      "my": "",
+      "clubs": ""
     },
     "clubs": {
       "nationalPark": "🌲 국립공원 산악회 (Hiking Club)",
@@ -54,13 +54,13 @@
     "geminiAi": "Gemini AI 에피소드 지원"
   },
   "dashboard": {
-    "heroBadge": "🚀 UC1 대시보드 종합 아카이브",
+    "heroBadge": "🚀 종합 아카이브",
     "heroTitle": "함께 발맞춘 산길,\n하나의 일기로 영원히 기록됩니다.",
     "heroTitleLine1": "함께 한 찬란한 순간들,",
     "heroTitleLine2": "하나의 일기로 영원히 기록됩니다.",
-    "heroDescription": "동호회 활동 모집(UC2), 구글 공유 드라이브 원본 사진 저장(UC9), 월별 하드커버 단행본 서가(UC3), 그리고 참여 뱃지(UC5)까지 활동 추억을 아카이빙하세요.",
+    "heroDescription": "동호회 활동 모집, 구글 공유 드라이브 원본 사진 저장, 하드커버 단행본 추억록 서가, 그리고 참여 뱃지 까지 활동 추억을 아카이빙하세요.",
     "heroCtaHikes": "📖 함께쓰는 다이어리 둘러보기",
-    "heroCtaDiaries": "📸 클럽 앨범 바로가기",
+    "heroCtaDiaries": "📸 크루 앨범 바로가기",
     "metricsUpcomingLabel": "Upcoming Activities",
     "metricsUpcomingValue": "3건 모집중",
     "metricsDiariesLabel": "Published Diaries",
@@ -69,7 +69,7 @@
     "metricsPhotosValue": "450장 저장됨",
     "metricsBadgesLabel": "Earned Badges",
     "metricsBadgesValue": "4개 보유중",
-    "recentHikesTitle": "🚩 모집중인 최근 활동 (UC2)",
+    "recentHikesTitle": "🚩 모집중인 최근 활동 ",
     "recentHikesUc": "UC2",
     "hikeJirisan": {
       "date": "2026.08.15",
@@ -81,13 +81,13 @@
       "title": "🌙 북한산 백운대 야간 일출",
       "desc": "새벽 4시 등반 • 모집인원 6/10명"
     },
-    "bookshelfTitle": "📖 최신 아카이빙 단행본 (UC3)",
+    "bookshelfTitle": "📖 최신 아카이빙 단행본",
     "bookshelfUc": "UC3",
     "bookshelfVol": "VOL.12",
     "bookshelfVolLabel": "2026.08 VOL.12 • 양장본",
     "bookshelfBookTitle": "지리산 능선에서의 여름날 교환일기",
     "bookshelfBookMeta": "에피소드 12편 • 사진 148장 구글 공유드라이브 보관",
-    "bookshelfCtaBrowse": "원목 서가에서 전체 단행본 열람하기 (UC3) →",
+    "bookshelfCtaBrowse": "원목 서가에서 전체 단행본 열람하기  →",
     "watermark": "PEAK",
     "publicEpisodesTitle": "🌟 모두가 함께 쓴 추억 일기",
     "publicEpisodesEmpty": "아직 공개된 추억 일기가 없습니다.",
@@ -102,11 +102,11 @@
     "loginButton": "로그인 / 회원가입"
   },
   "diaries": {
-    "badgeLabel": "Digital Scrapbook Archive",
+    "badgeLabel": "기억의 서가",
     "ucTag": "UC3 include UC8 (UC9+UC10)",
-    "sectionTitle": "📖 클럽앨범 & 교환일기 단행본 서가",
-    "sectionDesc": "우리 동호회가 함께 쓴 활동 교환일기와 에피소드가 월별 디지털 하드커버 단행본으로 서가에 보관됩니다.",
-    "tipText": "💡 서가에 놓인 책 표지를 클릭하면 단위 활동일기(UC8)로 이동합니다.",
+    "sectionTitle": "📖 크루앨범 & 교환일기 단행본 서가",
+    "sectionDesc": "우리 동호회가 함께 쓴 활동 교환일기와 에피소드가 디지털 하드커버 단행본으로 서가에 보관됩니다.",
+    "tipText": "💡 서가에 놓인 책 표지를 클릭하면 그날의 일기 로 이동합니다.",
     "shelfHeader": "국립공원 산악회 • 아카이빙 서가 (Library Shelf)",
     "shelfMeta": "총 12권의 단행본 보관중 • 하드커버 양장본 아카이브",
     "shelfSeasonBadge": "📚 2026 Season Archives",
@@ -146,10 +146,10 @@
   "my": {
     "sectionTitle": "🎖️ 마이클럽 & 나의 뱃지 갤러리",
     "ucTag": "UC4 include UC5, UC13",
-    "sectionDesc": "개인 동호회 활동 이력과 관리자가 부여한 스탬프 뱃지 현황입니다.",
+    "sectionDesc": "나의 동호회 활동 과 나의 소중 뱃지들.",
     "badgeCountLabel": "🎖️ 보유 뱃지 4개",
     "stampCountLabel": "참여 스탬프 18개",
-    "activityTitle": "🏃 나의 활동 기록 (3열 카드 그리드)",
+    "activityTitle": "🏃 나의 활동 기록 ",
     "activityUcTag": "UC13 활동기록",
     "activityMeta": "총 18회 활동 완료 • 획득 뱃지 동기화",
     "summitCompleted": "참여완료",
@@ -181,7 +181,7 @@
       "badgeName": "향적봉 정복 뱃지",
       "grantedBy": "granted_by: 김산길"
     },
-    "badgesTitle": "🏆 나의 수집 뱃지 (UC5)",
+    "badgesTitle": "🏆 나의 수집 뱃지 ",
     "badgesUcTag": "UC5 나의뱃지",
     "badgesCollectionRate": "수집률: 3 / 6 (50%)",
     "badge1": {
@@ -219,7 +219,7 @@
     },
     "episodesTitle": "✍️ 내가 작성한 활동 에피소드 목록",
     "episodesUcTag": "UC10 include UC11",
-    "episodesMeta": "총 3편의 에피소드 작성 완료 (`author_id: 88a-231`)",
+    "episodesMeta": "총 {{count}}편의 에피소드 작성 완료",
     "episode1": {
       "hikeName": "지리산 천왕봉 종주",
       "date": "2026.08.15",
@@ -240,12 +240,12 @@
     }
   },
   "clubs": {
-    "sectionTitle": "🏘️ 동호회 현황 & 관리 센터",
+    "sectionTitle": "🏘️ 동호회 라운지",
     "ucTag": "UC14 include UC15, UC17",
-    "sectionDesc": "새로운 활동 동호회를 개설 신청(UC17)하거나, 동호회의 구글 드라이브/Gemini 키 설정, 회원 승인, 활동 일정 및 뱃지 생성을 통합 관리(UC15)합니다.",
-    "adminBtn": "⚙️ 동호회 종합 관리 (UC15)",
-    "createBtn": "➕ 신규 동호회 개설 신청 (UC17)",
-    "openAdminCenter": "⚙️ 동호회 관리 센터 열기 (UC15)",
+    "sectionDesc": "새로운 활동 동호회를 개설 신청하거나, 동호회의 구글 드라이브/Gemini 키 설정, 회원 승인, 활동 일정 및 뱃지 생성을 통합 관리(UC15)합니다.",
+    "adminBtn": "⚙️ 동호회 종합 관리",
+    "createBtn": "➕ 신규 동호회 개설 신청",
+    "openAdminCenter": "⚙️ 동호회 라운지 입장 ",
     "club1": {
       "category": "카테고리: 등산/hiking",
       "role": "👑 개설자 (Owner)",
@@ -295,7 +295,7 @@
     }
   },
   "gallery": {
-    "title": "📷 공유 드라이브 사진첩 (UC9/UC12)",
+    "title": "📷 공유 드라이브 사진첩 ",
     "ucTag": "Google Shared Drive Sync",
     "description": "Google Shared Drive (`hikes/jirisan/`)에 저장된 원본 사진 및 B컷 비하인드 앨범입니다."
   },
@@ -312,7 +312,7 @@
       "title": "⚙️ {{clubName}} 종합 관리 센터",
       "description": "구글 공유 드라이브 Key 및 Gemini API Key 연동, 회원 가입 승인, 활동 일정 및 뱃지 생성을 관리합니다.",
       "tabKeys": "🔑 구글 드라이브 & AI Key 연동",
-      "tabMembers": "👥 회원 가입 승인 (UC14)",
+      "tabMembers": "👥 회원 가입 승인 ",
       "tabHikes": "🗓️ 활동 일정 등록",
       "tabBadges": "🏆 참여 뱃지 생성",
       "keysSuccessAlert": "✅ 구글 공유 드라이브 Folder ID 및 Gemini API Key가 성공적으로 업데이트 되었습니다!",
@@ -321,7 +321,7 @@
       "keysGeminiLabel": "🤖 에피소드 윤색용 Gemini API Key (gemini_api_key)",
       "keysGeminiHint": "에피소드 작성 시 AI 글쓰기 윤색 및 감성 문장 생성을 보조합니다.",
       "keysSaveBtn": "API 인증 키 및 드라이브 정보 저장하기",
-      "membersTitle": "👥 가입 신청 대기 회원 (UC14 승인)",
+      "membersTitle": "👥 가입 신청 대기 회원 ",
       "membersColApplicant": "신청자",
       "membersColDate": "신청일",
       "membersColInviteLink": "초청 링크 유입",
@@ -336,14 +336,14 @@
     "alerts": {
       "approveSuccess": "가입을 승인하였습니다.",
       "rejectSuccess": "가입을 거절하였습니다.",
-      "badgeGrant": "{{name}} 님에게 동호회 수여 뱃지를 부여합니다 (UC6).",
-      "clubCreate": "신규 트레킹 동호회 개설 신청 폼 (UC17) 모달을 엽니다."
+      "badgeGrant": "{{name}} 님에게 동호회 수여 뱃지를 부여합니다.",
+      "clubCreate": "신규 동호회 개설 신청 화면을 엽니다."
     },
     "demoData": {
       "hikeLeader": "산행 대장 (김산길)",
       "hikeDate": "2026.08.15",
       "hikeDesc": "지리산 천왕봉 종주 산행 모집 일정 상세 페이지입니다.",
-      "hikesDetailDesc": "트레킹 모집 상세 일정표입니다.",
+      "hikesDetailDesc": "새로운 상세 일정표 입니다.",
       "diaryEditor": "국립공원 산악회 편집부",
       "diaryVol": "2026.08 VOL.12",
       "diaryDesc": "새벽 4시 장터목 대피소 라면과 천왕봉 일출... 모임원들과 함께 쓴 12편의 에피소드가 수록된 하드커버 양장본 단행본입니다.",
@@ -353,11 +353,11 @@
     }
   },
   "language": {
-    "ko": "한국어",
-    "en": "English"
+    "ko": "KR",
+    "en": "EN"
   },
   "auth": {
-    "loginTitle": "함께쓰는 Tracking 일기에 오신 것을 환영합니다",
+    "loginTitle": "함께쓰는 클럽 다이어리에 오신 것을 환영합니다",
     "loginSubtitle": "소셜 계정으로 간편하게 시작하세요",
     "loginWithKakao": "카카오로 시작하기",
     "loginWithGoogle": "Google로 시작하기",
@@ -368,5 +368,70 @@
     "socialOnlyNotice": "소셜 로그인만 지원합니다",
     "loggingIn": "로그인 중...",
     "redirecting": "리다이렉트 중..."
+  },
+  "intro": {
+    "heroTitle": "함께쓰는 크루 일기",
+    "heroDesc": "동호회 크루들과 함께하는 산행의 모든 순간을 하나의 책처럼 기록하고 공유하세요.",
+    "feature1": {
+      "title": "🧑‍🤝‍🧑 우리끼리만 아는 산악회, 비밀 아지트 오픈!",
+      "desc1": "함께 땀 흘린 크루들과의 찐텐(진짜 텐션) 가득한 순간들을 기록하세요.",
+      "desc2": "우리만의 멋진 클럽을 만들고, 카톡으로 슥- 초대장 하나만 날리면 준비 끝!",
+      "desc3": "친구가 가입 신청을 누르면 쿨하게 승인해주세요. 그때부터 우리만의 프라이빗한 추억 공유가 시작됩니다."
+    },
+    "feature2": {
+      "title": "📅 다음 일정은 언제 해요? 일정부터 꿀잼 에피소드까지!",
+      "desc1": "'이번 주말 등산 갈 사람?' 일정을 띄우면 크루들이 우르르 모일 거예요.",
+      "desc2": "함께 걸은 산길, 정상에서 마신 커피, 하산 후 먹은 파전 사진은 필수! 그날의 꿀잼 에피소드도 실시간으로 나눠요.",
+      "desc3": "'오늘 네가 캐리했다!' 동호회 짱은 가장 고생한 크루에게 한정판 뱃지를 하사할 수 있답니다.",
+      "desc4": "흩어져 있던 우리의 하루가 모여 한 권의 멋진 디지털 책으로 완성됩니다."
+    },
+    "feature3": {
+      "title": "☁️ 사진 줍줍 귀찮으셨죠? 구글 드라이브가 다~ 해드립니다",
+      "desc1": "단톡방에 올라온 사진 일일이 저장하기 지치셨죠? 이제 동호회 전용 구글 드라이브로 싹 모아보세요.",
+      "desc2": "처음 한 번만 연동해두면, 앞으로 올리는 모든 사진은 자동으로 차곡차곡 보관되니 걱정 마세요.",
+      "desc3": "기본적으로 우리 크루들끼리만 보는 시크릿 갤러리! 하지만 '이건 진짜 레전드다' 싶은 인생샷은 동네방네 자랑(전체 공개)해 보세요."
+    },
+    "feature4": {
+      "title": "🤖 글솜씨 걱정 놉! AI 감성 작가님이 등판합니다",
+      "desc1": "'아~ 진짜 재밌었는데 글로 쓰려니 막막하네?' 걱정 마세요!",
+      "desc2": "여러분의 투박한 기록을 AI가 감성 한 스푼 듬뿍 담은 멋진 에세이로 마법처럼 윤색해 드립니다."
+    }
+  },
+  "hikes": {
+    "title": "모두 모여라!",
+    "subtitle": "내가 가입한 동호회의 모집 중인 일정입니다.",
+    "backToList": "목록으로 돌아가기",
+    "createNew": "⛰️ 새로운 일정 등록",
+    "upcomingTitle": "다가오는 행사 일정",
+    "loading": "일정을 불러오는 중...",
+    "emptyTitle": "참여 가능한 모집 일정이 없습니다.",
+    "emptyDesc": "동호회에 새로운 일정이 등록되기를 기다려주세요!",
+    "recruitingBadge": "모집중",
+    "myHostedHike": "👑 내가 주최한 일정",
+    "hostedHike": "👑 주최한 일정",
+    "cancelJoin": "참여 취소하기",
+    "join": "참여 신청하기",
+    "details": "상세 설명",
+    "noDetails": "상세 설명이 없습니다.",
+    "participants": "현재 참여자",
+    "noParticipants": "아직 참여자가 없습니다. 첫 번째로 참여해보세요!",
+    "unknown": "알 수 없음",
+    "close": "닫기",
+    "viewAlbum": "추억앨범 보기",
+    "noSchedule": "일정이 없습니다.",
+    "calendarTitle": "{{year}}년 {{month}}월 일정",
+    "weekNum": "{{week}}주차",
+    "days": "일,월,화,수,목,금,토",
+    "alertJoinFail": "참여 신청에 실패했습니다: ",
+    "alertJoinSuccess": "성공적으로 참여 신청되었습니다!",
+    "confirmLeave": "정말 참여를 취소하시겠습니까?",
+    "alertLeaveFail": "참여 취소에 실패했습니다: ",
+    "alertLeaveSuccess": "참여가 취소되었습니다.",
+    "hostPrefix": "주최:",
+    "difficulty": "난이도",
+    "diffEasy": "하",
+    "diffMedium": "중",
+    "diffHard": "상",
+    "diffExpert": "최상"
   }
 }
