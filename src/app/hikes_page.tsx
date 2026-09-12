@@ -289,7 +289,16 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
                         </div>
 
                         <div className="mt-6 flex flex-col space-y-2">
-                          {isOrganizer ? (
+                          {new Date(hike.hike_date) < new Date(new Date().setHours(0,0,0,0)) || hike.status === 'completed' ? (
+                            <button
+                              onClick={() => {
+                                if (onNavigateTab) onNavigateTab('diaries')
+                              }}
+                              className="w-full py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-md"
+                            >
+                              {t('hikes.viewAlbum')}
+                            </button>
+                          ) : isOrganizer ? (
                             <div className="text-center py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-500 font-bold text-sm">
                               {t('hikes.myHostedHike')}
                             </div>
@@ -413,7 +422,7 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
                 >
                   {t('hikes.close')}
                 </button>
-                {selectedHikeToJoin.status === 'completed' || new Date(selectedHikeToJoin.hike_date) < new Date() ? (
+                {selectedHikeToJoin.status === 'completed' || new Date(selectedHikeToJoin.hike_date) < new Date(new Date().setHours(0,0,0,0)) ? (
                   <button
                     onClick={() => {
                       setSelectedHikeToJoin(null)
