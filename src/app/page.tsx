@@ -104,7 +104,8 @@ export default function Home() {
             await supabase.from('club_members').insert({
               club_id: clubIdNum,
               user_id: user.id,
-              role: role || 'member',
+              role: 'member',
+              role_title: role === 'guest' ? '게스트' : '정회원',
               status: 'approved',
               approved_at: new Date().toISOString()
             })

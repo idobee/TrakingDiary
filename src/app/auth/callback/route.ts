@@ -76,7 +76,8 @@ export async function GET(request: Request) {
             const { error: insertError } = await (supabase.from('club_members') as any).insert({
               club_id: clubIdNum,
               user_id: user.id,
-              role: inviteRole,
+              role: 'member',
+              role_title: inviteRole === 'guest' ? '게스트' : '정회원',
               status: 'approved',
               approved_at: new Date().toISOString()
             })
