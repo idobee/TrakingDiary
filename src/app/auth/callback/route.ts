@@ -72,14 +72,13 @@ export async function GET(request: Request) {
             .single()
 
           if (!existingMember) {
-            // Add as approved member directly via invite link
+            // Add as pending member via invite link
             const { error: insertError } = await (supabase.from('club_members') as any).insert({
               club_id: clubIdNum,
               user_id: user.id,
               role: 'member',
               role_title: inviteRole === 'guest' ? '게스트' : '정회원',
-              status: 'approved',
-              approved_at: new Date().toISOString()
+              status: 'pending'
             })
 
             if (insertError) {

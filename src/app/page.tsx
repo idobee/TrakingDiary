@@ -106,10 +106,9 @@ export default function Home() {
               user_id: user.id,
               role: 'member',
               role_title: role === 'guest' ? '게스트' : '정회원',
-              status: 'approved',
-              approved_at: new Date().toISOString()
+              status: 'pending'
             })
-            alert('초대받은 동호회에 성공적으로 가입되었습니다!')
+            alert('동호회 가입 신청이 완료되었습니다. 관리자 승인을 기다려주세요.')
           }
           
           // Remove query params to avoid re-triggering and clean up URL
