@@ -119,8 +119,8 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
         </div>
       </div>
 
-      <div className="w-full lg:w-2/3 bg-gray-50/50 p-3 sm:p-4 rounded-xl border border-gray-100 flex flex-row flex-nowrap overflow-x-auto items-end gap-3 sm:gap-4 scrollbar-none">
-        <div className="space-y-1 min-w-[100px] sm:min-w-[120px] flex-shrink-0">
+      <div className="w-full xl:w-3/4 bg-gray-50/50 p-3 sm:p-4 rounded-xl border border-gray-100 grid grid-cols-2 md:flex md:flex-row md:items-end gap-3 sm:gap-4">
+        <div className="space-y-1 col-span-2 md:flex-1 md:min-w-[150px]">
           <label className="text-[10px] sm:text-xs font-bold text-gray-500">{t('gallery.filterHike')}</label>
           <select
             value={filterHikeId}
@@ -134,7 +134,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
           </select>
         </div>
 
-        <div className="space-y-1 min-w-[80px] sm:min-w-[100px] flex-shrink-0">
+        <div className="space-y-1 col-span-1 md:w-[130px]">
           <label className="text-[10px] sm:text-xs font-bold text-gray-500">{t('gallery.filterStartDate')}</label>
           <input
             type="date"
@@ -144,7 +144,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
           />
         </div>
 
-        <div className="space-y-1 min-w-[80px] sm:min-w-[100px] flex-shrink-0">
+        <div className="space-y-1 col-span-1 md:w-[130px]">
           <label className="text-[10px] sm:text-xs font-bold text-gray-500">{t('gallery.filterEndDate')}</label>
           <input
             type="date"
@@ -156,7 +156,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
 
         <button
           onClick={handleResetFilters}
-          className="flex-shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-200 text-gray-700 font-bold text-xs sm:text-sm rounded-lg hover:bg-gray-300 transition"
+          className="col-span-2 md:w-auto px-3 sm:px-4 py-2 bg-gray-200 text-gray-700 font-bold text-xs sm:text-sm rounded-lg hover:bg-gray-300 transition"
         >
           {t('gallery.resetFilters')}
         </button>
