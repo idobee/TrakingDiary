@@ -295,9 +295,19 @@
     }
   },
   "gallery": {
-    "title": "📷 Shared Drive Photo Gallery (UC9/UC12)",
+    "title": "📷 Gallery",
     "ucTag": "Google Shared Drive Sync",
-    "description": "Original photos and behind-the-scenes B-cut album stored in Google Shared Drive (`hikes/jirisan/`)."
+    "description": "Original photos and behind-the-scenes B-cut album stored in Google Shared Drive (`hikes/jirisan/`).",
+    "filterHike": "Trekking Diary",
+    "filterAllHikes": "All Treks",
+    "filterStartDate": "Start Date",
+    "filterEndDate": "End Date",
+    "resetFilters": "Reset",
+    "loading": "Loading...",
+    "empty": "No photos found for the selected criteria.",
+    "published": "Published",
+    "unpublished": "Private",
+    "toggleFail": "Failed to change publish status."
   },
   "modal": {
     "episode": {

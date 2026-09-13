@@ -80,11 +80,11 @@ export const MyPage: React.FC<MyPageProps> = ({
         </div>
       </div>
 
-      {/* Top Split Layout: Activities (Left 2/3) + Badges (Right 1/3) */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      {/* Grid Layout: Activities (order-1), Badges (order-3), Episodes (order-2) on Mobile, Standard order on PC */}
+      <div className="flex flex-col xl:grid xl:grid-cols-3 gap-6">
         
         {/* Activity Grid (UC13 활동기록) */}
-        <div className="xl:col-span-2 bg-white rounded-2xl p-6 shadow-md border border-paper-high space-y-4">
+        <div className="order-1 xl:order-1 xl:col-span-2 bg-white rounded-2xl p-6 shadow-md border border-paper-high space-y-4">
           <div className="flex items-center justify-between border-b border-gray-100 pb-3">
             <div className="flex items-center space-x-2">
               <h3 className="font-heading font-bold text-lg text-forest">{t('my.activityTitle')}</h3>
@@ -137,7 +137,7 @@ export const MyPage: React.FC<MyPageProps> = ({
       </div>
 
       {/* Badge Stamp Grid (UC5 나의뱃지) */}
-      <div className="xl:col-span-1 bg-white rounded-2xl p-6 shadow-md border border-paper-high space-y-4">
+      <div className="order-3 xl:order-2 xl:col-span-1 bg-white rounded-2xl p-6 shadow-md border border-paper-high space-y-4 h-max">
           <div className="flex items-center justify-between border-b border-gray-100 pb-3">
             <div className="flex items-center space-x-2">
               <h3 className="font-heading font-bold text-lg text-forest">{t('my.badgesTitle')}</h3>
@@ -175,7 +175,7 @@ export const MyPage: React.FC<MyPageProps> = ({
       </div>
 
       {/* My Written Episodes List (UC10/UC11) */}
-      <div className="bg-white rounded-2xl p-6 shadow-md border border-paper-high space-y-5">
+      <div className="order-2 xl:order-3 xl:col-span-3 bg-white rounded-2xl p-6 shadow-md border border-paper-high space-y-5 h-max">
         <div className="flex items-center justify-between border-b border-gray-100 pb-3">
           <div className="flex items-center space-x-2">
             <h3 className="font-heading font-bold text-lg text-forest">{t('my.episodesTitle')}</h3>

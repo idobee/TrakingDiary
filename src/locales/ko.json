@@ -295,9 +295,19 @@
     }
   },
   "gallery": {
-    "title": "📷 공유 드라이브 사진첩 ",
+    "title": "📷 사진첩",
     "ucTag": "Google Shared Drive Sync",
-    "description": "Google Shared Drive (`hikes/jirisan/`)에 저장된 원본 사진 및 B컷 비하인드 앨범입니다."
+    "description": "Google Shared Drive (`hikes/jirisan/`)에 저장된 원본 사진 및 B컷 비하인드 앨범입니다.",
+    "filterHike": "트레킹 다이어리",
+    "filterAllHikes": "전체 트레킹",
+    "filterStartDate": "기간 검색 (시작일)",
+    "filterEndDate": "기간 검색 (종료일)",
+    "resetFilters": "초기화",
+    "loading": "로딩 중...",
+    "empty": "조건에 맞는 사진이 없습니다.",
+    "published": "공개 중",
+    "unpublished": "비공개",
+    "toggleFail": "공유 상태 변경에 실패했습니다."
   },
   "modal": {
     "episode": {

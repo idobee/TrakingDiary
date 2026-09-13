@@ -107,7 +107,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
       setPhotos(photos.map(p => p.id === photoId ? { ...p, is_published: !currentStatus } : p))
     } catch (err) {
       console.error('Failed to toggle publish status:', err)
-      alert('공유 상태 변경에 실패했습니다.')
+      alert(t('gallery.toggleFail'))
     }
   }
 
@@ -115,61 +115,60 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
     <div className="bg-white p-6 md:p-8 rounded-3xl border border-paper-high shadow-sm space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-100 pb-4 gap-4">
         <div className="flex items-center space-x-3">
-          <h2 className="font-heading font-extrabold text-2xl text-forest">사진첩</h2>
-          <span className="bg-forest-light/20 text-forest text-xs font-bold px-2 py-1 rounded-full">UC9</span>
+          <h2 className="font-heading font-extrabold text-2xl text-forest">{t('gallery.title')}</h2>
         </div>
       </div>
 
-      <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-100 flex flex-wrap gap-4 items-end">
-        <div className="space-y-1 flex-1 min-w-[200px]">
-          <label className="text-xs font-bold text-gray-500">트레킹 다이어리</label>
+      <div className="w-full lg:w-2/3 bg-gray-50/50 p-3 sm:p-4 rounded-xl border border-gray-100 flex flex-row flex-nowrap overflow-x-auto items-end gap-3 sm:gap-4 scrollbar-none">
+        <div className="space-y-1 min-w-[140px] sm:min-w-[180px] flex-shrink-0">
+          <label className="text-[10px] sm:text-xs font-bold text-gray-500">{t('gallery.filterHike')}</label>
           <select 
             value={filterHikeId} 
             onChange={(e) => setFilterHikeId(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
-            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
+            className="w-full px-2 sm:px-3 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
           >
-            <option value="all">전체 트레킹</option>
+            <option value="all">{t('gallery.filterAllHikes')}</option>
             {hikes.map(h => (
               <option key={h.id} value={h.id}>{h.title} ({new Date(h.hike_date).toLocaleDateString()})</option>
             ))}
           </select>
         </div>
 
-        <div className="space-y-1">
-          <label className="text-xs font-bold text-gray-500">기간 검색 (시작일)</label>
+        <div className="space-y-1 min-w-[110px] sm:min-w-[130px] flex-shrink-0">
+          <label className="text-[10px] sm:text-xs font-bold text-gray-500">{t('gallery.filterStartDate')}</label>
           <input 
             type="date" 
             value={filterStartDate}
             onChange={(e) => setFilterStartDate(e.target.value)}
-            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
+            className="w-full px-2 sm:px-3 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
           />
         </div>
 
-        <div className="space-y-1">
-          <label className="text-xs font-bold text-gray-500">기간 검색 (종료일)</label>
+        <div className="space-y-1 min-w-[110px] sm:min-w-[130px] flex-shrink-0">
+          <label className="text-[10px] sm:text-xs font-bold text-gray-500">{t('gallery.filterEndDate')}</label>
           <input 
             type="date" 
             value={filterEndDate}
             onChange={(e) => setFilterEndDate(e.target.value)}
-            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
+            className="w-full px-2 sm:px-3 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
           />
         </div>
 
         <button 
           onClick={handleResetFilters}
-          className="px-4 py-2 bg-gray-200 text-gray-700 font-bold text-sm rounded-lg hover:bg-gray-300 transition"
+          className="flex-shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-200 text-gray-700 font-bold text-xs sm:text-sm rounded-lg hover:bg-gray-300 transition"
         >
-          초기화
+          {t('gallery.resetFilters')}
         </button>
       </div>
 
       {isLoading ? (
         <div className="py-20 flex justify-center items-center">
-          <span className="text-forest animate-pulse font-bold">로딩 중...</span>
+          <span className="text-forest animate-pulse font-bold">{t('gallery.loading')}</span>
         </div>
       ) : photos.length === 0 ? (
         <div className="py-20 text-center space-y-2">
-          <p className="text-gray-400 font-bold">조건에 맞는 사진이 없습니다.</p>
+          <p className="text-gray-400 font-bold">{t('gallery.empty')}</p>
         </div>
       ) : (
         <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6 gap-2 sm:gap-4 space-y-2 sm:space-y-4">
@@ -189,7 +188,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
                       onClick={(e) => { e.stopPropagation(); handleTogglePublish(photo.id, photo.is_published); }}
                       className={`px-3 py-1 text-xs font-bold rounded-full shadow backdrop-blur-md border ${photo.is_published ? 'bg-forest/80 text-white border-forest' : 'bg-white/80 text-gray-600 border-gray-300 hover:bg-white'}`}
                     >
-                      {photo.is_published ? '공개 중' : '비공개'}
+                      {photo.is_published ? t('gallery.published') : t('gallery.unpublished')}
                     </button>
                   </div>
                 )}
