@@ -64,13 +64,27 @@ export function useClubMembers(clubId: number | null) {
       updateData.approved_at = new Date().toISOString()
     }
 
-    const { error } = await (supabase.from('club_members') as any)
-      .update(updateData)
-      .eq('club_id', clubId)
-      .eq('user_id', userId)
+    try {
+      const res = await fetch('/api/clubs/members/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clubId,
+          userId,
+          updateData
+        })
+      })
 
-    if (error) {
+      const result = await res.json()
+
+      if (!res.ok || result.error) {
+        console.error('Failed to update member status:', result.error)
+        alert(`권한 변경 실패: ${result.error || '권한이 없습니다.'}`)
+        return false
+      }
+    } catch (error: any) {
       console.error('Failed to update member status:', error)
+      alert(`권한 변경 중 오류가 발생했습니다.`)
       return false
     }
 
@@ -81,14 +95,21 @@ export function useClubMembers(clubId: number | null) {
   const removeMember = async (userId: string) => {
     if (!clubId) return false
 
-    const { error } = await supabase
-      .from('club_members')
-      .delete()
-      .eq('club_id', clubId)
-      .eq('user_id', userId)
+    try {
+      const res = await fetch(`/api/clubs/members/update?clubId=${clubId}&userId=${userId}`, {
+        method: 'DELETE'
+      })
 
-    if (error) {
+      const result = await res.json()
+
+      if (!res.ok || result.error) {
+        console.error('Failed to remove member:', result.error)
+        alert(`멤버 강제 탈퇴 실패: ${result.error || '권한이 없습니다.'}`)
+        return false
+      }
+    } catch (error: any) {
       console.error('Failed to remove member:', error)
+      alert(`멤버 강제 탈퇴 중 오류가 발생했습니다.`)
       return false
     }
 

@@ -17,7 +17,7 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
   const { members, isLoading, updateMemberStatus, removeMember } = useClubMembers(clubId)
   
   const currentUserMember = members.find(m => m.user_id === user?.id)
-  const isClubAdmin = user?.system_role === 'admin' || currentUserMember?.role === 'owner' || currentUserMember?.role === 'admin'
+  const isClubAdmin = user?.system_role === 'admin' || user?.system_role === 'sys_admin' || currentUserMember?.role === 'owner' || currentUserMember?.role === 'admin'
 
   const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'hikes_new' | 'badges'>('approved')
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null)

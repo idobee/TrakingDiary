@@ -15,7 +15,7 @@ interface DiariesIdPageProps {
 
 export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: DiariesIdPageProps) {
   const { user } = useAuth()
-  const isAdmin = user?.system_role === 'admin'
+  const isAdmin = user?.system_role === 'admin' || user?.system_role === 'sys_admin'
 
   const [hike, setHike] = useState<any>(null)
   const [participants, setParticipants] = useState<any[]>([])

@@ -16,7 +16,7 @@ export const ClubsPage: React.FC<ClubsPageProps> = ({
 }) => {
   const { t } = useTranslation()
   const { user } = useAuth()
-  const isAdmin = user?.system_role === 'admin'
+  const isAdmin = user?.system_role === 'admin' || user?.system_role === 'sys_admin'
   const { clubs, isLoading, updateClubStatus } = useAllClubs(isAdmin)
 
   const [activeTab, setActiveTab] = useState<'approved' | 'pending'>('approved')

@@ -18,7 +18,7 @@ export interface Database {
           provider: 'kakao' | 'google' | 'naver' | 'oauth'
           provider_id: string | null
           character_type: string
-          system_role: 'admin' | 'user'
+          system_role: 'admin' | 'sys_admin' | 'user'
           created_at: string
         }
         Insert: {
@@ -29,7 +29,7 @@ export interface Database {
           provider: 'kakao' | 'google' | 'naver' | 'oauth'
           provider_id?: string | null
           character_type?: string
-          system_role?: 'admin' | 'user'
+          system_role?: 'admin' | 'sys_admin' | 'user'
           created_at?: string
         }
         Update: {
@@ -40,7 +40,7 @@ export interface Database {
           provider?: 'kakao' | 'google' | 'naver' | 'oauth'
           provider_id?: string | null
           character_type?: string
-          system_role?: 'admin' | 'user'
+          system_role?: 'admin' | 'sys_admin' | 'user'
           created_at?: string
         }
         Relationships: []

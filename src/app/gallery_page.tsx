@@ -175,7 +175,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
           {photos.map(photo => {
             const fileId = photo.google_drive_file_id
             const imgSrc = `/api/drive/image?id=${fileId}`
-            const isUploaderOrAdmin = user?.id === photo.uploader_id || user?.system_role === 'admin'
+            const isUploaderOrAdmin = user?.id === photo.uploader_id || user?.system_role === 'admin' || user?.system_role === 'sys_admin'
 
             return (
               <div key={photo.id} className="break-inside-avoid relative group rounded-xl overflow-hidden bg-gray-100 shadow-sm border border-gray-200">

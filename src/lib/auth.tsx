@@ -7,7 +7,7 @@ import { Session, User } from '@supabase/supabase-js'
 export type ExtendedUser = User & {
   nickname?: string
   avatar_url?: string
-  system_role?: 'admin' | 'user'
+  system_role?: 'admin' | 'sys_admin' | 'user'
 }
 
 interface AuthContextValue {
@@ -64,7 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', authUser.id)
         .single()
         
-      const profile = data as { nickname: string; avatar_url: string; system_role: 'admin' | 'user' } | null
+      const profile = data as { nickname: string; avatar_url: string; system_role: 'admin' | 'sys_admin' | 'user' } | null
 
       setUser({
         ...authUser,
