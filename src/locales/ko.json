@@ -151,7 +151,9 @@
     "stampCountLabel": "참여 스탬프 18개",
     "activityTitle": "🏃 나의 활동 기록 ",
     "activityUcTag": "UC13 활동기록",
-    "activityMeta": "총 18회 활동 완료 • 획득 뱃지 동기화",
+    "activityMeta": "총 {{count}}회 활동 완료 • 획득 뱃지 동기화",
+    "clubsTitle": "🏕️ 내 참여 동호회",
+    "clubsEmpty": "참여 중인 동호회가 없습니다.",
     "summitCompleted": "참여완료",
     "badgeGranted": "뱃지 수여됨",
     "activity1": {

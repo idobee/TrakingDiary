@@ -35,10 +35,19 @@ export interface MyEpisode {
   hikeName: string
 }
 
+export interface MyClub {
+  id: number
+  name: string
+  category: string
+  description: string
+  createdAt: string
+}
+
 export const useMyTrekking = (userId?: string) => {
   const [activities, setActivities] = useState<Activity[]>([])
   const [badges, setBadges] = useState<BadgeItem[]>([])
   const [episodes, setEpisodes] = useState<MyEpisode[]>([])
+  const [clubs, setClubs] = useState<MyClub[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
@@ -98,9 +107,21 @@ export const useMyTrekking = (userId?: string) => {
         // Get user's clubs
         const { data: clubMembers } = await supabase
           .from('club_members')
-          .select('club_id')
+          .select(`
+            club_id,
+            clubs ( id, name, category, created_at, description )
+          `)
           .eq('user_id', userId)
           .eq('status', 'approved')
+        
+        const mappedClubs: MyClub[] = (clubMembers || []).filter((cm: any) => cm.clubs).map((cm: any) => ({
+          id: cm.clubs.id,
+          name: cm.clubs.name,
+          category: cm.clubs.category,
+          description: cm.clubs.description,
+          createdAt: cm.clubs.created_at
+        }))
+        setClubs(mappedClubs)
         
         let mappedBadges: BadgeItem[] = []
         const clubIds = (clubMembers || []).map((cm: any) => cm.club_id)
@@ -157,5 +178,5 @@ export const useMyTrekking = (userId?: string) => {
       }
   }
 
-  return { activities, badges, episodes, isLoading, refetch: fetchData }
+  return { activities, badges, episodes, clubs, isLoading, refetch: fetchData }
 }

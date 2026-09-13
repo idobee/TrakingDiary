@@ -144,14 +144,16 @@
     }
   },
   "my": {
-    "sectionTitle": "🎖️ My Club & Badge Gallery",
+    "sectionTitle": "🎖️ My Stories",
     "ucTag": "UC4 include UC5, UC13",
     "sectionDesc": "Your personal activity history and stamp badges granted by club administrators.",
     "badgeCountLabel": "🎖️ 4 badges owned",
     "stampCountLabel": "18 participation stamps",
     "activityTitle": "🏃 My Activity Record (3-Column Card Grid)",
     "activityUcTag": "UC13 Activity Record",
-    "activityMeta": "18 activities completed • Badge sync active",
+    "activityMeta": "{{count}} activities completed • Badge sync active",
+    "clubsTitle": "🏕️ My Joined Clubs",
+    "clubsEmpty": "You have not joined any clubs yet.",
     "summitCompleted": "Completed",
     "badgeGranted": "Badge Granted",
     "activity1": {
