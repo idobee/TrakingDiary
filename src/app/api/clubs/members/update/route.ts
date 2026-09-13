@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 // This route requires the service_role key to bypass RLS for sys_admin updates
-const supabaseAdmin = createClient(
+const supabaseAdmin = createSupabaseClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
@@ -18,12 +19,21 @@ export async function POST(request: Request) {
 
     // 1. Verify caller's identity using standard client (cookie-based auth)
     const cookieStore = cookies()
-    const supabaseClient = createClient(
+    const supabaseClient = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
-        global: { headers: { cookie: cookieStore.toString() } },
-        auth: { persistSession: false }
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+          set(name: string, value: string, options: CookieOptions) {
+            // Read-only in route handler
+          },
+          remove(name: string, options: CookieOptions) {
+            // Read-only in route handler
+          },
+        },
       }
     )
 
@@ -94,12 +104,21 @@ export async function DELETE(request: Request) {
 
     // 1. Verify caller's identity
     const cookieStore = cookies()
-    const supabaseClient = createClient(
+    const supabaseClient = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
-        global: { headers: { cookie: cookieStore.toString() } },
-        auth: { persistSession: false }
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+          set(name: string, value: string, options: CookieOptions) {
+            // Read-only in route handler
+          },
+          remove(name: string, options: CookieOptions) {
+            // Read-only in route handler
+          },
+        },
       }
     )
 
