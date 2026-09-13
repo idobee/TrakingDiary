@@ -175,7 +175,7 @@ export default function Home() {
   }
 
   // Dashboard and intro are public, but other tabs require login.
-  if (!user && activeTab !== 'dashboard' && activeTab !== 'intro' && activeTab !== 'login') {
+  if (!user && activeTab !== 'dashboard' && activeTab !== 'intro') {
     return <LoginPage inviteClubId={inviteClubId} inviteRole={inviteRole} />
   }
 
