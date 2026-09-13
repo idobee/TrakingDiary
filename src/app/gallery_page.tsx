@@ -68,7 +68,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
       if (filterHikeId !== 'all') {
         query = query.eq('hike_id', filterHikeId)
       }
-      
+
       if (filterStartDate) {
         query = query.gte('created_at', filterStartDate + 'T00:00:00Z')
       }
@@ -78,7 +78,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
 
       const { data: photoData, error: photoError } = await query
       if (photoError) throw photoError
-      
+
       setPhotos(photoData || [])
 
     } catch (err) {
@@ -100,9 +100,9 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
         .from('photos')
         .update({ is_published: !currentStatus })
         .eq('id', photoId)
-      
+
       if (error) throw error
-      
+
       // Update local state
       setPhotos(photos.map(p => p.id === photoId ? { ...p, is_published: !currentStatus } : p))
     } catch (err) {
@@ -120,10 +120,10 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
       </div>
 
       <div className="w-full lg:w-2/3 bg-gray-50/50 p-3 sm:p-4 rounded-xl border border-gray-100 flex flex-row flex-nowrap overflow-x-auto items-end gap-3 sm:gap-4 scrollbar-none">
-        <div className="space-y-1 min-w-[140px] sm:min-w-[180px] flex-shrink-0">
+        <div className="space-y-1 min-w-[100px] sm:min-w-[120px] flex-shrink-0">
           <label className="text-[10px] sm:text-xs font-bold text-gray-500">{t('gallery.filterHike')}</label>
-          <select 
-            value={filterHikeId} 
+          <select
+            value={filterHikeId}
             onChange={(e) => setFilterHikeId(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
             className="w-full px-2 sm:px-3 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
           >
@@ -134,27 +134,27 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
           </select>
         </div>
 
-        <div className="space-y-1 min-w-[110px] sm:min-w-[130px] flex-shrink-0">
+        <div className="space-y-1 min-w-[80px] sm:min-w-[100px] flex-shrink-0">
           <label className="text-[10px] sm:text-xs font-bold text-gray-500">{t('gallery.filterStartDate')}</label>
-          <input 
-            type="date" 
+          <input
+            type="date"
             value={filterStartDate}
             onChange={(e) => setFilterStartDate(e.target.value)}
             className="w-full px-2 sm:px-3 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
           />
         </div>
 
-        <div className="space-y-1 min-w-[110px] sm:min-w-[130px] flex-shrink-0">
+        <div className="space-y-1 min-w-[80px] sm:min-w-[100px] flex-shrink-0">
           <label className="text-[10px] sm:text-xs font-bold text-gray-500">{t('gallery.filterEndDate')}</label>
-          <input 
-            type="date" 
+          <input
+            type="date"
             value={filterEndDate}
             onChange={(e) => setFilterEndDate(e.target.value)}
             className="w-full px-2 sm:px-3 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
           />
         </div>
 
-        <button 
+        <button
           onClick={handleResetFilters}
           className="flex-shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-200 text-gray-700 font-bold text-xs sm:text-sm rounded-lg hover:bg-gray-300 transition"
         >
@@ -176,15 +176,15 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
             const fileId = photo.google_drive_file_id
             const imgSrc = `/api/drive/image?id=${fileId}`
             const isUploaderOrAdmin = user?.id === photo.uploader_id || user?.system_role === 'admin'
-            
+
             return (
               <div key={photo.id} className="break-inside-avoid relative group rounded-xl overflow-hidden bg-gray-100 shadow-sm border border-gray-200">
                 <img src={imgSrc} alt="Gallery Photo" className="w-full h-auto object-cover group-hover:scale-105 transition duration-500" />
-                
+
                 {/* Publish Toggle Button */}
                 {isUploaderOrAdmin && (
                   <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button 
+                    <button
                       onClick={(e) => { e.stopPropagation(); handleTogglePublish(photo.id, photo.is_published); }}
                       className={`px-3 py-1 text-xs font-bold rounded-full shadow backdrop-blur-md border ${photo.is_published ? 'bg-forest/80 text-white border-forest' : 'bg-white/80 text-gray-600 border-gray-300 hover:bg-white'}`}
                     >
@@ -192,7 +192,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
                     </button>
                   </div>
                 )}
-                
+
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex flex-col justify-end p-3 pointer-events-none">
                   <span className="text-white font-bold text-xs line-clamp-1">{photo.hikes?.title}</span>
                   <div className="flex items-center justify-between mt-1">
