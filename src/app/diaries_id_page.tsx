@@ -497,7 +497,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
         </div>
       </div>
 
-      <div className="p-8 space-y-12">
+      <div className="p-4 sm:p-8 space-y-8 sm:space-y-12">
         
         {/* Participants & Badges (UC6) */}
         <section className="space-y-4 border-b border-gray-100 pb-8">
@@ -579,7 +579,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
               아직 등록된 사진이 없습니다. 첫 번째 사진을 올려보세요!
             </div>
           ) : (
-            <div className="grid grid-cols-5 gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
               {photos.slice(0, 5).map((photo) => {
                 const fileId = photo.google_drive_file_id
                 const imgSrc = `/api/drive/image?id=${fileId}`
@@ -595,13 +595,13 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
 
         {/* Episodes (UC10/UC11) */}
         <section className="space-y-6 pt-8 border-t border-gray-100">
-          <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-100 pb-2 gap-3 sm:gap-0">
             <h2 className="font-heading font-bold text-xl text-forest">📝 에피소드</h2>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
               <button onClick={() => setShowAiKeyModal(true)} className="bg-gray-100 text-gray-500 hover:bg-gray-200 p-3 rounded-xl transition shadow-sm" title="AI 설정">
                 ⚙️
               </button>
-              <button onClick={handleGenerateBookClick} className="bg-emerald-600 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-emerald-700 transition shadow-md flex items-center gap-2">
+              <button onClick={handleGenerateBookClick} className="bg-emerald-600 text-white px-4 sm:px-5 py-3 rounded-xl text-xs sm:text-sm font-bold hover:bg-emerald-700 transition shadow-md flex items-center gap-1 sm:gap-2">
                 <span>🤖</span> 단행본 만들기
               </button>
               {!showEpisodeForm && (
@@ -726,7 +726,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                   ) : (
                     <>
                       <h3 className="font-heading font-extrabold text-lg text-forest">{ep.title}</h3>
-                      <div className={`text-sm text-gray-700 font-body whitespace-pre-line leading-relaxed ${expandedEpisodes[ep.id] ? '' : 'line-clamp-3'}`}>
+                      <div className={`text-sm text-gray-700 font-body whitespace-pre-line leading-relaxed break-words break-all sm:break-normal ${expandedEpisodes[ep.id] ? '' : 'line-clamp-3'}`}>
                         {ep.content}
                       </div>
                       {ep.content.length > 150 && (

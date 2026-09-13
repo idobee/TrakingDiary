@@ -151,7 +151,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Navigation Tabs Bar */}
-        <nav className="flex space-x-1 sm:space-x-2 border-t border-forest-container overflow-x-auto py-2 scrollbar-none">
+        <nav className="flex flex-wrap justify-center sm:justify-start gap-2 border-t border-forest-container py-2">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id
             return (

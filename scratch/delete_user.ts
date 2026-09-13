@@ -1,31 +1,33 @@
 import { createClient } from '@supabase/supabase-js'
-import * as dotenv from 'dotenv'
 
-dotenv.config({ path: '.env.local' })
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+if (!supabaseUrl || !supabaseServiceRoleKey) {
+  console.error("Missing environment variables")
+  process.exit(1)
+}
 
-const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey)
 
-async function deleteUser() {
-  const uid = '7ad13714-3204-46bc-b0da-5bca2ad58dbf'
+async function deleteUser(userId: string) {
+  console.log(`Deleting user: ${userId}...`)
   
-  // Delete from public.users
-  const { error: dbError } = await supabase.from('users').delete().eq('id', uid)
+  // First delete from public.users to be safe, though cascade might handle it
+  const { error: dbError } = await supabaseAdmin.from('users').delete().eq('id', userId)
   if (dbError) {
-    console.error('Failed to delete from database:', dbError)
+    console.log("Error deleting from public.users (might not exist):", dbError.message)
   } else {
-    console.log('Successfully deleted from public.users')
+    console.log("Successfully deleted from public.users (or it didn't exist)")
   }
 
-  // Delete from auth.users
-  const { data, error: authError } = await supabase.auth.admin.deleteUser(uid)
+  // Then delete from auth.users
+  const { data, error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId)
   if (authError) {
-    console.error('Failed to delete from auth:', authError)
+    console.error("Failed to delete user from auth.users:", authError.message)
   } else {
-    console.log('Successfully deleted from auth.users:', data)
+    console.log("Successfully deleted user from auth.users!", data)
   }
 }
 
-deleteUser()
+deleteUser('98f251c9-c4cb-4309-bd15-1e1adaf6f390')

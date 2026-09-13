@@ -172,7 +172,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
           <p className="text-gray-400 font-bold">조건에 맞는 사진이 없습니다.</p>
         </div>
       ) : (
-        <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
+        <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6 gap-2 sm:gap-4 space-y-2 sm:space-y-4">
           {photos.map(photo => {
             const fileId = photo.google_drive_file_id
             const imgSrc = `/api/drive/image?id=${fileId}`
