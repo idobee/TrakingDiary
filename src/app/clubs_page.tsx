@@ -99,14 +99,12 @@ export const ClubsPage: React.FC<ClubsPageProps> = ({
                   <div>
                     <div className="flex items-center space-x-3 mb-3 pt-2">
                       <div className="w-12 h-12 rounded-full bg-forest text-white font-heading font-bold text-xl flex items-center justify-center shadow">
-                        {t(`clubs.categoryMapping.${club.category}.icon`)}{club.category}
+                        🏕️
                       </div>
                       <div>
                         <h3 className="font-heading font-bold text-lg text-forest">{club.name}</h3>
                         <div className="flex items-center space-x-2">
-                          <p className="text-[11px] text-gray-500 font-label">{t(`clubs.categoryMapping.${club.category}.name`)}</p>
-                          <span className="text-gray-300">•</span>
-                          <p className="text-[11px] text-gray-500 font-label">{new Date(club.created_at).toLocaleDateString()}</p>
+                          <p className="text-[11px] text-gray-500 font-label">가입 신청일: {new Date(club.created_at).toLocaleDateString()}</p>
                         </div>
                       </div>
                     </div>
@@ -149,11 +147,7 @@ export const ClubsPage: React.FC<ClubsPageProps> = ({
           {approvedClubs.map(club => (
             <div key={club.id} className="bg-white rounded-2xl p-6 shadow-md border border-paper-high flex flex-col justify-between space-y-4">
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="bg-forest text-white font-label text-[10px] px-2.5 py-1 rounded-full font-bold uppercase flex items-center space-x-1">
-                    <span>{t(`clubs.categoryMapping.${club.category}.icon`)}</span>
-                    <span>{t(`clubs.categoryMapping.${club.category}.name`)}</span>
-                  </span>
+                <div className="flex items-center justify-end mb-3 h-6">
                   {user?.id === club.owner_id && (
                     <span className="bg-emerald-100 text-emerald-800 font-label text-[10px] px-2 py-0.5 rounded font-bold">운영자</span>
                   )}
@@ -161,7 +155,7 @@ export const ClubsPage: React.FC<ClubsPageProps> = ({
 
                 <div className="flex items-center space-x-3 mb-3">
                   <div className="w-12 h-12 rounded-full bg-forest text-white font-heading font-bold text-xl flex items-center justify-center shadow">
-                    {t(`clubs.categoryMapping.${club.category}.icon`)}
+                    🏕️
                   </div>
                   <div>
                     <h3 className="font-heading font-bold text-lg text-forest">{club.name}</h3>
