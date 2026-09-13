@@ -51,7 +51,7 @@ export function useClubMembers(clubId: number | null) {
 
     const updateData: any = { status: newStatus }
     if (newRole) {
-      updateData.role = (newRole === 'regular' || newRole === 'guest') ? 'member' : newRole
+      updateData.role = newRole
       // If role_title isn't explicitly provided, infer it from the newRole if it's regular/guest
       if (newRoleTitle === undefined && (newRole === 'regular' || newRole === 'guest')) {
         updateData.role_title = newRole === 'guest' ? '게스트' : '정회원'
