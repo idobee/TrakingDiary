@@ -97,10 +97,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 <span>{t('dashboard.heroCtaHikes')}</span>
               </button>
               <button
-                onClick={() => onNavigateTab('intro')}
+                onClick={() => onNavigateTab('club_guide')}
                 className="bg-paper-low/20 hover:bg-paper-low/30 text-sand border border-sand/40 font-heading font-bold text-xs px-5 py-2.5 rounded-full transition flex items-center space-x-1.5"
               >
-                <span>{t('dashboard.heroCtaDiaries')}</span>
+                <span>{t('dashboard.heroCtaClubGuide')}</span>
               </button>
             </div>
           </div>

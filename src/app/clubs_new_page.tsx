@@ -52,7 +52,7 @@ export const ClubsNewPage: React.FC<ClubsNewPageProps> = ({ isOpen, onClose, onS
       onClose()
     } catch (err: any) {
       console.error('Error creating club:', err)
-      setError(err.message || 'Failed to submit club application.')
+      setError(err.message || t('clubsNew.errorDefault'))
     } finally {
       setIsSubmitting(false)
     }
@@ -63,8 +63,8 @@ export const ClubsNewPage: React.FC<ClubsNewPageProps> = ({ isOpen, onClose, onS
       <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border-2 border-forest-container p-6 sm:p-8 space-y-6">
         <div className="flex justify-between items-start border-b border-gray-200 pb-4">
           <div>
-            <h3 className="font-heading font-extrabold text-2xl text-forest mt-1">동호회 개설 신청</h3>
-            <p className="text-xs text-gray-500 font-body mt-0.5">새로운 산악회/동호회를 개설하고 관리자 승인을 기다리세요.</p>
+            <h3 className="font-heading font-extrabold text-2xl text-forest mt-1">{t('clubsNew.title')}</h3>
+            <p className="text-xs text-gray-500 font-body mt-0.5">{t('clubsNew.desc')}</p>
           </div>
           <button
             onClick={onClose}
@@ -82,53 +82,53 @@ export const ClubsNewPage: React.FC<ClubsNewPageProps> = ({ isOpen, onClose, onS
           )}
 
           <div>
-            <label className="block text-xs font-bold text-forest mb-1">동호회 이름</label>
+            <label className="block text-xs font-bold text-forest mb-1">{t('clubsNew.nameLabel')}</label>
             <input
               type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest focus:border-transparent transition"
-              placeholder="예: 국립공원 등산반"
+              placeholder={t('clubsNew.namePlaceholder')}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-forest mb-1">카테고리</label>
+            <label className="block text-xs font-bold text-forest mb-1">{t('clubsNew.categoryLabel')}</label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value as any)}
               className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest focus:border-transparent transition"
             >
-              <option value="hiking">하이킹 (Hiking)</option>
-              <option value="running">러닝 (Running)</option>
-              <option value="cycling">자전거 (Cycling)</option>
-              <option value="tracking">트레킹 (Tracking)</option>
-              <option value="general">일반 (General)</option>
+              <option value="hiking">{t('clubsNew.categoryHiking')}</option>
+              <option value="running">{t('clubsNew.categoryRunning')}</option>
+              <option value="cycling">{t('clubsNew.categoryCycling')}</option>
+              <option value="tracking">{t('clubsNew.categoryTracking')}</option>
+              <option value="general">{t('clubsNew.categoryGeneral')}</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-forest mb-1">동호회 소개</label>
+            <label className="block text-xs font-bold text-forest mb-1">{t('clubsNew.descLabel')}</label>
             <textarea
               required
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest focus:border-transparent transition resize-none"
-              placeholder="동호회에 대한 간단한 소개를 적어주세요."
+              placeholder={t('clubsNew.descPlaceholder')}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-forest mb-1">신청자 연락처</label>
+            <label className="block text-xs font-bold text-forest mb-1">{t('clubsNew.contactLabel')}</label>
             <input
               type="tel"
               required
               value={contactPhone}
               onChange={(e) => setContactPhone(e.target.value)}
               className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest focus:border-transparent transition"
-              placeholder="예: 010-1234-5678"
+              placeholder={t('clubsNew.contactPlaceholder')}
             />
           </div>
 
@@ -138,14 +138,14 @@ export const ClubsNewPage: React.FC<ClubsNewPageProps> = ({ isOpen, onClose, onS
               onClick={onClose}
               className="px-6 py-2.5 rounded-full text-xs font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition"
             >
-              취소
+              {t('clubsNew.cancel')}
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
               className="px-6 py-2.5 rounded-full text-xs font-bold text-white bg-terracotta hover:bg-terracotta-dark transition shadow disabled:opacity-50"
             >
-              {isSubmitting ? '신청 중...' : '개설 신청하기'}
+              {isSubmitting ? t('clubsNew.submitting') : t('clubsNew.submit')}
             </button>
           </div>
         </form>

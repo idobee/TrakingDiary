@@ -17,8 +17,8 @@
     "googleDriveLinkedTag": "Google Shared Drive Linked"
   },
   "header": {
-    "appTitle": "함께쓰는 클럽 다이어리",
-    "appSubtitle": "Shared Activity & Club Archive",
+    "appTitle": "함께쓰는 행복한 순간들 (Happic)",
+    "appSubtitle": "행복한 에피소드 와 사진들의 아카이브 (Happy Episodes & Pictures)",
     "ucDashboardRoot": "UC1 대시보드 Root",
     "profileName": "김산길 님",
     "profileUc": "UC4 마이클럽",
@@ -151,9 +151,7 @@
     "stampCountLabel": "참여 스탬프 18개",
     "activityTitle": "🏃 나의 활동 기록 ",
     "activityUcTag": "UC13 활동기록",
-    "activityMeta": "총 {{count}}회 활동 완료 • 획득 뱃지 동기화",
-    "clubsTitle": "🏕️ 내 참여 동호회",
-    "clubsEmpty": "참여 중인 동호회가 없습니다.",
+    "activityMeta": "총 18회 활동 완료 • 획득 뱃지 동기화",
     "summitCompleted": "참여완료",
     "badgeGranted": "뱃지 수여됨",
     "activity1": {
@@ -244,7 +242,7 @@
   "clubs": {
     "sectionTitle": "🏘️ 동호회 라운지",
     "ucTag": "UC14 include UC15, UC17",
-    "sectionDesc": "새로운 활동 동호회를 개설 신청하거나, 동호회의 구글 드라이브/Gemini 키 설정, 회원 승인, 활동 일정 및 뱃지 생성을 통합 관리(UC15)합니다.",
+    "sectionDesc": "새로운 활동 동호회를 개설 신청하거나, 동호회의 구글 드라이브/Gemini 키 설정, 회원 승인, 활동 일정 및 뱃지 생성을 통합 관리 합니다.",
     "adminBtn": "⚙️ 동호회 종합 관리",
     "createBtn": "➕ 신규 동호회 개설 신청",
     "openAdminCenter": "⚙️ 동호회 라운지 입장 ",

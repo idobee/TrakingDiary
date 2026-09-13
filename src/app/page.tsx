@@ -14,6 +14,7 @@ import { LoginPage } from './login_page'
 import { GalleryPage } from './gallery_page'
 import HikesPage from './hikes_page'
 import { IntroPage } from './intro_page'
+import { ClubGuidePage } from './club_guide_page'
 import { useTranslation } from '@/lib/i18n'
 import { useAuth } from '@/lib/auth'
 import { useClubs } from '@/hooks/useClubs'
@@ -232,6 +233,10 @@ export default function Home() {
 
           {activeTab === 'intro' && (
             <IntroPage onNavigateTab={(tab) => setActiveTab(tab)} />
+          )}
+
+          {activeTab === 'club_guide' && (
+            <ClubGuidePage onNavigateTab={(tab) => setActiveTab(tab)} />
           )}
 
           {activeTab === 'diaries' && (

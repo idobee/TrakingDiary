@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useTranslation } from '@/lib/i18n'
 
 interface HikeNewFormProps {
   clubId: number
@@ -7,6 +8,7 @@ interface HikeNewFormProps {
 }
 
 export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) => {
+  const { t } = useTranslation()
   const [title, setTitle] = useState('')
   const [mountainName, setMountainName] = useState('')
   const [hikeDate, setHikeDate] = useState('')
@@ -25,7 +27,7 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) =
     try {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('로그인이 필요합니다.')
+      if (!user) throw new Error(t('hikes.formErrorLogin'))
 
       // 1. Insert Hike first (with image URL if provided, else without cover image)
       const { data: newHike, error: hikeError } = await supabase
@@ -72,7 +74,7 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) =
 
         const uploadData = await uploadRes.json()
         if (!uploadRes.ok) {
-          throw new Error(uploadData.error || '이미지 업로드에 실패했습니다.')
+          throw new Error(uploadData.error || t('hikes.formErrorUpload'))
         }
 
         // Update hike with image url and folder id
@@ -92,7 +94,7 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) =
       setImageUrl('')
     } catch (err: any) {
       console.error(err)
-      setError(err.message || '일정 등록에 실패했습니다.')
+      setError(err.message || t('hikes.formErrorSubmit'))
     } finally {
       setIsSubmitting(false)
     }
@@ -100,49 +102,49 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) =
 
   return (
     <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-      <h3 className="font-heading font-bold text-2xl text-forest mb-4">새 트레킹 일정 등록</h3>
+      <h3 className="font-heading font-bold text-2xl text-forest mb-4">{t('hikes.formTitle')}</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">{error}</div>}
         
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-1">제목 (모임명)</label>
+          <label className="block text-sm font-bold text-gray-700 mb-1">{t('hikes.formNameLabel')}</label>
           <input 
             type="text" 
             required 
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-forest focus:border-forest outline-none transition" 
-            placeholder="예: 북한산 단풍 트레킹" 
+            placeholder={t('hikes.formNamePlaceholder')} 
           />
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
-            <label className="block text-sm font-bold text-gray-700 mb-1">대상 산 이름</label>
+            <label className="block text-sm font-bold text-gray-700 mb-1">{t('hikes.formLocationLabel')}</label>
             <input 
               type="text" 
               required 
               value={mountainName}
               onChange={(e) => setMountainName(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-forest focus:border-forest outline-none transition" 
-              placeholder="예: 북한산" 
+              placeholder={t('hikes.formLocationPlaceholder')} 
             />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-bold text-gray-700 mb-1">상세 설명</label>
+            <label className="block text-sm font-bold text-gray-700 mb-1">{t('hikes.formDescLabel')}</label>
             <textarea 
               rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-forest focus:border-forest outline-none transition" 
-              placeholder="코스 설명, 준비물, 회비 등을 입력하세요." 
+              placeholder={t('hikes.formDescPlaceholder')} 
             />
           </div>
           <div className="md:col-span-2 space-y-2">
-            <label className="block text-sm font-bold text-gray-700">커버 이미지 첨부 (선택)</label>
+            <label className="block text-sm font-bold text-gray-700">{t('hikes.formImageLabel')}</label>
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
-                <span className="text-[10px] text-gray-500 mb-1 block">파일 직접 업로드 (구글 드라이브 저장)</span>
+                <span className="text-[10px] text-gray-500 mb-1 block">{t('hikes.formImageDirect')}</span>
                 <input 
                   type="file"
                   accept="image/*"
@@ -156,10 +158,10 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) =
                 />
               </div>
               <div className="flex items-center justify-center pt-5">
-                <span className="text-gray-400 text-xs font-bold bg-white px-2">또는</span>
+                <span className="text-gray-400 text-xs font-bold bg-white px-2">{t('hikes.formImageOr')}</span>
               </div>
               <div className="flex-1">
-                <span className="text-[10px] text-gray-500 mb-1 block">이미지 링크(URL) 입력</span>
+                <span className="text-[10px] text-gray-500 mb-1 block">{t('hikes.formImageLink')}</span>
                 <input 
                   type="text" 
                   value={imageUrl}
@@ -167,15 +169,15 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) =
                     setImageUrl(e.target.value)
                     if (e.target.value) setImageFile(null)
                   }}
-                  placeholder="https://..."
+                  placeholder={t('hikes.formImageLinkPlaceholder')}
                   className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-forest focus:border-forest outline-none transition text-sm" 
                 />
               </div>
             </div>
-            <p className="text-[10px] text-gray-400 mt-1">파일을 직접 업로드하거나, 외부 이미지 링크(URL)를 복사해서 붙여넣을 수 있습니다.</p>
+            <p className="text-[10px] text-gray-400 mt-1">{t('hikes.formImageHint')}</p>
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">트레킹 일시</label>
+            <label className="block text-sm font-bold text-gray-700 mb-1">{t('hikes.formDateLabel')}</label>
             <input 
               type="datetime-local" 
               required 
@@ -185,7 +187,7 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) =
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">난이도</label>
+            <label className="block text-sm font-bold text-gray-700 mb-1">{t('hikes.formDifficultyLabel')}</label>
             <div className="flex space-x-4 h-full items-center">
               {['easy', 'medium', 'hard', 'expert'].map((lvl) => (
                 <label key={lvl} className="flex items-center space-x-2 cursor-pointer">
@@ -198,7 +200,7 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) =
                     className="text-forest focus:ring-forest"
                   />
                   <span className="text-sm font-bold">
-                    {lvl === 'easy' ? '하' : lvl === 'medium' ? '중' : lvl === 'hard' ? '상' : '최상'}
+                    {lvl === 'easy' ? t('hikes.diffEasy') : lvl === 'medium' ? t('hikes.diffMedium') : lvl === 'hard' ? t('hikes.diffHard') : t('hikes.diffExpert')}
                   </span>
                 </label>
               ))}
@@ -213,7 +215,7 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) =
             disabled={isSubmitting}
             className="bg-forest hover:bg-forest-light text-white font-bold py-3 px-8 rounded-xl transition shadow-md disabled:opacity-50"
           >
-            {isSubmitting ? '등록 중...' : '일정 등록하기'}
+            {isSubmitting ? t('hikes.formSubmitting') : t('hikes.formSubmit')}
           </button>
         </div>
       </form>
