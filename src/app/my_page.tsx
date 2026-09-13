@@ -221,7 +221,7 @@ export const MyPage: React.FC<MyPageProps> = ({
         <div className="xl:col-span-1 space-y-6 flex flex-col">
           
           {/* My Clubs */}
-          <div className="bg-white rounded-2xl p-6 shadow-md border border-paper-high space-y-4">
+          <div className="bg-gray-50/80 rounded-2xl p-6 shadow-sm border border-gray-200 space-y-4">
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <div className="flex items-center space-x-2">
                 <h3 className="font-heading font-bold text-lg text-forest">{t('my.clubsTitle')}</h3>
@@ -250,7 +250,7 @@ export const MyPage: React.FC<MyPageProps> = ({
           </div>
 
           {/* Badge Stamp Grid */}
-          <div className="bg-white rounded-2xl p-6 shadow-md border border-paper-high space-y-4 flex-1">
+          <div className="bg-gray-50/80 rounded-2xl p-6 shadow-sm border border-gray-200 space-y-4 flex-1">
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <div className="flex items-center space-x-2">
                 <h3 className="font-heading font-bold text-lg text-forest">{t('my.badgesTitle')}</h3>
