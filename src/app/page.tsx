@@ -107,14 +107,20 @@ export default function Home() {
       .single()
 
     if (!existingMember) {
-      await supabase.from('club_members').insert({
+      const { error: insertError } = await supabase.from('club_members').insert({
         club_id: inviteClubId,
         user_id: user.id,
-        role: 'member',
+        role: 'regular',
         role_title: inviteRole === 'guest' ? '게스트' : '정회원',
         status: 'pending'
       })
-      alert('동호회 가입 신청이 완료되었습니다. 관리자 승인을 기다려주세요.')
+      
+      if (insertError) {
+        console.error(insertError)
+        alert('가입 신청 중 오류가 발생했습니다: ' + insertError.message)
+      } else {
+        alert('동호회 가입 신청이 완료되었습니다. 관리자 승인을 기다려주세요.')
+      }
     } else {
       alert('이미 가입되었거나 가입 신청 중인 동호회입니다.')
     }

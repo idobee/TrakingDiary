@@ -90,7 +90,7 @@ export async function GET(request: Request) {
             const { error: insertError } = await supabaseAdmin.from('club_members').insert({
               club_id: clubIdNum,
               user_id: user.id,
-              role: 'member',
+              role: 'regular',
               role_title: inviteRole === 'guest' ? '게스트' : '정회원',
               status: 'pending'
             })
