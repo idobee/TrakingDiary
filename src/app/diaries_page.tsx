@@ -27,12 +27,12 @@ export const DiariesPage: React.FC<DiariesPageProps> = ({ clubId, clubName, onOp
   return (
     <div className="space-y-6">
       {/* Section Header */}
-      <div className="bg-forest text-paper p-6 rounded-2xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4 border-2 border-forest-container">
+      <div className="bg-forest text-paper p-5 sm:p-6 rounded-2xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4 border-2 border-forest-container">
         <div>
           <div className="flex items-center space-x-2">
             <span className="bg-terracotta text-white text-[11px] font-label font-bold px-3 py-1 rounded-full uppercase">{t('diaries.badgeLabel')}</span>
           </div>
-          <h2 className="font-heading font-extrabold text-2xl mt-2">{t('diaries.sectionTitle')}</h2>
+          <h2 className="font-heading font-extrabold text-xl sm:text-2xl mt-2">{t('diaries.sectionTitle')}</h2>
           <p className="text-xs text-paper/80 font-body mt-1">{t('diaries.sectionDesc')}</p>
         </div>
         <div className="bg-paper-low/10 border border-sand/30 px-4 py-2 rounded-xl text-[11px] font-label text-sand flex items-center space-x-1.5">
@@ -41,13 +41,13 @@ export const DiariesPage: React.FC<DiariesPageProps> = ({ clubId, clubName, onOp
       </div>
 
       {/* Real Wooden Bookshelf Frame Container */}
-      <div className="bg-[#2a170a] p-6 sm:p-8 rounded-3xl border-4 border-[#1a0e05] shadow-2xl space-y-6 relative overflow-hidden">
+      <div className="bg-[#2a170a] p-5 sm:p-8 rounded-3xl border-4 border-[#1a0e05] shadow-2xl space-y-6 relative overflow-hidden">
         {/* Bookshelf Top Brass Header Plate */}
         <div className="flex justify-between items-center border-b-2 border-[#5c3718] pb-4">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 rounded-full bg-amber-700/60 border border-amber-400/40 text-amber-200 flex items-center justify-center font-heading font-bold text-sm shadow">🏛️</div>
             <div>
-              <h3 className="font-heading font-extrabold text-lg text-amber-100 tracking-wide">{clubName ? `${clubName} 앨범` : t('diaries.shelfHeader')}</h3>
+              <h3 className="font-heading font-extrabold text-base sm:text-lg text-amber-100 tracking-wide">{clubName ? `${clubName} 앨범` : t('diaries.shelfHeader')}</h3>
               <p className="text-[10px] text-amber-300/70 font-label">{t('diaries.shelfMeta')}</p>
             </div>
           </div>
@@ -77,7 +77,7 @@ export const DiariesPage: React.FC<DiariesPageProps> = ({ clubId, clubName, onOp
                     </div>
                     <div className="pt-2">
                       <span className="text-[10px] font-label text-sand/70 block uppercase tracking-wider">{t('common.scrapbookHardcover')}</span>
-                      <h3 className="font-heading font-extrabold text-xl text-amber-100 group-hover:text-white transition mt-1 leading-snug">
+                      <h3 className="font-heading font-extrabold text-lg sm:text-xl text-amber-100 group-hover:text-white transition mt-1 leading-snug">
                         {hike.title}
                       </h3>
                       <p className="text-[11px] text-sand/80 font-body mt-2">{hike.mountain_name} • {new Date(hike.hike_date).toLocaleDateString()}</p>

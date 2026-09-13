@@ -46,15 +46,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       <div className="lg:col-span-2 space-y-8">
         
         {/* Hero Banner (Promotional) */}
-        <div className="relative bg-gradient-to-r from-forest via-forest-light to-forest-container text-paper p-8 rounded-3xl shadow-xl overflow-hidden border-2 border-forest-container">
-          <div className="absolute right-0 top-0 opacity-10 font-heading font-black text-9xl select-none">
+        <div className="relative bg-gradient-to-r from-forest via-forest-light to-forest-container text-paper p-5 sm:p-8 rounded-3xl shadow-xl overflow-hidden border-2 border-forest-container">
+          <div className="absolute right-0 top-0 opacity-10 font-heading font-black text-7xl sm:text-9xl select-none">
             {t('dashboard.watermark')}
           </div>
           <div className="relative z-10 max-w-2xl space-y-4">
             <div className="inline-flex items-center space-x-2 bg-terracotta text-white px-3 py-1 rounded-full text-xs font-label font-bold uppercase">
               <span>{t('dashboard.heroBadge')}</span>
             </div>
-            <h2 className="font-heading font-extrabold text-3xl sm:text-4xl text-paper leading-tight">
+            <h2 className="font-heading font-extrabold text-2xl sm:text-3xl md:text-4xl text-paper leading-tight">
               {t('dashboard.heroTitleLine1')}<br />
               {t('dashboard.heroTitleLine2')}
             </h2>
@@ -80,7 +80,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         </div>
 
         {/* Public Episodes Section */}
-        <div className="bg-white p-6 rounded-3xl border border-paper-high shadow-md space-y-4">
+        <div className="bg-white p-4 sm:p-6 rounded-3xl border border-paper-high shadow-md space-y-4">
           <div className="flex items-center justify-between border-b border-gray-100 pb-3">
             <div className="flex items-center space-x-2">
               <h3 className="font-heading font-bold text-lg text-forest">{t('dashboard.publicEpisodesTitle')}</h3>

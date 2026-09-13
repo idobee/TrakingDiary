@@ -210,9 +210,9 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-gray-100 gap-4 sm:gap-0">
         <div>
-          <h2 className="font-heading font-extrabold text-2xl text-forest">{t('hikes.title')}</h2>
+          <h2 className="font-heading font-extrabold text-xl sm:text-2xl text-forest">{t('hikes.title')}</h2>
           <p className="text-gray-500 text-sm mt-1">{t('hikes.subtitle')}</p>
         </div>
         {isAdmin && (
@@ -236,7 +236,7 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
             <div className="md:col-span-2 space-y-6">
               <div className="flex justify-between items-end">
                 <div>
-                  <h2 className="font-heading font-bold text-xl text-gray-800">{t('hikes.upcomingTitle')}</h2>
+                  <h2 className="font-heading font-bold text-lg sm:text-xl text-gray-800">{t('hikes.upcomingTitle')}</h2>
                   <p className="text-gray-500 text-sm mt-1">{t('hikes.subtitle')}</p>
                 </div>
               </div>
@@ -258,7 +258,7 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
                     const isJoined = joinedHikeIds.has(hike.id)
 
                     return (
-                      <div key={hike.id} className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md transition border border-gray-100 flex flex-col justify-between">
+                      <div key={hike.id} className="bg-white rounded-3xl p-5 sm:p-6 shadow-sm hover:shadow-md transition border border-gray-100 flex flex-col justify-between">
                         <div>
                           <div className="flex justify-between items-start mb-4">
                             {new Date(hike.hike_date) >= new Date(new Date().setHours(0,0,0,0)) && (
@@ -276,7 +276,7 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
 
                           <button
                             onClick={() => setSelectedHikeToJoin(hike)}
-                            className="font-heading font-bold text-xl text-forest hover:text-forest-light text-left mb-2 line-clamp-2 transition hover:underline"
+                            className="font-heading font-bold text-lg sm:text-xl text-forest hover:text-forest-light text-left mb-2 line-clamp-2 transition hover:underline"
                           >
                             {hike.title}
                           </button>

@@ -41,7 +41,21 @@ export async function GET(request: Request) {
         const name = user.user_metadata?.name || user.email?.split('@')[0] || 'Trekker'
         const avatarUrl = user.user_metadata?.avatar_url || ''
 
-        const { error: upsertError } = await supabase.from('users').upsert({
+        // Create a supabaseAdmin client to bypass RLS for inserts since the anon client
+        // doesn't have the new session cookies in the current request scope yet.
+        const supabaseAdmin = createServerClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          {
+            cookies: {
+              get() { return null },
+              set() {},
+              remove() {}
+            }
+          }
+        )
+
+        const { error: upsertError } = await supabaseAdmin.from('users').upsert({
           id: user.id,
           email: user.email || '',
           nickname: name,
@@ -64,7 +78,7 @@ export async function GET(request: Request) {
           }
 
           // Check if the user is already a member
-          const { data: existingMember, error: selectError } = await supabase
+          const { data: existingMember, error: selectError } = await supabaseAdmin
             .from('club_members')
             .select('*')
             .eq('club_id', clubIdNum)
@@ -73,7 +87,7 @@ export async function GET(request: Request) {
 
           if (!existingMember) {
             // Add as pending member via invite link
-            const { error: insertError } = await (supabase.from('club_members') as any).insert({
+            const { error: insertError } = await supabaseAdmin.from('club_members').insert({
               club_id: clubIdNum,
               user_id: user.id,
               role: 'member',
