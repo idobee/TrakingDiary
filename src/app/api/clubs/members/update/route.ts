@@ -37,9 +37,29 @@ export async function POST(request: Request) {
       }
     )
 
-    const { data: { user: authUser }, error: authError } = await supabaseClient.auth.getUser()
+    let authUser = null
+    const { data: { user: cookieUser } } = await supabaseClient.auth.getUser()
     
-    if (authError || !authUser) {
+    if (cookieUser) {
+      authUser = cookieUser
+    } else {
+      // Fallback: check Authorization header
+      const authHeader = request.headers.get('Authorization')
+      if (authHeader) {
+        const fallbackClient = createSupabaseClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          {
+            global: { headers: { Authorization: authHeader } },
+            auth: { persistSession: false }
+          }
+        )
+        const { data: { user: headerUser } } = await fallbackClient.auth.getUser()
+        if (headerUser) authUser = headerUser
+      }
+    }
+    
+    if (!authUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -122,9 +142,29 @@ export async function DELETE(request: Request) {
       }
     )
 
-    const { data: { user: authUser }, error: authError } = await supabaseClient.auth.getUser()
+    let authUser = null
+    const { data: { user: cookieUser } } = await supabaseClient.auth.getUser()
     
-    if (authError || !authUser) {
+    if (cookieUser) {
+      authUser = cookieUser
+    } else {
+      // Fallback: check Authorization header
+      const authHeader = request.headers.get('Authorization')
+      if (authHeader) {
+        const fallbackClient = createSupabaseClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          {
+            global: { headers: { Authorization: authHeader } },
+            auth: { persistSession: false }
+          }
+        )
+        const { data: { user: headerUser } } = await fallbackClient.auth.getUser()
+        if (headerUser) authUser = headerUser
+      }
+    }
+    
+    if (!authUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

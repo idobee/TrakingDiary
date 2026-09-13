@@ -65,9 +65,14 @@ export function useClubMembers(clubId: number | null) {
     }
 
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      
       const res = await fetch('/api/clubs/members/update', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { 'Authorization': `Bearer ${session.access_token}` } : {})
+        },
         body: JSON.stringify({
           clubId,
           userId,
@@ -96,8 +101,13 @@ export function useClubMembers(clubId: number | null) {
     if (!clubId) return false
 
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+
       const res = await fetch(`/api/clubs/members/update?clubId=${clubId}&userId=${userId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          ...(session?.access_token ? { 'Authorization': `Bearer ${session.access_token}` } : {})
+        }
       })
 
       const result = await res.json()
