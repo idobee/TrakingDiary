@@ -14,6 +14,8 @@ interface DashboardPageProps {
   publicEpisodes?: any[]
   publicPhotos?: any[]
   user?: any
+  inviteClubId?: number | null
+  onAcceptInvite?: () => void
   onOpenDiaryDetail?: (hikeId: number) => void
 }
 
@@ -26,6 +28,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   publicEpisodes = [],
   publicPhotos = [],
   user = null,
+  inviteClubId = null,
+  onAcceptInvite,
   onOpenDiaryDetail
 }) => {
   const { t } = useTranslation()
@@ -45,6 +49,29 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       {/* Left Column (2/3) - Public / Promotional Content */}
       <div className="lg:col-span-2 space-y-8">
         
+        {/* Invite Banner (Conditional) */}
+        {inviteClubId && (
+          <div className="bg-amber-100 border-2 border-amber-300 p-6 rounded-3xl shadow-md flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-amber-400 rounded-full flex items-center justify-center text-2xl shadow-inner">
+                ✉️
+              </div>
+              <div>
+                <h3 className="font-heading font-extrabold text-xl text-amber-900">동호회 초대 수락하기</h3>
+                <p className="text-sm text-amber-800 font-body">
+                  초대받은 동호회 멤버로 가입하시겠습니까?
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onAcceptInvite}
+              className="w-full sm:w-auto bg-forest hover:bg-forest-light text-white font-heading font-bold text-sm px-6 py-3 rounded-full transition shadow"
+            >
+              초대 승인하기
+            </button>
+          </div>
+        )}
+
         {/* Hero Banner (Promotional) */}
         <div className="relative bg-gradient-to-r from-forest via-forest-light to-forest-container text-paper p-5 sm:p-8 rounded-3xl shadow-xl overflow-hidden border-2 border-forest-container">
           <div className="absolute right-0 top-0 opacity-10 font-heading font-black text-7xl sm:text-9xl select-none">

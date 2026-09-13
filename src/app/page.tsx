@@ -79,45 +79,51 @@ export default function Home() {
   }, [activeTab])
 
   React.useEffect(() => {
-    async function processInvite() {
-      if (typeof window === 'undefined') return
-      
-      const params = new URLSearchParams(window.location.search)
-      const clubIdStr = params.get('invite_club_id')
-      const role = params.get('invite_role')
-      
-      if (clubIdStr) {
-        const clubIdNum = parseInt(clubIdStr, 10)
-        setInviteClubId(clubIdNum)
-        if (role) setInviteRole(role)
-
-        // If user is already logged in, process the invite directly
-        if (user && !isNaN(clubIdNum)) {
-          const { data: existingMember } = await supabase
-            .from('club_members')
-            .select('*')
-            .eq('club_id', clubIdNum)
-            .eq('user_id', user.id)
-            .single()
-
-          if (!existingMember) {
-            await supabase.from('club_members').insert({
-              club_id: clubIdNum,
-              user_id: user.id,
-              role: 'member',
-              role_title: role === 'guest' ? '게스트' : '정회원',
-              status: 'pending'
-            })
-            alert('동호회 가입 신청이 완료되었습니다. 관리자 승인을 기다려주세요.')
-          }
-          
-          // Remove query params to avoid re-triggering and clean up URL
-          window.history.replaceState({}, document.title, window.location.pathname)
-        }
-      }
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const clubIdStr = params.get('invite_club_id')
+    const role = params.get('invite_role')
+    
+    if (clubIdStr) {
+      setInviteClubId(parseInt(clubIdStr, 10))
+      if (role) setInviteRole(role)
     }
-    processInvite()
-  }, [user])
+  }, [])
+
+  const handleAcceptInvite = async () => {
+    if (!inviteClubId) return
+
+    if (!user) {
+      setActiveTab('login')
+      return
+    }
+
+    // User is logged in, process the invite directly
+    const { data: existingMember } = await supabase
+      .from('club_members')
+      .select('*')
+      .eq('club_id', inviteClubId)
+      .eq('user_id', user.id)
+      .single()
+
+    if (!existingMember) {
+      await supabase.from('club_members').insert({
+        club_id: inviteClubId,
+        user_id: user.id,
+        role: 'member',
+        role_title: inviteRole === 'guest' ? '게스트' : '정회원',
+        status: 'pending'
+      })
+      alert('동호회 가입 신청이 완료되었습니다. 관리자 승인을 기다려주세요.')
+    } else {
+      alert('이미 가입되었거나 가입 신청 중인 동호회입니다.')
+    }
+    
+    // Clear URL
+    window.history.replaceState({}, document.title, window.location.pathname)
+    setInviteClubId(null)
+    setInviteRole(null)
+  }
 
   React.useEffect(() => {
     if (clubs.length > 0 && selectedClubId === null) {
@@ -169,7 +175,7 @@ export default function Home() {
   }
 
   // Dashboard and intro are public, but other tabs require login.
-  if (!user && activeTab !== 'dashboard' && activeTab !== 'intro') {
+  if (!user && activeTab !== 'dashboard' && activeTab !== 'intro' && activeTab !== 'login') {
     return <LoginPage inviteClubId={inviteClubId} inviteRole={inviteRole} />
   }
 
@@ -205,6 +211,8 @@ export default function Home() {
               publicEpisodes={publicEpisodes}
               publicPhotos={publicPhotos}
               user={user}
+              inviteClubId={inviteClubId}
+              onAcceptInvite={handleAcceptInvite}
               onOpenDiaryDetail={(hikeId) => {
                 setSelectedHikeId(hikeId)
                 setActiveTab('diaries_id')
