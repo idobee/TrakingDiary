@@ -150,7 +150,7 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
             <div className="flex items-center space-x-2">
               <h4 className="font-heading font-bold text-forest text-lg">{name}</h4>
               {member.role_title && (
-                <span className="text-xs bg-forest-container text-forest-dark px-2 py-0.5 rounded-full font-bold">
+                <span className="text-xs bg-forest text-white px-2 py-0.5 rounded-full font-bold">
                   {member.role_title}
                 </span>
               )}
