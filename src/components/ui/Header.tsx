@@ -79,7 +79,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
               ) : (
                 <button
-                  onClick={() => setActiveTab('dashboard')}
+                  onClick={() => setActiveTab('login')}
                   className="bg-terracotta hover:bg-terracotta-dark text-white font-heading font-bold text-xs px-3 py-1.5 rounded-full shadow-sm"
                 >
                   {t('auth.loginBtn')}
@@ -139,7 +139,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
               ) : (
                 <button
-                  onClick={() => setActiveTab('dashboard')}
+                  onClick={() => setActiveTab('login')}
                   className="bg-terracotta hover:bg-terracotta-dark text-white font-heading font-bold text-xs px-4 py-2 rounded-full shadow-sm"
                 >
                   {t('auth.loginBtn')}

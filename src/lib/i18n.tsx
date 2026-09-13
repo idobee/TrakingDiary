@@ -139,18 +139,15 @@ export const LanguageSwitcher: React.FC = () => {
   return (
     <button
       onClick={toggleLocale}
-      className="relative flex items-center bg-forest-container hover:bg-forest-surface rounded-full border border-sand/30 transition shadow-inner overflow-hidden"
-      style={{ width: '56px', height: '28px' }}
+      className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden border border-sand/30 hover:border-terracotta transition shadow-sm"
       aria-label="Switch language"
       title={locale === 'ko' ? 'Switch to English' : '한국어로 전환'}
     >
-      <div className={`absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white shadow-sm transition-all duration-300 flex items-center justify-center overflow-hidden ${locale === 'ko' ? 'left-1' : 'left-[calc(100%-1.5rem-0.25rem)]'}`}>
-        <img 
-          src={locale === 'ko' ? 'https://flagcdn.com/kr.svg' : 'https://flagcdn.com/us.svg'} 
-          alt={locale === 'ko' ? 'Korean Flag' : 'US Flag'} 
-          className="w-full h-full object-cover" 
-        />
-      </div>
+      <img 
+        src={locale === 'ko' ? 'https://flagcdn.com/kr.svg' : 'https://flagcdn.com/us.svg'} 
+        alt={locale === 'ko' ? 'Korean Flag' : 'US Flag'} 
+        className="w-full h-full object-cover" 
+      />
     </button>
   )
 }
