@@ -45,10 +45,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      
+
       {/* Left Column (2/3) - Public / Promotional Content */}
       <div className="lg:col-span-2 space-y-8">
-        
+
         {/* Invite Banner (Conditional) */}
         {inviteClubId && (
           <div className="bg-amber-100 border-2 border-amber-300 p-6 rounded-3xl shadow-md flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
@@ -88,7 +88,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             <p className="text-sand text-sm font-body leading-relaxed">
               {t('dashboard.heroDescription')}
             </p>
-            
+
             <div className="pt-2 flex flex-wrap gap-3">
               <button
                 onClick={() => onNavigateTab('intro')}
@@ -100,7 +100,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 onClick={() => onNavigateTab('club_guide')}
                 className="bg-paper-low/20 hover:bg-paper-low/30 text-sand border border-sand/40 font-heading font-bold text-xs px-5 py-2.5 rounded-full transition flex items-center space-x-1.5"
               >
-                <span>{t('dashboard.heroCtaClubGuide')}</span>
+                <span>{t('dashboard.heroCtaDiaries')}</span>
               </button>
             </div>
           </div>
@@ -160,7 +160,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               {t('common.viewAll')} &rarr;
             </button>
           </div>
-          
+
           {publicPhotos.length > 0 ? (
             <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
               {publicPhotos.map(photo => {
@@ -188,18 +188,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
       {/* Right Column (1/3) - Joined Clubs or Login Prompt */}
       <div className="lg:col-span-1 space-y-6">
-        
+
         {user ? (
           <div className="bg-paper-low border-2 border-forest-container p-6 rounded-3xl shadow-md sticky top-24">
             <h3 className="font-heading font-extrabold text-xl text-forest mb-4 border-b border-forest-surface pb-3">
               {t('dashboard.joinedClubsTitle')}
             </h3>
-            
+
             <div className="space-y-3">
               {clubs.length > 0 ? (
                 clubs.map(club => (
-                  <div 
-                    key={club.id} 
+                  <div
+                    key={club.id}
                     onClick={() => onNavigateTab('clubs')}
                     className="p-3 bg-white rounded-2xl border border-paper-high hover:border-terracotta hover:shadow transition cursor-pointer flex items-center space-x-3"
                   >
@@ -227,12 +227,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 </div>
               )}
             </div>
-            
+
             {/* Quick Metrics */}
             <div className="mt-6 pt-4 border-t border-forest-surface grid grid-cols-2 gap-3">
               <div className="bg-white p-3 rounded-xl border border-gray-100 text-center shadow-sm">
                 <span className="text-[10px] font-bold text-gray-400 block">{t('dashboard.metricsUpcomingLabel')}</span>
-                <span className="text-lg font-heading font-extrabold text-forest">{hikes.filter(h => h.status==='recruiting').length}</span>
+                <span className="text-lg font-heading font-extrabold text-forest">{hikes.filter(h => h.status === 'recruiting').length}</span>
               </div>
               <div className="bg-white p-3 rounded-xl border border-gray-100 text-center shadow-sm">
                 <span className="text-[10px] font-bold text-gray-400 block">{t('dashboard.metricsDiariesLabel')}</span>
@@ -253,7 +253,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 {t('dashboard.loginPromptDesc')}
               </p>
             </div>
-            <button 
+            <button
               onClick={() => onNavigateTab('login')}
               className="w-full bg-amber-400 hover:bg-amber-300 text-amber-950 font-heading font-bold text-sm py-3 rounded-full transition shadow mt-2"
             >
@@ -279,7 +279,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               recentHikes.map((hike) => {
                 const hikeDate = new Date(hike.hike_date)
                 const isPast = hikeDate < now
-                
+
                 return (
                   <div
                     key={hike.id}
@@ -321,12 +321,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               {t('common.viewAll')} &rarr;
             </button>
           </div>
-          
+
           <div className="grid grid-cols-3 gap-2">
             {allClubs.length > 0 ? (
               allClubs.map(club => (
-                <div 
-                  key={club.id} 
+                <div
+                  key={club.id}
                   onClick={() => onNavigateTab('clubs')}
                   className="p-3 bg-gray-50 rounded-2xl border border-gray-100 hover:border-forest/30 hover:shadow transition cursor-pointer flex flex-col items-center text-center space-y-2"
                 >
