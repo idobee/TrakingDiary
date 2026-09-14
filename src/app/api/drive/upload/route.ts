@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { google } from 'googleapis'
 import stream from 'stream'
+import sharp from 'sharp'
 
 export async function POST(req: NextRequest) {
   try {
@@ -139,13 +140,42 @@ export async function POST(req: NextRequest) {
     const webContentLink = uploadRes.data.webContentLink || uploadRes.data.webViewLink || ''
     const webViewLink = uploadRes.data.webViewLink || ''
 
+    // Generate WebP Thumbnail with sharp
+    let supabaseThumbnailUrl = uploadRes.data.thumbnailLink || `https://drive.google.com/thumbnail?id=${uploadRes.data.id}&sz=w800`
+    
+    try {
+      const webpBuffer = await sharp(buffer)
+        .resize({ width: 800, withoutEnlargement: true })
+        .webp({ quality: 70 })
+        .toBuffer()
+
+      const fileName = `${clubId}/${hikeId}/${Date.now()}_${Math.random().toString(36).substring(7)}.webp`
+      
+      const { data: storageData, error: storageError } = await supabaseAdmin
+        .storage
+        .from('thumbnails')
+        .upload(fileName, webpBuffer, {
+          contentType: 'image/webp',
+          upsert: true
+        })
+
+      if (storageError) {
+        console.error('Supabase Storage Upload Error:', storageError)
+      } else if (storageData) {
+        const { data: publicUrlData } = supabaseAdmin.storage.from('thumbnails').getPublicUrl(fileName)
+        supabaseThumbnailUrl = publicUrlData.publicUrl
+      }
+    } catch (sharpError) {
+      console.error('Sharp/Thumbnail generation error:', sharpError)
+    }
+
     // 2. Insert into Supabase photos table securely
     const { error: dbError } = await supabaseAdmin.from('photos').insert({
       hike_id: parseInt(hikeId),
       uploader_id: uploaderId,
       google_drive_file_id: uploadRes.data.id,
       google_drive_web_link: webContentLink,
-      thumbnail_url: uploadRes.data.thumbnailLink || `https://drive.google.com/thumbnail?id=${uploadRes.data.id}&sz=w800`
+      thumbnail_url: supabaseThumbnailUrl
     })
 
     if (dbError) {

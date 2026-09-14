@@ -179,7 +179,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
 
             return (
               <div key={photo.id} className="break-inside-avoid relative group rounded-xl overflow-hidden bg-gray-100 shadow-sm border border-gray-200">
-                <img src={imgSrc} alt="Gallery Photo" className="w-full h-auto object-cover group-hover:scale-105 transition duration-500" />
+                <img src={photo.thumbnail_url || imgSrc} alt="Gallery Photo" loading="lazy" className="w-full h-auto object-cover group-hover:scale-105 transition duration-500" />
 
                 {/* Publish Toggle Button */}
                 {isUploaderOrAdmin && (
@@ -190,6 +190,21 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
                     >
                       {photo.is_published ? t('gallery.published') : t('gallery.unpublished')}
                     </button>
+                  </div>
+                )}
+
+                {/* Download Original Button */}
+                {photo.google_drive_web_link && (
+                  <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <a
+                      href={photo.google_drive_web_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1.5 text-xs font-bold rounded-full shadow backdrop-blur-md border bg-white/80 text-gray-700 border-gray-300 hover:bg-white flex items-center space-x-1"
+                      title="원본 사진 다운로드 (Google Drive)"
+                    >
+                      <span>⬇️</span>
+                    </a>
                   </div>
                 )}
 
