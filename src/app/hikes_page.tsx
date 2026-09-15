@@ -15,6 +15,7 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
   const [participants, setParticipants] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [showNewForm, setShowNewForm] = useState(false)
+  const [editingHike, setEditingHike] = useState<any>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [userClubId, setUserClubId] = useState<number | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
@@ -109,6 +110,7 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
 
   const handleHikeCreated = () => {
     setShowNewForm(false)
+    setEditingHike(null)
     fetchHikesAndPermissions()
   }
 
@@ -148,6 +150,46 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
       alert(t('hikes.alertLeaveSuccess'))
       setSelectedHikeToJoin(null)
       fetchHikesAndPermissions()
+    }
+  }
+
+  const handleKakaoShare = (hike: any) => {
+    if (typeof window !== 'undefined' && (window as any).Kakao) {
+      const Kakao = (window as any).Kakao
+      const inviteUrl = `${window.location.origin}/?invite_hike_id=${hike.id}`
+      
+      try {
+        if (!Kakao.isInitialized()) {
+          Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY)
+        }
+        
+        Kakao.Share.sendDefault({
+          objectType: 'feed',
+          content: {
+            title: hike.title || '트레킹 일정',
+            description: hike.description || '새로운 트레킹 일정이 등록되었습니다.',
+            imageUrl: hike.cover_image_url || 'https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1000&auto=format&fit=crop',
+            link: {
+              mobileWebUrl: inviteUrl,
+              webUrl: inviteUrl,
+            },
+          },
+          buttons: [
+            {
+              title: '일정 참가 신청하기',
+              link: {
+                mobileWebUrl: inviteUrl,
+                webUrl: inviteUrl,
+              },
+            },
+          ],
+        })
+      } catch (error) {
+        console.error('Kakao share error:', error)
+        alert('카카오톡 공유 실패: 카카오 앱 키(JavaScript 키)가 올바르게 설정되었는지 확인해 주세요.')
+      }
+    } else {
+      alert('카카오 SDK가 로드되지 않았습니다.')
     }
   }
 
@@ -217,7 +259,10 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
         </div>
         {isAdmin && (
           <button
-            onClick={() => setShowNewForm(!showNewForm)}
+            onClick={() => {
+              if (showNewForm) setEditingHike(null)
+              setShowNewForm(!showNewForm)
+            }}
             className="bg-terracotta hover:bg-orange-600 text-white px-5 py-2.5 rounded-full font-bold text-sm transition shadow-md"
           >
             {showNewForm ? t('hikes.backToList') : t('hikes.createNew')}
@@ -228,7 +273,7 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
       <div>
         {showNewForm && userClubId ? (
           <div className="mb-8 max-w-2xl mx-auto">
-            <HikeNewForm clubId={userClubId} onSuccess={handleHikeCreated} />
+            <HikeNewForm clubId={userClubId} initialData={editingHike} onSuccess={handleHikeCreated} />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
@@ -415,38 +460,75 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
                 )}
               </div>
 
-              <div className="flex space-x-3 pt-2">
+              <div className="flex flex-wrap gap-2 pt-2">
                 <button
                   onClick={() => setSelectedHikeToJoin(null)}
-                  className="flex-1 py-3 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition"
+                  className="flex-1 min-w-[100px] py-3 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition"
                 >
                   {t('hikes.close')}
                 </button>
-                {selectedHikeToJoin.status === 'completed' || new Date(selectedHikeToJoin.hike_date) < new Date(new Date().setHours(0,0,0,0)) ? (
+                {selectedHikeToJoin.organizer_id === currentUserId ? (
+                  <>
+                    <button
+                      onClick={() => {
+                        setEditingHike(selectedHikeToJoin)
+                        setSelectedHikeToJoin(null)
+                        setShowNewForm(true)
+                      }}
+                      className="flex-1 min-w-[100px] py-3 rounded-xl font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition"
+                    >
+                      ✏️ 일정 수정
+                    </button>
+                    <button
+                      onClick={() => {
+                        const inviteUrl = `${window.location.origin}/?invite_hike_id=${selectedHikeToJoin.id}`
+                        navigator.clipboard.writeText(inviteUrl)
+                        alert('일정 참가 초대 링크가 복사되었습니다! (URL: ' + inviteUrl + ')')
+                      }}
+                      className="flex-1 min-w-[100px] py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 transition"
+                    >
+                      🔗 링크 복사
+                    </button>
+                    <button
+                      onClick={() => handleKakaoShare(selectedHikeToJoin)}
+                      className="flex-1 min-w-[120px] py-3 rounded-xl font-bold text-[#000000] bg-[#FEE500] hover:bg-[#FEE500]/90 transition shadow-sm flex items-center justify-center gap-1"
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M12 3c-5.52 0-10 3.52-10 7.86 0 2.8 1.83 5.25 4.6 6.55-.26 1.05-1 3.97-1.04 4.14-.05.17.06.26.17.2 0 0 3.32-2.18 4.54-3.08.56.09 1.13.13 1.73.13 5.52 0 10-3.52 10-7.86C22 6.52 17.52 3 12 3z"/></svg>
+                      카톡 공유
+                    </button>
+                    {(selectedHikeToJoin.status === 'completed' || new Date(selectedHikeToJoin.hike_date) < new Date(new Date().setHours(0,0,0,0))) && (
+                      <button
+                        onClick={() => {
+                          setSelectedHikeToJoin(null)
+                          if (onNavigateTab) onNavigateTab('diaries')
+                        }}
+                        className="flex-1 min-w-[100px] py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-md"
+                      >
+                        {t('hikes.viewAlbum')}
+                      </button>
+                    )}
+                  </>
+                ) : (selectedHikeToJoin.status === 'completed' || new Date(selectedHikeToJoin.hike_date) < new Date(new Date().setHours(0,0,0,0))) ? (
                   <button
                     onClick={() => {
                       setSelectedHikeToJoin(null)
                       if (onNavigateTab) onNavigateTab('diaries')
                     }}
-                    className="flex-1 py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-md"
+                    className="flex-1 min-w-[100px] py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-md"
                   >
                     {t('hikes.viewAlbum')}
                   </button>
-                ) : selectedHikeToJoin.organizer_id === currentUserId ? (
-                  <div className="flex-1 py-3 rounded-xl font-bold text-gray-500 bg-gray-50 border border-gray-200 text-center flex items-center justify-center">
-                    {t('hikes.hostedHike')}
-                  </div>
                 ) : joinedHikeIds.has(selectedHikeToJoin.id) ? (
                   <button
                     onClick={() => handleLeaveHike(selectedHikeToJoin.id)}
-                    className="flex-1 py-3 rounded-xl font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition shadow-sm"
+                    className="flex-1 min-w-[100px] py-3 rounded-xl font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition shadow-sm"
                   >
                     {t('hikes.cancelJoin')}
                   </button>
                 ) : (
                   <button
                     onClick={() => handleJoinHike(selectedHikeToJoin.id)}
-                    className="flex-1 py-3 rounded-xl font-bold text-white bg-forest hover:bg-forest-light transition shadow-md"
+                    className="flex-1 min-w-[100px] py-3 rounded-xl font-bold text-white bg-forest hover:bg-forest-light transition shadow-md"
                   >
                     {t('hikes.join')}
                   </button>

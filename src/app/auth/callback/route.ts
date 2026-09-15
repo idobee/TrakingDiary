@@ -69,6 +69,7 @@ export async function GET(request: Request) {
         
         const inviteClubId = searchParams.get('invite_club_id')
         const inviteRole = searchParams.get('invite_role')
+        const inviteHikeId = searchParams.get('invite_hike_id')
 
         if (inviteClubId && inviteRole) {
           const clubIdNum = parseInt(inviteClubId, 10)
@@ -97,6 +98,34 @@ export async function GET(request: Request) {
 
             if (insertError) {
               return NextResponse.json({ error: 'Club member insert error', details: insertError.message }, { status: 500 })
+            }
+          }
+        }
+
+        if (inviteHikeId) {
+          const hikeIdNum = parseInt(inviteHikeId, 10)
+          
+          if (!isNaN(hikeIdNum)) {
+            // Check if the user is already a member
+            const { data: existingHikeMember } = await supabaseAdmin
+              .from('hike_members')
+              .select('*')
+              .eq('hike_id', hikeIdNum)
+              .eq('user_id', user.id)
+              .single()
+
+            if (!existingHikeMember) {
+              // Add as approved member immediately
+              const { error: insertHikeError } = await supabaseAdmin.from('hike_members').insert({
+                hike_id: hikeIdNum,
+                user_id: user.id,
+                role: 'member',
+                status: 'approved'
+              })
+
+              if (insertHikeError) {
+                console.error('Hike member insert error', insertHikeError.message)
+              }
             }
           }
         }

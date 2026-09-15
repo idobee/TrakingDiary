@@ -33,6 +33,7 @@ export interface MyEpisode {
   createdAt: string
   photoUrl: string | null
   hikeName: string
+  hikeId: number
 }
 
 export interface MyClub {
@@ -155,7 +156,7 @@ export const useMyTrekking = (userId?: string) => {
         const { data: episodesData } = await supabase
           .from('episodes')
           .select(`
-            id, title, content, created_at, photo_urls,
+            id, hike_id, title, content, created_at, photo_urls,
             hikes ( title )
           `)
           .eq('author_id', userId)
@@ -167,7 +168,8 @@ export const useMyTrekking = (userId?: string) => {
           content: ep.content,
           createdAt: ep.created_at,
           photoUrl: ep.photo_urls && ep.photo_urls.length > 0 ? ep.photo_urls[0] : null,
-          hikeName: ep.hikes?.title || ''
+          hikeName: ep.hikes?.title || '',
+          hikeId: ep.hike_id
         }))
         setEpisodes(mappedEpisodes)
 

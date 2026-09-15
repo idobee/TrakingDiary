@@ -4,16 +4,32 @@ import { useTranslation } from '@/lib/i18n'
 
 interface HikeNewFormProps {
   clubId: number
-  onSuccess?: () => void
+  initialData?: any
+  onSuccess?: (hike: any) => void
 }
 
-export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) => {
+export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, initialData, onSuccess }) => {
   const { t } = useTranslation()
-  const [title, setTitle] = useState('')
-  const [mountainName, setMountainName] = useState('')
-  const [hikeDate, setHikeDate] = useState('')
-  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard' | 'expert'>('medium')
-  const [description, setDescription] = useState('')
+  const [title, setTitle] = useState(initialData?.title || '')
+  const [mountainName, setMountainName] = useState(initialData?.mountain_name || '')
+  
+  // Format initialDate for datetime-local (YYYY-MM-DDTHH:mm)
+  const formatInitialDate = (dateString: string) => {
+    if (!dateString) return ''
+    try {
+      const d = new Date(dateString)
+      // Adjust for timezone offset to get local YYYY-MM-DDTHH:mm
+      const offset = d.getTimezoneOffset() * 60000
+      const localISOTime = (new Date(d.getTime() - offset)).toISOString().slice(0, 16)
+      return localISOTime
+    } catch {
+      return ''
+    }
+  }
+  
+  const [hikeDate, setHikeDate] = useState(formatInitialDate(initialData?.hike_date))
+  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard' | 'expert'>(initialData?.difficulty || 'medium')
+  const [description, setDescription] = useState(initialData?.description || '')
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imageUrl, setImageUrl] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -29,42 +45,65 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) =
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error(t('hikes.formErrorLogin'))
 
-      // 1. Insert Hike first (with image URL if provided, else without cover image)
-      const { data: newHike, error: hikeError } = await supabase
-        .from('hikes')
-        .insert({
-          club_id: clubId,
-          organizer_id: user.id,
-          title,
-          mountain_name: mountainName,
-          hike_date: hikeDate,
-          difficulty,
-          description,
-          cover_image_url: imageUrl || null,
-          status: 'recruiting'
-        } as any)
-        .select()
-        .single()
+      let currentHike: any = initialData
 
-      if (hikeError) throw hikeError
+      if (initialData) {
+        // Update Mode
+        const { data: updatedHike, error: updateError } = await supabase
+          .from('hikes')
+          .update({
+            title,
+            mountain_name: mountainName,
+            hike_date: new Date(hikeDate).toISOString(), // Ensure UTC for DB
+            difficulty,
+            description,
+            cover_image_url: imageUrl || initialData.cover_image_url,
+          })
+          .eq('id', initialData.id)
+          .select()
+          .single()
 
-      // 2. Add organizer as member automatically
-      if (newHike) {
-        await (supabase.from('hike_members') as any).insert({
-          hike_id: (newHike as any).id,
-          user_id: user.id,
-          role: 'organizer',
-          status: 'approved'
-        })
+        if (updateError) throw updateError
+        currentHike = updatedHike
+      } else {
+        // Insert Mode
+        const { data: newHike, error: hikeError } = await supabase
+          .from('hikes')
+          .insert({
+            club_id: clubId,
+            organizer_id: user.id,
+            title,
+            mountain_name: mountainName,
+            hike_date: new Date(hikeDate).toISOString(),
+            difficulty,
+            description,
+            cover_image_url: imageUrl || null,
+            status: 'recruiting'
+          } as any)
+          .select()
+          .single()
+
+        if (hikeError) throw hikeError
+        currentHike = newHike
+
+        // 2. Add organizer as member automatically only on create
+        if (currentHike) {
+          await (supabase.from('hike_members') as any).insert({
+            hike_id: currentHike.id,
+            user_id: user.id,
+            role: 'organizer',
+            status: 'approved'
+          })
+        }
       }
 
       // 3. Upload image if exists and update hike
-      if (imageFile && newHike) {
+      if (imageFile && currentHike) {
         const formData = new FormData()
         formData.append('file', imageFile)
         formData.append('club_id', String(clubId))
-        formData.append('hike_date', hikeDate)
-        formData.append('hike_id', String((newHike as any).id))
+        formData.append('hike_date', new Date(hikeDate).toISOString())
+        formData.append('hike_id', String(currentHike.id))
         formData.append('uploader_id', user.id)
 
         const uploadRes = await fetch('/api/drive/upload', {
@@ -78,20 +117,25 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) =
         }
 
         // Update hike with image url and folder id
-        await supabase.from('hikes').update({
+        const { data: finalHike } = await supabase.from('hikes').update({
           cover_image_url: uploadData.webContentLink,
           google_drive_folder_id: uploadData.targetFolderId
-        }).eq('id', (newHike as any).id)
+        }).eq('id', currentHike.id).select().single()
+        
+        currentHike = finalHike || currentHike
       }
 
-      if (onSuccess) onSuccess()
-      // reset form
-      setTitle('')
-      setMountainName('')
-      setHikeDate('')
-      setDescription('')
-      setImageFile(null)
-      setImageUrl('')
+      if (onSuccess) onSuccess(currentHike)
+      
+      // reset form only on create
+      if (!initialData) {
+        setTitle('')
+        setMountainName('')
+        setHikeDate('')
+        setDescription('')
+        setImageFile(null)
+        setImageUrl('')
+      }
     } catch (err: any) {
       console.error(err)
       setError(err.message || t('hikes.formErrorSubmit'))
@@ -102,7 +146,9 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) =
 
   return (
     <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-      <h3 className="font-heading font-bold text-2xl text-forest mb-4">{t('hikes.formTitle')}</h3>
+      <h3 className="font-heading font-bold text-2xl text-forest mb-4">
+        {initialData ? '일정 수정하기' : t('hikes.formTitle')}
+      </h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">{error}</div>}
         
@@ -215,7 +261,7 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, onSuccess }) =
             disabled={isSubmitting}
             className="bg-forest hover:bg-forest-light text-white font-bold py-3 px-8 rounded-xl transition shadow-md disabled:opacity-50"
           >
-            {isSubmitting ? t('hikes.formSubmitting') : t('hikes.formSubmit')}
+            {isSubmitting ? t('hikes.formSubmitting') : initialData ? '수정 완료' : t('hikes.formSubmit')}
           </button>
         </div>
       </form>

@@ -19,7 +19,8 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
   const currentUserMember = members.find(m => m.user_id === user?.id)
   const isClubAdmin = user?.system_role === 'admin' || user?.system_role === 'sys_admin' || currentUserMember?.role === 'owner' || currentUserMember?.role === 'admin'
 
-  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'hikes_new' | 'badges'>('approved')
+  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'hikes_new' | 'hikes_view' | 'badges'>('approved')
+  const [currentViewHike, setCurrentViewHike] = useState<any | null>(null)
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null)
 
   const [customBadges, setCustomBadges] = useState<any[]>([])
@@ -37,6 +38,46 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
   useEffect(() => {
     fetchCustomBadges()
   }, [clubId])
+
+  const handleKakaoShare = (hike: any) => {
+    if (typeof window !== 'undefined' && (window as any).Kakao) {
+      const Kakao = (window as any).Kakao
+      const inviteUrl = `${window.location.origin}/?invite_hike_id=${hike.id}`
+      
+      try {
+        if (!Kakao.isInitialized()) {
+          Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY)
+        }
+        
+        Kakao.Share.sendDefault({
+          objectType: 'feed',
+          content: {
+            title: hike.title || '트레킹 일정',
+            description: hike.description || '새로운 트레킹 일정이 등록되었습니다.',
+            imageUrl: hike.cover_image_url || 'https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1000&auto=format&fit=crop',
+            link: {
+              mobileWebUrl: inviteUrl,
+              webUrl: inviteUrl,
+            },
+          },
+          buttons: [
+            {
+              title: '일정 참가 신청하기',
+              link: {
+                mobileWebUrl: inviteUrl,
+                webUrl: inviteUrl,
+              },
+            },
+          ],
+        })
+      } catch (error) {
+        console.error('Kakao share error:', error)
+        alert('카카오톡 공유 실패: 카카오 앱 키(JavaScript 키)가 올바르게 설정되었는지 확인해 주세요.')
+      }
+    } else {
+      alert('카카오톡 공유 기능을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.')
+    }
+  }
 
   const fetchCustomBadges = async () => {
     const { data } = await supabase.from('badges').select('*').eq('club_id', clubId)
@@ -271,7 +312,7 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
         {isClubAdmin && (
           <>
             <button
-              onClick={() => setActiveTab('hikes_new')}
+              onClick={() => { setActiveTab('hikes_new'); setCurrentViewHike(null); }}
               className={`pb-3 font-heading font-bold text-lg transition ${
                 activeTab === 'hikes_new'
                   ? 'text-forest border-b-4 border-terracotta'
@@ -280,6 +321,18 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
             >
               ⛰️ 트레킹 일정 등록
             </button>
+            {currentViewHike && (
+              <button
+                onClick={() => setActiveTab('hikes_view')}
+                className={`pb-3 font-heading font-bold text-lg transition ${
+                  activeTab === 'hikes_view'
+                    ? 'text-forest border-b-4 border-terracotta'
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
+              >
+                👁️ 일정 열람
+              </button>
+            )}
             <button
               onClick={() => setActiveTab('badges')}
               className={`pb-3 font-heading font-bold text-lg transition ${
@@ -330,12 +383,60 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
             
             {activeTab === 'hikes_new' && (
               <HikeNewForm 
-                clubId={clubId} 
-                onSuccess={() => {
-                  alert("일정이 성공적으로 등록되었습니다!");
-                  // Optionally redirect or reset
+                clubId={clubId}
+                initialData={currentViewHike}
+                onSuccess={(hike) => {
+                  alert(currentViewHike ? "일정이 성공적으로 수정되었습니다!" : "일정이 성공적으로 등록되었습니다!");
+                  setCurrentViewHike(hike);
+                  setActiveTab('hikes_view');
                 }} 
               />
+            )}
+
+            {activeTab === 'hikes_view' && currentViewHike && (
+              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                  <div>
+                    <span className="text-[10px] font-bold text-terracotta bg-orange-50 px-2 py-1 rounded-lg">등록 완료</span>
+                    <h3 className="font-heading font-extrabold text-2xl text-forest mt-2">{currentViewHike.title}</h3>
+                    <p className="text-gray-500 text-sm mt-1">📍 {currentViewHike.mountain_name} • 📅 {new Date(currentViewHike.hike_date).toLocaleString()}</p>
+                    <p className="text-gray-400 text-xs mt-1">난이도: {currentViewHike.difficulty}</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                    <button 
+                      onClick={() => setActiveTab('hikes_new')}
+                      className="flex-1 sm:flex-none bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-bold transition flex justify-center"
+                    >
+                      ✏️ 수정하기
+                    </button>
+                    <button 
+                      onClick={() => {
+                        const inviteUrl = `${window.location.origin}/?invite_hike_id=${currentViewHike.id}`
+                        navigator.clipboard.writeText(inviteUrl)
+                        alert('일정 참가 초대 링크가 복사되었습니다!')
+                      }}
+                      className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold transition flex items-center justify-center gap-1 shadow-sm"
+                    >
+                      🔗 초대 링크 복사
+                    </button>
+                    <button 
+                      onClick={() => handleKakaoShare(currentViewHike)}
+                      className="flex-1 sm:flex-none bg-[#FEE500] hover:bg-[#FEE500]/90 text-[#000000] px-4 py-2 rounded-xl text-sm font-bold transition shadow-sm flex items-center justify-center gap-1"
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M12 3c-5.52 0-10 3.52-10 7.86 0 2.8 1.83 5.25 4.6 6.55-.26 1.05-1 3.97-1.04 4.14-.05.17.06.26.17.2 0 0 3.32-2.18 4.54-3.08.56.09 1.13.13 1.73.13 5.52 0 10-3.52 10-7.86C22 6.52 17.52 3 12 3z"/></svg>
+                      카톡 공유
+                    </button>
+                  </div>
+                </div>
+                
+                {currentViewHike.cover_image_url && (
+                  <img src={currentViewHike.cover_image_url} alt="Cover" className="w-full h-64 object-cover rounded-xl" />
+                )}
+                
+                <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 whitespace-pre-wrap text-sm text-gray-700">
+                  {currentViewHike.description || '상세 내용이 없습니다.'}
+                </div>
+              </div>
             )}
 
             {activeTab === 'badges' && (

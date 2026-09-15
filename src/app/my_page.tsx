@@ -26,6 +26,15 @@ export const MyPage: React.FC<MyPageProps> = ({
   const [editTitle, setEditTitle] = useState('')
   const [editContent, setEditContent] = useState('')
   const [isUpdating, setIsUpdating] = useState(false)
+
+  // Blog Generation State
+  const [isBlogMode, setIsBlogMode] = useState(false)
+  const [selectedBlogEpisodes, setSelectedBlogEpisodes] = useState<number[]>([])
+  const [showBlogModal, setShowBlogModal] = useState(false)
+  const [blogLength, setBlogLength] = useState('1000')
+  const [generatedBlogHtml, setGeneratedBlogHtml] = useState('')
+  const [isGeneratingBlog, setIsGeneratingBlog] = useState(false)
+
   const supabase = createClient()
 
   const handleUpdateEpisode = async () => {
@@ -66,6 +75,64 @@ export const MyPage: React.FC<MyPageProps> = ({
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-forest"></div>
       </div>
     )
+  }
+
+  const handleShareEpisode = async (ep: MyEpisode) => {
+    // Check participation
+    const isParticipant = activities.some(a => a.id === ep.hikeId)
+    if (!isParticipant) {
+      alert('참여한 산행의 에피소드만 공유할 수 있습니다.')
+      return
+    }
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: ep.title,
+          text: `[TrakingDiary] ${ep.title} 에세이를 확인해보세요!`,
+          url: `${window.location.origin}/diaries/${ep.hikeId}`
+        })
+      } catch (error) {
+        console.log('공유 취소 또는 실패', error)
+      }
+    } else {
+      alert('이 브라우저에서는 기본 공유 기능을 지원하지 않습니다.')
+    }
+  }
+
+  const handleGenerateBlog = async () => {
+    setIsGeneratingBlog(true)
+    setGeneratedBlogHtml('')
+    try {
+      const selectedEps = episodes.filter(ep => selectedBlogEpisodes.includes(ep.id))
+      const combinedText = selectedEps.map(ep => `제목: ${ep.title}\n내용: ${ep.content}`).join('\n\n')
+      
+      const apiKey = localStorage.getItem('gemini_api_key') || localStorage.getItem('openai_api_key')
+      if (!apiKey) {
+        alert('AI 설정에서 API Key를 먼저 등록해 주세요.')
+        setIsGeneratingBlog(false)
+        return
+      }
+      
+      const prompt = `다음은 사용자가 작성한 여러 트레킹 에피소드들입니다.\n\n${combinedText}\n\n위 내용들을 바탕으로, 네이버/티스토리 등 블로그에 바로 올릴 수 있는 트렌디하고 검색 최적화(SEO)된 멋진 블로그 포스팅 초안을 ${blogLength}자 내외로 작성해 주세요. 제목, 서론, 본론, 결론, 해시태그를 포함하세요. HTML 태그를 사용하지 말고 일반 텍스트 포맷으로 작성해주세요.`
+      
+      const res = await fetch('/api/ai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider: localStorage.getItem('ai_provider') || 'gemini', apiKey, prompt })
+      })
+      
+      if (res.ok) {
+        const data = await res.json()
+        setGeneratedBlogHtml(data.text)
+      } else {
+        throw new Error('블로그 생성 실패')
+      }
+    } catch (err) {
+      console.error(err)
+      alert('블로그 글 생성에 실패했습니다.')
+    } finally {
+      setIsGeneratingBlog(false)
+    }
   }
 
   return (
@@ -140,17 +207,67 @@ export const MyPage: React.FC<MyPageProps> = ({
 
           {/* My Written Episodes List */}
           <div className="bg-white rounded-2xl p-6 shadow-md border border-paper-high space-y-5 flex-1">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-100 pb-3 gap-3">
               <div className="flex items-center space-x-2">
                 <h3 className="font-heading font-bold text-lg text-forest">{t('my.episodesTitle')}</h3>
+                <span className="font-label text-xs text-gray-500">{t('my.episodesMeta', { count: episodes.length })}</span>
               </div>
-              <span className="font-label text-xs text-gray-500">{t('my.episodesMeta', { count: episodes.length })}</span>
+              <div className="flex items-center gap-2">
+                {!isBlogMode ? (
+                  <button
+                    onClick={() => {
+                      setIsBlogMode(true)
+                      setSelectedBlogEpisodes([])
+                    }}
+                    className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-100 transition shadow-sm"
+                  >
+                    블로그 글 만들기
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setIsBlogMode(false)}
+                      className="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg text-xs font-bold hover:bg-gray-200 transition shadow-sm"
+                    >
+                      취소
+                    </button>
+                    <button
+                      onClick={() => setShowBlogModal(true)}
+                      disabled={selectedBlogEpisodes.length === 0}
+                      className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition shadow-sm disabled:opacity-50"
+                    >
+                      블로그 생성 시작 ({selectedBlogEpisodes.length})
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
+            
+            {isBlogMode && (
+              <p className="text-xs text-blue-600 font-bold bg-blue-50 p-2 rounded-lg text-center animate-pulse">
+                블로그 글로 엮을 에피소드들을 선택하세요.
+              </p>
+            )}
 
             {episodes.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {episodes.map((ep) => (
-                  <div key={ep.id} className="bg-paper-low rounded-2xl p-5 border-2 border-forest/20 shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-3">
+                  <div key={ep.id} className={`relative bg-paper-low rounded-2xl p-5 border-2 ${selectedBlogEpisodes.includes(ep.id) ? 'border-blue-500 ring-2 ring-blue-200' : 'border-forest/20'} shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-3`}>
+                    
+                    {isBlogMode && (
+                      <div className="absolute top-3 right-3 z-10 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedBlogEpisodes.includes(ep.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) setSelectedBlogEpisodes(prev => [...prev, ep.id])
+                            else setSelectedBlogEpisodes(prev => prev.filter(id => id !== ep.id))
+                          }}
+                          className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
+                        />
+                      </div>
+                    )}
+                    
                     <div>
                       <div className="flex justify-between items-center border-b border-gray-200/70 pb-2 mb-3">
                         <div className="flex items-center space-x-2">
@@ -205,6 +322,17 @@ export const MyPage: React.FC<MyPageProps> = ({
                         </p>
                       </div>
                     </div>
+                    
+                    {!isBlogMode && (
+                      <div className="pt-2 flex justify-end">
+                        <button
+                          onClick={() => handleShareEpisode(ep)}
+                          className="px-3 py-1 bg-yellow-400 text-black rounded-full text-xs font-bold hover:bg-yellow-500 transition shadow-sm flex items-center gap-1"
+                        >
+                          <span>📲</span> 카톡/공유
+                        </button>
+                      </div>
+                    )}
 
                   </div>
                 ))}
@@ -322,6 +450,93 @@ export const MyPage: React.FC<MyPageProps> = ({
                 className="px-6 py-2 bg-forest text-white rounded-xl text-xs font-bold shadow hover:bg-forest-light transition disabled:opacity-50"
               >
                 {isUpdating ? '저장 중...' : '저장 완료'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Blog Generation Modal */}
+      {showBlogModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl w-full max-w-3xl p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]">
+            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+              <h3 className="font-heading font-bold text-xl text-blue-600 flex items-center gap-2">
+                <span>📝</span> 블로그 글 생성기
+              </h3>
+              <button onClick={() => setShowBlogModal(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+
+            <div className="flex items-center justify-between bg-blue-50 p-4 rounded-xl">
+              <div>
+                <p className="text-sm font-bold text-gray-700">목표 글자 수 선택</p>
+                <p className="text-xs text-gray-500">선택한 에피소드 {selectedBlogEpisodes.length}개를 엮어 블로그 글을 작성합니다.</p>
+              </div>
+              <select 
+                value={blogLength} 
+                onChange={(e) => setBlogLength(e.target.value)}
+                className="bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="1000">1000자 내외 (기본)</option>
+                <option value="2000">2000자 내외 (상세)</option>
+                <option value="3000">3000자 내외 (심층)</option>
+              </select>
+            </div>
+
+            <div className="flex-1 min-h-[200px] max-h-[500px] overflow-y-auto bg-gray-50 rounded-xl border border-gray-200 p-4 relative">
+              {isGeneratingBlog ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/50 backdrop-blur-sm">
+                  <div className="text-4xl animate-spin mb-4">⚙️</div>
+                  <p className="font-bold text-blue-600 animate-pulse">트렌디한 블로그 초안을 작성 중입니다...</p>
+                </div>
+              ) : generatedBlogHtml ? (
+                <textarea 
+                  value={generatedBlogHtml}
+                  readOnly
+                  className="w-full h-full bg-transparent border-none resize-none focus:outline-none text-sm leading-loose text-gray-800"
+                />
+              ) : (
+                <div className="h-full flex items-center justify-center text-gray-400 text-sm font-bold">
+                  아래 [생성하기] 버튼을 눌러주세요.
+                </div>
+              )}
+            </div>
+
+            <div className="pt-2 text-xs text-red-500 font-bold text-center">
+              ⚠️ 생성된 글은 서버에 자동 저장되지 않습니다. 반드시 클립보드에 복사하여 블로그에 붙여넣기 하세요!
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-4 border-t border-gray-100">
+              <button 
+                onClick={() => {
+                  const blob = new Blob([generatedBlogHtml.replace(/\n/g, '<br/>')], { type: 'text/html' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `blog_draft.html`
+                  a.click()
+                }} 
+                disabled={!generatedBlogHtml || isGeneratingBlog}
+                className="px-4 py-2 bg-purple-100 text-purple-700 rounded-xl text-xs font-bold hover:bg-purple-200 transition shadow-sm disabled:opacity-50"
+              >
+                HTML 다운로드
+              </button>
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText(generatedBlogHtml)
+                  alert('클립보드에 복사되었습니다! 블로그 에디터에 붙여넣기 하세요.')
+                }} 
+                disabled={!generatedBlogHtml || isGeneratingBlog}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-xs font-bold hover:bg-gray-200 transition shadow-sm disabled:opacity-50 flex items-center gap-1"
+              >
+                <span>📋</span> 클립보드 복사
+              </button>
+              <button 
+                onClick={handleGenerateBlog} 
+                disabled={isGeneratingBlog} 
+                className="px-6 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold shadow hover:bg-blue-700 transition disabled:opacity-50"
+              >
+                {isGeneratingBlog ? '생성 중...' : (generatedBlogHtml ? '다시 생성하기' : '✨ 블로그 글 생성하기')}
               </button>
             </div>
           </div>

@@ -16,6 +16,8 @@ interface DashboardPageProps {
   user?: any
   inviteClubId?: number | null
   onAcceptInvite?: () => void
+  inviteHikeId?: number | null
+  onAcceptHikeInvite?: () => void
   onOpenDiaryDetail?: (hikeId: number) => void
 }
 
@@ -30,6 +32,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   user = null,
   inviteClubId = null,
   onAcceptInvite,
+  inviteHikeId = null,
+  onAcceptHikeInvite,
   onOpenDiaryDetail
 }) => {
   const { t } = useTranslation()
@@ -68,6 +72,29 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               className="w-full sm:w-auto bg-forest hover:bg-forest-light text-white font-heading font-bold text-sm px-6 py-3 rounded-full transition shadow"
             >
               초대 승인하기
+            </button>
+          </div>
+        )}
+
+        {/* Hike Invite Banner (Conditional) */}
+        {inviteHikeId && (
+          <div className="bg-blue-50 border-2 border-blue-200 p-6 rounded-3xl shadow-md flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-blue-400 rounded-full flex items-center justify-center text-2xl shadow-inner">
+                ⛰️
+              </div>
+              <div>
+                <h3 className="font-heading font-extrabold text-xl text-blue-900">일정 참가 초대 수락하기</h3>
+                <p className="text-sm text-blue-800 font-body">
+                  초대받은 트레킹 일정에 참가하시겠습니까?
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onAcceptHikeInvite}
+              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-heading font-bold text-sm px-6 py-3 rounded-full transition shadow"
+            >
+              참가 신청하기
             </button>
           </div>
         )}

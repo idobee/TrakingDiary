@@ -14,7 +14,7 @@ interface AuthContextValue {
   user: ExtendedUser | null
   session: Session | null
   isLoading: boolean
-  signInWithProvider: (provider: 'kakao' | 'google', inviteClubId?: number | null, inviteRole?: string | null) => Promise<void>
+  signInWithProvider: (provider: 'kakao' | 'google', inviteClubId?: number | null, inviteRole?: string | null, inviteHikeId?: number | null) => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -80,10 +80,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
-  const signInWithProvider = async (provider: 'kakao' | 'google', inviteClubId?: number | null, inviteRole?: string | null) => {
+  const signInWithProvider = async (provider: 'kakao' | 'google', inviteClubId?: number | null, inviteRole?: string | null, inviteHikeId?: number | null) => {
     let callbackUrl = `${window.location.origin}/auth/callback`
+    const params = new URLSearchParams()
     if (inviteClubId && inviteRole) {
-      callbackUrl += `?invite_club_id=${inviteClubId}&invite_role=${inviteRole}`
+      params.append('invite_club_id', inviteClubId.toString())
+      params.append('invite_role', inviteRole)
+    }
+    if (inviteHikeId) {
+      params.append('invite_hike_id', inviteHikeId.toString())
+    }
+    if (params.toString()) {
+      callbackUrl += `?${params.toString()}`
     }
 
     const options: any = {

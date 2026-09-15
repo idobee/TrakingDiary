@@ -316,8 +316,9 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
         }
       })
 
-      prompt += `위 내용들을 바탕으로, 감각적인 여행 매거진(잡지)의 한 페이지처럼 유려하고 세련된 에세이로 전체 글을 재작성해 주세요. 
-각자의 시선이 하나로 어우러지는 기승전결이 있는 에세이 톤으로 작성해 주시고, 
+      prompt += `위 내용들을 바탕으로 세스 고딘(Seth Godin)의 '보라빛 소가 온다(Purple Cow)' 마케팅 개념을 트레킹 에세이에 적용해 주세요. 
+평범하고 지루한 산행 기록이 아니라, 이번 산행에서 가장 눈에 띄고, 독특하며, 사람들의 입에 오르내릴 만한 '리마커블(Remarkable)한 포인트'를 찾아내어 집중적으로 부각시켜 주세요.
+감각적인 여행 매거진(잡지)의 한 페이지처럼 유려하고 세련된 에세이 톤으로 재작성해 주시고, 
 글의 흐름에 맞게 특정 장소나 순간을 묘사하는 문단 바로 옆에 사진이 배치될 수 있도록, 적절한 위치에 "[PHOTO_1]", "[PHOTO_2]" 와 같이 사진 플레이스홀더를 넣어주세요 (최대 8개). 
 마치 잡지의 다단 레이아웃처럼, 짧고 임팩트 있는 소제목들을 적극 활용해 주세요.
 답변은 Markdown 포맷(적절한 제목, 문단 구분)으로 작성해 주시고, 각 사진 플레이스홀더는 반드시 문단과 문단 사이의 별도의 줄에 작성해주세요.`
@@ -383,6 +384,34 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
     a.href = url
     a.download = `${hike?.title}_에세이.html`
     a.click()
+  }
+
+  const handleCopyForBlog = () => {
+    const article = document.getElementById('book-article')
+    if (!article) return
+    const htmlContent = article.innerHTML.replace(/src="\//g, `src="${window.location.origin}/`)
+    navigator.clipboard.writeText(htmlContent).then(() => {
+      alert('블로그용 HTML이 클립보드에 복사되었습니다. 네이버/티스토리 에디터(HTML 모드)에 붙여넣기 하세요.')
+    }).catch(err => {
+      console.error('클립보드 복사 실패:', err)
+      alert('복사에 실패했습니다.')
+    })
+  }
+
+  const handleShareNative = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: hike?.title || 'TrakingDiary',
+          text: `[TrakingDiary] ${hike?.title} 에세이를 확인해보세요!`,
+          url: window.location.href
+        })
+      } catch (error) {
+        console.log('공유 취소 또는 실패', error)
+      }
+    } else {
+      alert('이 브라우저에서는 기본 공유 기능을 지원하지 않습니다.')
+    }
   }
 
   const handleSaveAsEpisode = async () => {
@@ -1055,6 +1084,23 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
             >
               <span>🌐</span> HTML 저장
             </button>
+            <button 
+              onClick={handleCopyForBlog} 
+              className="bg-purple-600 text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-purple-700 transition shadow-md flex items-center gap-2"
+              disabled={isGeneratingBook}
+            >
+              <span>📝</span> 블로그용 복사
+            </button>
+            {/* 참가자만 공유 기능 접근 가능 */}
+            {user && participants.some(p => p.user_id === user.id) && (
+              <button 
+                onClick={handleShareNative} 
+                className="bg-yellow-400 text-black px-4 py-2 rounded-full text-sm font-bold hover:bg-yellow-500 transition shadow-md flex items-center gap-2"
+                disabled={isGeneratingBook}
+              >
+                <span>📲</span> 카톡/공유
+              </button>
+            )}
             <button 
               onClick={() => window.print()} 
               className="bg-terracotta text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-terracotta-dark transition shadow-md flex items-center gap-2"

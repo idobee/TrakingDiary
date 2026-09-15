@@ -35,6 +35,7 @@ export default function Home() {
   
   const [inviteClubId, setInviteClubId] = useState<number | null>(null)
   const [inviteRole, setInviteRole] = useState<string | null>(null)
+  const [inviteHikeId, setInviteHikeId] = useState<number | null>(null)
 
   const { hikes, isLoading: isHikesLoading } = useHikes(selectedClubId || undefined)
 
@@ -84,10 +85,15 @@ export default function Home() {
     const params = new URLSearchParams(window.location.search)
     const clubIdStr = params.get('invite_club_id')
     const role = params.get('invite_role')
+    const hikeIdStr = params.get('invite_hike_id')
     
     if (clubIdStr) {
       setInviteClubId(parseInt(clubIdStr, 10))
       if (role) setInviteRole(role)
+    }
+
+    if (hikeIdStr) {
+      setInviteHikeId(parseInt(hikeIdStr, 10))
     }
   }, [])
 
@@ -130,6 +136,49 @@ export default function Home() {
     window.history.replaceState({}, document.title, window.location.pathname)
     setInviteClubId(null)
     setInviteRole(null)
+  }
+
+  const handleAcceptHikeInvite = async () => {
+    if (!inviteHikeId) return
+
+    if (!user) {
+      setActiveTab('login')
+      return
+    }
+
+    const { data: existingMember } = await supabase
+      .from('hike_members')
+      .select('*')
+      .eq('hike_id', inviteHikeId)
+      .eq('user_id', user.id)
+      .single()
+
+    if (!existingMember) {
+      const { error: insertError } = await supabase.from('hike_members').insert({
+        hike_id: inviteHikeId,
+        user_id: user.id,
+        role: 'member',
+        status: 'approved'
+      })
+      
+      if (insertError) {
+        console.error(insertError)
+        alert('참가 신청 중 오류가 발생했습니다: ' + insertError.message)
+      } else {
+        alert('일정 참가가 확정되었습니다! 명단에 등록되었습니다.')
+      }
+    } else {
+      alert('이미 참여 중이거나 참여 신청한 일정입니다.')
+    }
+    
+    // Clear URL
+    const params = new URLSearchParams(window.location.search)
+    params.delete('invite_hike_id')
+    const newSearch = params.toString() ? `?${params.toString()}` : ''
+    window.history.replaceState({}, document.title, window.location.pathname + newSearch)
+    setInviteHikeId(null)
+    setActiveTab('hikes')
+    setSelectedHikeId(inviteHikeId)
   }
 
   React.useEffect(() => {
@@ -183,7 +232,7 @@ export default function Home() {
 
   // Dashboard and intro are public, but other tabs require login.
   if (!user && activeTab !== 'dashboard' && activeTab !== 'intro') {
-    return <LoginPage inviteClubId={inviteClubId} inviteRole={inviteRole} />
+    return <LoginPage inviteClubId={inviteClubId} inviteRole={inviteRole} inviteHikeId={inviteHikeId} />
   }
 
   return (
@@ -220,6 +269,8 @@ export default function Home() {
               user={user}
               inviteClubId={inviteClubId}
               onAcceptInvite={handleAcceptInvite}
+              inviteHikeId={inviteHikeId}
+              onAcceptHikeInvite={handleAcceptHikeInvite}
               onOpenDiaryDetail={(hikeId) => {
                 setSelectedHikeId(hikeId)
                 setActiveTab('diaries_id')
