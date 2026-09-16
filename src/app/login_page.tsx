@@ -36,19 +36,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ inviteClubId, inviteRole, 
 
       <div className="relative z-10 w-full max-w-md bg-white p-8 rounded-[2.5rem] shadow-2xl border-2 border-forest-container text-center space-y-8 relative">
         
-        {/* Close Button */}
-        {onCancel && (
-          <button 
-            onClick={onCancel}
-            className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors"
-            aria-label="Close"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
-          </button>
-        )}
-
         {/* Branding & Logo */}
         <div className="space-y-4">
           <div className="w-20 h-20 mx-auto rounded-full bg-terracotta flex items-center justify-center text-white text-4xl shadow-lg border-4 border-white">
@@ -91,6 +78,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({ inviteClubId, inviteRole, 
           <p className="text-[10px] text-gray-400 font-label pt-4">
             {t('auth.socialOnlyNotice')}
           </p>
+
+          {/* Cancel Button */}
+          {onCancel && (
+            <button
+              onClick={onCancel}
+              className="w-full mt-4 bg-gray-100 hover:bg-gray-200 text-gray-600 font-heading font-bold text-sm px-6 py-4 rounded-2xl transition shadow-sm flex items-center justify-center"
+            >
+              취소하고 돌아가기
+            </button>
+          )}
         </div>
 
       </div>
