@@ -8,6 +8,7 @@ import { Club } from '@/hooks/useClubs'
 interface DashboardPageProps {
   onNavigateTab: (tab: string) => void
   onOpenScheduleModal: (title: string) => void
+  onOpenDiaryDetail?: (hikeId: number) => void
   hikes: Hike[]
   clubs?: Club[]
   allClubs?: Club[]
@@ -18,7 +19,6 @@ interface DashboardPageProps {
   onAcceptInvite?: () => void
   inviteHikeId?: number | null
   onAcceptHikeInvite?: () => void
-  onOpenDiaryDetail?: (hikeId: number) => void
 }
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({
@@ -35,7 +35,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   inviteHikeId = null,
   onAcceptHikeInvite,
   onOpenDiaryDetail
-}) => {
+}: DashboardPageProps) => {
   const { t } = useTranslation()
 
   const now = new Date()
@@ -149,16 +149,22 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               publicEpisodes.map(ep => {
                 const hasPhoto = ep.photo_urls && ep.photo_urls.length > 0
                 return (
-                  <div key={ep.id} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:shadow-md transition">
-                    <div className="flex items-center space-x-2 mb-2">
-                      {ep.users?.avatar_url ? (
-                        <img src={ep.users.avatar_url} className="w-6 h-6 rounded-full" />
-                      ) : (
-                        <div className="w-6 h-6 rounded-full bg-forest text-white text-[10px] font-bold flex items-center justify-center">
-                          {ep.users?.nickname?.[0]}
-                        </div>
-                      )}
-                      <span className="text-xs font-bold text-gray-700">{ep.users?.nickname}</span>
+                  <div 
+                    key={ep.id} 
+                    className="p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:shadow-md transition cursor-pointer"
+                    onClick={() => onOpenDiaryDetail && ep.hike_id && onOpenDiaryDetail(ep.hike_id)}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        {ep.hikes?.clubs?.logo_url ? (
+                          <img src={ep.hikes.clubs.logo_url} className="w-6 h-6 rounded-full object-cover" />
+                        ) : (
+                          <div className="w-6 h-6 rounded-full bg-forest text-white text-[10px] font-bold flex items-center justify-center">
+                            {ep.hikes?.clubs?.name?.[0] || '?'}
+                          </div>
+                        )}
+                        <span className="text-xs text-gray-600 font-bold">{ep.hikes?.clubs?.name || 'Unknown Club'}</span>
+                      </div>
                       <span className="text-[10px] text-gray-400">{new Date(ep.created_at).toLocaleDateString()}</span>
                     </div>
                     <h4 className="font-heading font-bold text-forest text-sm line-clamp-1">{ep.title}</h4>

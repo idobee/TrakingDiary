@@ -48,7 +48,7 @@ export default function Home() {
       // Fetch public episodes
       const { data: eps } = await supabase
         .from('episodes')
-        .select(`id, title, content, created_at, photo_urls, episode_type, users(nickname, avatar_url)`)
+        .select(`id, title, content, created_at, photo_urls, episode_type, users(nickname, avatar_url), hikes(clubs(name, logo_url))`)
         .eq('is_published', true)
         .order('created_at', { ascending: false })
         .limit(6)
@@ -261,6 +261,10 @@ export default function Home() {
                   t('modal.demoData.hikeDesc'),
                 )
               }
+              onOpenDiaryDetail={(hikeId) => {
+                setSelectedHikeId(hikeId)
+                setActiveTab('diaries_id')
+              }}
               hikes={hikes}
               clubs={clubs}
               allClubs={allClubs}
