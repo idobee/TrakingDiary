@@ -280,10 +280,6 @@ export default function Home() {
               onAcceptInvite={handleAcceptInvite}
               inviteHikeId={inviteHikeId}
               onAcceptHikeInvite={handleAcceptHikeInvite}
-              onOpenDiaryDetail={(hikeId) => {
-                setSelectedHikeId(hikeId)
-                setActiveTab('diaries_id')
-              }}
             />
           )}
 
