@@ -275,8 +275,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
         ) : (
           <div className="bg-forest text-paper p-6 rounded-3xl shadow-xl sticky top-24 border border-forest-surface text-center space-y-4">
-            <div className="w-16 h-16 bg-terracotta text-white rounded-full mx-auto flex items-center justify-center text-3xl shadow-inner">
-              🏔️
+            <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center shadow-inner overflow-hidden border-2 border-terracotta/20 bg-forest-surface">
+              <img src="/pixel_emoji.png" alt="Login Icon" className="w-full h-full object-cover" />
             </div>
             <div>
               <h3 className="font-heading font-extrabold text-lg text-white leading-tight">
