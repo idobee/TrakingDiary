@@ -43,6 +43,15 @@ export default function Home() {
   const [publicPhotos, setPublicPhotos] = useState<any[]>([])
   const [allClubs, setAllClubs] = useState<any[]>([])
 
+  // 다국어(I18n) 설정에 따라 문서 제목(title)과 설명(description)을 동적으로 변경합니다.
+  React.useEffect(() => {
+    document.title = t('header.appTitle')
+    const metaDesc = document.querySelector('meta[name="description"]')
+    if (metaDesc) {
+      metaDesc.setAttribute('content', t('header.appSubtitle'))
+    }
+  }, [t])
+
   React.useEffect(() => {
     async function fetchPublicData() {
       // Fetch public episodes
