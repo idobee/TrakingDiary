@@ -340,7 +340,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               })
             ) : (
               <div className="p-4 text-center text-sm text-gray-500 font-body">
-                {t('dashboard.hikesEmpty')}
+                모집 중인 일정이 없습니다.
               </div>
             )}
           </div>
