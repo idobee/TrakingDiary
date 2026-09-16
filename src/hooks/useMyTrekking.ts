@@ -50,6 +50,7 @@ export const useMyTrekking = (userId?: string) => {
   const [episodes, setEpisodes] = useState<MyEpisode[]>([])
   const [clubs, setClubs] = useState<MyClub[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [isSample, setIsSample] = useState(false)
 
   useEffect(() => {
     fetchData()
@@ -171,7 +172,54 @@ export const useMyTrekking = (userId?: string) => {
           hikeName: ep.hikes?.title || '',
           hikeId: ep.hike_id
         }))
-        setEpisodes(mappedEpisodes)
+        
+        // --- Sample Data Injection ---
+        if (mappedClubs.length === 0) {
+          const sampleClubId = process.env.NEXT_PUBLIC_SAMPLE_CLUB_ID;
+          if (sampleClubId) {
+            setIsSample(true);
+            
+            const { data: sampleClub } = await supabase.from('clubs').select('*').eq('id', sampleClubId).single();
+            if (sampleClub) {
+              setClubs([{
+                id: sampleClub.id,
+                name: sampleClub.name,
+                category: sampleClub.category,
+                description: sampleClub.description,
+                createdAt: sampleClub.created_at
+              }]);
+            }
+            
+            const { data: sampleHike } = await supabase.from('hikes').select('*').eq('club_id', sampleClubId).order('hike_date', { ascending: false }).limit(1).single();
+            if (sampleHike) {
+              setActivities([{
+                id: sampleHike.id,
+                hikeId: sampleHike.id,
+                title: sampleHike.title,
+                mountainName: sampleHike.mountain_name,
+                hikeDate: sampleHike.hike_date,
+                description: sampleHike.description || ''
+              }]);
+            }
+
+            const { data: sampleEpisode } = await supabase.from('episodes').select('*, hikes(title)').eq('hike_id', sampleHike?.id || 0).single();
+            if (sampleEpisode) {
+              setEpisodes([{
+                id: sampleEpisode.id,
+                title: sampleEpisode.title,
+                content: sampleEpisode.content,
+                createdAt: sampleEpisode.created_at,
+                photoUrl: sampleEpisode.photo_urls && sampleEpisode.photo_urls.length > 0 ? sampleEpisode.photo_urls[0] : null,
+                hikeName: sampleEpisode.hikes?.title || '',
+                hikeId: sampleEpisode.hike_id
+              }]);
+            }
+          }
+        } else {
+          setIsSample(false);
+          setActivities(mappedActivities)
+          setEpisodes(mappedEpisodes)
+        }
 
       } catch (error) {
         console.error('Error fetching My Trekking data', error)
@@ -180,5 +228,5 @@ export const useMyTrekking = (userId?: string) => {
       }
   }
 
-  return { activities, badges, episodes, clubs, isLoading, refetch: fetchData }
+  return { activities, badges, episodes, clubs, isLoading, isSample, refetch: fetchData }
 }

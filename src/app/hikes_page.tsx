@@ -163,11 +163,18 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
           Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY)
         }
         
+        // 카카오톡 description은 최대 200자 제한이 있으므로 안전하게 자릅니다.
+        const maxDescLen = 200 - inviteUrl.length - 15;
+        const rawDesc = hike.description || '새로운 트레킹 일정이 등록되었습니다.';
+        const safeDesc = rawDesc.length > maxDescLen 
+          ? rawDesc.substring(0, maxDescLen) + '...' 
+          : rawDesc;
+
         Kakao.Share.sendDefault({
           objectType: 'feed',
           content: {
             title: hike.title || '트레킹 일정',
-            description: hike.description || '새로운 트레킹 일정이 등록되었습니다.',
+            description: `${safeDesc}\n\n🔗 초대 링크:\n${inviteUrl}`,
             imageUrl: hike.cover_image_url || 'https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1000&auto=format&fit=crop',
             link: {
               mobileWebUrl: inviteUrl,

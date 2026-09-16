@@ -17,7 +17,7 @@ export const MyPage: React.FC<MyPageProps> = ({
   onOpenBadgeGrantModal,
 }) => {
   const { t } = useTranslation()
-  const { activities, badges, episodes, clubs, isLoading, refetch } = useMyTrekking(user?.id)
+  const { activities, badges, episodes, clubs, isLoading, isSample, refetch } = useMyTrekking(user?.id)
 
   const earnedBadgesCount = badges.filter(b => !b.isLocked).length
 
@@ -146,6 +146,23 @@ export const MyPage: React.FC<MyPageProps> = ({
           <p className="text-xs text-gray-600 font-body mt-1">{t('my.sectionDesc')}</p>
         </div>
       </div>
+
+      {isSample && (
+        <div className="bg-sky-50 border border-sky-200 p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+          <div>
+            <h3 className="text-sky-800 font-heading font-bold text-lg flex items-center gap-2">
+              <span>👋</span> 환영합니다! 아래는 샘플 동호회 데이터입니다.
+            </h3>
+            <p className="text-sky-600 text-sm mt-1">지금 나만의 첫 동호회를 만들고 직접 산행 기록을 남겨보세요!</p>
+          </div>
+          <button 
+            onClick={() => window.location.href = '/clubs/new'}
+            className="bg-sky-600 hover:bg-sky-700 text-white font-bold py-2.5 px-6 rounded-full transition-colors whitespace-nowrap shadow-md flex items-center gap-2"
+          >
+            <span>➕</span> 나만의 동호회 만들기
+          </button>
+        </div>
+      )}
 
       {/* 2-Column Layout for PC, Stacked for Mobile */}
       <div className="flex flex-col xl:grid xl:grid-cols-3 gap-6">
@@ -311,12 +328,10 @@ export const MyPage: React.FC<MyPageProps> = ({
                       </h4>
                       
                       <div className="flex space-x-3 items-start">
-                        {ep.photoUrl && (
-                          <div className="shrink-0 w-20 h-20 rounded-xl overflow-hidden border border-sand shadow-sm bg-gray-100 relative">
-                            <div className="washi-tape-sm"></div>
-                            <img src={ep.photoUrl} className="w-full h-full object-cover" />
-                          </div>
-                        )}
+                        <div className="shrink-0 w-20 h-20 rounded-xl overflow-hidden border border-sand shadow-sm bg-gray-100 relative">
+                          <div className="washi-tape-sm"></div>
+                          <img src={ep.photoUrl || '/images/default_image.jpg'} className="w-full h-full object-cover" />
+                        </div>
                         <p className="text-xs text-gray-600 font-body line-clamp-3 leading-relaxed">
                           {ep.content}
                         </p>
