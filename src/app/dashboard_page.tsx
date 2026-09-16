@@ -149,8 +149,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               publicEpisodes.map(ep => {
                 const hasPhoto = ep.photo_urls && ep.photo_urls.length > 0
                 return (
-                  <div 
-                    key={ep.id} 
+                  <div
+                    key={ep.id}
                     className="p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:shadow-md transition cursor-pointer"
                     onClick={() => onOpenDiaryDetail && ep.hike_id && onOpenDiaryDetail(ep.hike_id)}
                   >
@@ -300,7 +300,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           <div className="flex items-center justify-between border-b border-gray-100 pb-3">
             <div className="flex items-center space-x-2">
               <h3 className="font-heading font-bold text-lg text-forest">{t('dashboard.recentHikesTitle')}</h3>
-              <span className="uc-tag">{t('dashboard.recentHikesUc')}</span>
+
             </div>
             <button onClick={() => onNavigateTab('hikes')} className="text-xs font-label text-terracotta hover:underline font-bold">
               {t('common.viewAll')} &rarr;
@@ -340,7 +340,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               })
             ) : (
               <div className="p-4 text-center text-sm text-gray-500 font-body">
-                모집 중인 산행이 없습니다.
+                모집 중인 일정이 없습니다.
               </div>
             )}
           </div>

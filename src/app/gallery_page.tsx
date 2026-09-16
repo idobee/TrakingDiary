@@ -113,15 +113,15 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
         return
       }
 
-      const prompt = `다음 정보를 바탕으로, 인스타그램에 올리기 좋은 감각적이고 트렌디한 등산 피드 글을 작성해줘. 첫 줄은 시선을 끄는 감성적인 문구로 시작하고, 본문에는 자연의 아름다움과 힐링을 강조해줘. 마지막엔 5~6개의 관련 해시태그를 꼭 포함해줘. (안내 멘트 없이 캡션 내용만 출력할 것)\n\n산/장소: ${photo.hikes?.mountain_name || '어느 아름다운 산'}\n산행 제목: ${photo.hikes?.title || '트레킹'}`
+      const prompt = `다음 정보를 바탕으로, 인스타그램에 올리기 좋은 감각적이고 트렌디한 이벤트 피드 글을 작성해줘. 첫 줄은 시선을 끄는 감성적인 문구로 시작하고, 본문에는 자연의 아름다움과 힐링을 강조해줘. 마지막엔 5~6개의 관련 해시태그를 꼭 포함해줘. (안내 멘트 없이 캡션 내용만 출력할 것)\n\n산/장소: ${photo.hikes?.mountain_name || '어느 아름다운 산'}\n산행 제목: ${photo.hikes?.title || '트레킹'}`
 
       const res = await fetch('/api/ai/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          provider: localStorage.getItem('ai_provider') || 'gemini', 
-          apiKey, 
-          prompt 
+        body: JSON.stringify({
+          provider: localStorage.getItem('ai_provider') || 'gemini',
+          apiKey,
+          prompt
         })
       })
 
@@ -304,13 +304,13 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
               <h3 className="font-heading font-bold text-xl text-forest">📸 인스타 인증샷 만들기</h3>
               <button onClick={() => setShowInstaModal(false)} className="text-gray-400 hover:text-gray-600">✕</button>
             </div>
-            
+
             <div className="p-6 space-y-4">
               <div className="aspect-square w-full max-w-sm mx-auto rounded-xl overflow-hidden shadow-inner relative bg-gray-100">
-                <img 
-                  src={selectedInstaPhoto.thumbnail_url || `/api/drive/image?id=${selectedInstaPhoto.google_drive_file_id}`} 
-                  alt="preview" 
-                  className="w-full h-full object-cover" 
+                <img
+                  src={selectedInstaPhoto.thumbnail_url || `/api/drive/image?id=${selectedInstaPhoto.google_drive_file_id}`}
+                  alt="preview"
+                  className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                 <div className="absolute bottom-4 left-4 right-4">
@@ -340,8 +340,8 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
 
             <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-2">
               <button onClick={() => setShowInstaModal(false)} className="px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-200 rounded-xl">취소</button>
-              <button 
-                onClick={handleDownloadInstaShot} 
+              <button
+                onClick={handleDownloadInstaShot}
                 disabled={isGeneratingInstaAi}
                 className="bg-gradient-to-tr from-pink-500 to-orange-400 text-white px-6 py-2 rounded-xl text-sm font-bold hover:from-pink-600 hover:to-orange-500 transition shadow disabled:opacity-50"
               >
@@ -355,14 +355,14 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
       {/* Hidden Instagram Gallery Template for html2canvas */}
       {showInstaModal && selectedInstaPhoto && (
         <div id="instagram-gallery-template" style={{ display: 'none', width: '1080px', height: '1080px', position: 'relative', backgroundColor: '#fff', overflow: 'hidden' }}>
-          <img 
-            src={`/api/drive/image?id=${selectedInstaPhoto.google_drive_file_id}`} 
-            alt="bg" 
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} 
+          <img
+            src={`/api/drive/image?id=${selectedInstaPhoto.google_drive_file_id}`}
+            alt="bg"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
             crossOrigin="anonymous"
           />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.3))' }} />
-          
+
           <div style={{ position: 'absolute', bottom: '100px', left: '100px', right: '100px', color: '#fff', fontFamily: 'sans-serif' }}>
             <h1 style={{ fontSize: '48px', fontWeight: '900', lineHeight: 1.4, marginBottom: '24px', textShadow: '2px 2px 8px rgba(0,0,0,0.8)', whiteSpace: 'pre-wrap', wordBreak: 'keep-all' }}>
               {instaAiText}

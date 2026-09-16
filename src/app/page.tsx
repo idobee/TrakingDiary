@@ -232,7 +232,12 @@ export default function Home() {
 
   // Dashboard and intro are public, but other tabs require login.
   if (!user && activeTab !== 'dashboard' && activeTab !== 'intro') {
-    return <LoginPage inviteClubId={inviteClubId} inviteRole={inviteRole} inviteHikeId={inviteHikeId} />
+    return <LoginPage 
+      inviteClubId={inviteClubId} 
+      inviteRole={inviteRole} 
+      inviteHikeId={inviteHikeId} 
+      onCancel={() => setActiveTab('dashboard')} 
+    />
   }
 
   return (
