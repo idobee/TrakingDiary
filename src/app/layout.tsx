@@ -3,6 +3,7 @@
 import './globals.css'
 import { I18nProvider } from '@/lib/i18n'
 import { AuthProvider } from '@/lib/auth'
+import InstallPrompt from '@/components/InstallPrompt'
 
 export default function RootLayout({
   children,
@@ -22,6 +23,7 @@ export default function RootLayout({
         <I18nProvider defaultLocale="ko">
           <AuthProvider>
             {children}
+            <InstallPrompt />
           </AuthProvider>
         </I18nProvider>
       </body>

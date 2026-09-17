@@ -14,7 +14,13 @@
     "openBook": "Open Book →",
     "scrapbookHardcover": "Scrapbook Hardcover",
     "googleDriveSyncTag": "Google Shared Drive Sync",
-    "googleDriveLinkedTag": "Google Shared Drive Linked"
+    "googleDriveLinkedTag": "Google Shared Drive Linked",
+    "installPrompt": {
+      "androidMessage": "Install the app for a better experience!",
+      "iosMessage": "To install the app, tap the [Share] button and select 'Add to Home Screen'.",
+      "installButton": "Install",
+      "closeButton": "Close"
+    }
   },
   "header": {
     "appTitle": "Happy Episodes Diary",
