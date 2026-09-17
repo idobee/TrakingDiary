@@ -163,7 +163,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                             {ep.hikes?.clubs?.name?.[0] || '?'}
                           </div>
                         )}
-                        <span className="text-xs text-gray-600 font-bold">{ep.hikes?.clubs?.name || 'Unknown Club'}</span>
+                        <span className="text-xs text-gray-600 font-bold">{ep.hikes?.clubs?.name || 'unknown'}</span>
                       </div>
                       <span className="text-[10px] text-gray-400">{new Date(ep.created_at).toLocaleDateString()}</span>
                     </div>
