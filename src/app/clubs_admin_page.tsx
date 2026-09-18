@@ -205,7 +205,6 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
     
     if (!window.confirm(`선택한 ${selectedMemberIds.length}명의 회원을 일괄 처리하시겠습니까?`)) return
     
-    setIsLoading(true)
     try {
       if (action === 'approve_regular') {
         await supabase.from('club_members').update({ status: 'approved', role: 'regular' }).in('user_id', selectedMemberIds).eq('club_id', clubId)
@@ -224,11 +223,9 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
       }
       setSelectedMemberIds([])
       await fetchMembers()
-    } catch (e) {
-      console.error(e)
-      alert('일괄 처리 중 오류가 발생했습니다.')
-    } finally {
-      setIsLoading(false)
+    } catch (err) {
+      console.error(err)
+      alert('일괄 처리에 실패했습니다.')
     }
   }
 
