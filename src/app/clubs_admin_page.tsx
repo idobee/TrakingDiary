@@ -14,7 +14,7 @@ import { useAuth } from '@/lib/auth'
 export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
   const { t } = useTranslation()
   const { user } = useAuth()
-  const { members, isLoading, updateMemberStatus, removeMember } = useClubMembers(clubId)
+  const { members, isLoading, fetchMembers, updateMemberStatus, removeMember } = useClubMembers(clubId)
   
   const currentUserMember = members.find(m => m.user_id === user?.id)
   const isClubAdmin = user?.system_role === 'admin' || user?.system_role === 'sys_admin' || currentUserMember?.role === 'owner' || currentUserMember?.role === 'admin'
