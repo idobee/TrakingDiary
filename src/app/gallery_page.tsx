@@ -18,6 +18,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
   const { t } = useTranslation()
   const { user } = useAuth()
   const [hikes, setHikes] = useState<any[]>([])
+  const [myJoinedHikeIds, setMyJoinedHikeIds] = useState<number[]>([])
   const [photos, setPhotos] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -57,6 +58,16 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
 
       if (hikeError) throw hikeError
       setHikes(hikeData || [])
+
+      if (user) {
+        const { data: members } = await supabase
+          .from('hike_members')
+          .select('hike_id')
+          .eq('user_id', user.id)
+        if (members) {
+          setMyJoinedHikeIds(members.map(m => m.hike_id))
+        }
+      }
 
       const hikeIds = (hikeData || []).map((h: any) => h.id)
 
@@ -271,9 +282,28 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
             className="w-full px-2 sm:px-3 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
           >
             <option value="all">{t('gallery.filterAllHikes')}</option>
-            {hikes.map(h => (
-              <option key={h.id} value={h.id}>{h.title} ({new Date(h.hike_date).toLocaleDateString()})</option>
-            ))}
+            {(() => {
+              const myHikes = hikes.filter(h => myJoinedHikeIds.includes(h.id))
+              const otherHikes = hikes.filter(h => !myJoinedHikeIds.includes(h.id))
+              return (
+                <>
+                  {myHikes.length > 0 && (
+                    <optgroup label="내가 참여한 행사">
+                      {myHikes.map(h => (
+                        <option key={h.id} value={h.id}>{h.title} ({new Date(h.hike_date).toLocaleDateString()})</option>
+                      ))}
+                    </optgroup>
+                  )}
+                  {otherHikes.length > 0 && (
+                    <optgroup label="기타 행사">
+                      {otherHikes.map(h => (
+                        <option key={h.id} value={h.id}>{h.title} ({new Date(h.hike_date).toLocaleDateString()})</option>
+                      ))}
+                    </optgroup>
+                  )}
+                </>
+              )
+            })()}
           </select>
         </div>
 
