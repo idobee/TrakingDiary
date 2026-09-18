@@ -246,9 +246,9 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
 
   return (
     <div className="bg-white p-6 md:p-8 rounded-3xl border border-paper-high shadow-sm space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-100 pb-4 gap-4">
-        <div className="flex items-center space-x-3">
-          <h2 className="font-heading font-extrabold text-2xl text-forest">{t('gallery.title')}</h2>
+      <div className="flex justify-between items-center border-b border-gray-100 pb-4 gap-4 w-full">
+        <div className="flex items-center space-x-3 truncate">
+          <h2 className="font-heading font-extrabold text-xl sm:text-2xl text-forest truncate">{t('gallery.title')}</h2>
         </div>
         <div className="flex items-center space-x-2">
           <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple onChange={handlePhotoUpload} />
