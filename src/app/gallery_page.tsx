@@ -284,21 +284,21 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
             className="w-full px-2 sm:px-3 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
           >
             <option value="all">{t('gallery.filterAllHikes')}</option>
-            {myJoinedHikeIds.length > 0 && <option value="my_hikes">내가 참여한 행사 전체</option>}
+            {myJoinedHikeIds.length > 0 && <option value="my_hikes">{t('gallery.filterMyHikes')}</option>}
             {(() => {
               const myHikes = hikes.filter(h => myJoinedHikeIds.includes(h.id))
               const otherHikes = hikes.filter(h => !myJoinedHikeIds.includes(h.id))
               return (
                 <>
                   {myHikes.length > 0 && (
-                    <optgroup label="내가 참여한 행사">
+                    <optgroup label={t('gallery.optgroupMyHikes')}>
                       {myHikes.map(h => (
                         <option key={h.id} value={h.id}>{h.title} ({new Date(h.hike_date).toLocaleDateString()})</option>
                       ))}
                     </optgroup>
                   )}
                   {otherHikes.length > 0 && (
-                    <optgroup label="기타 행사">
+                    <optgroup label={t('gallery.optgroupOtherHikes')}>
                       {otherHikes.map(h => (
                         <option key={h.id} value={h.id}>{h.title} ({new Date(h.hike_date).toLocaleDateString()})</option>
                       ))}
