@@ -182,7 +182,7 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
     const avatar = member.users?.avatar_url || ''
     
     return (
-      <div key={member.user_id} className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-2xl shadow-sm mb-3">
+      <div key={member.user_id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white border border-gray-100 rounded-2xl shadow-sm mb-3 gap-4">
         <div className="flex items-center space-x-4">
           <div className="w-12 h-12 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
             {avatar ? <img src={avatar} alt={name} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-forest text-white flex items-center justify-center font-bold text-xl">{name.charAt(0)}</div>}
@@ -210,31 +210,31 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
         </div>
         
         
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap gap-2 justify-end w-full sm:w-auto">
           {isClubAdmin && (
             isPending ? (
               <>
-                <button onClick={() => updateMemberStatus(member.user_id, 'approved', 'regular')} className="bg-forest hover:bg-forest-light text-white text-xs font-bold py-2 px-3 rounded-lg transition">정회원 승인</button>
-                <button onClick={() => updateMemberStatus(member.user_id, 'approved', 'guest')} className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-bold py-2 px-3 rounded-lg transition">게스트 승인</button>
-                <button onClick={() => updateMemberStatus(member.user_id, 'rejected')} className="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold py-2 px-3 rounded-lg transition">거절</button>
+                <button onClick={() => updateMemberStatus(member.user_id, 'approved', 'regular')} className="bg-forest hover:bg-forest-light text-white text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap">정회원 승인</button>
+                <button onClick={() => updateMemberStatus(member.user_id, 'approved', 'guest')} className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap">게스트 승인</button>
+                <button onClick={() => updateMemberStatus(member.user_id, 'rejected')} className="bg-red-50 hover:bg-red-100 text-red-600 text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap">거절</button>
               </>
             ) : (
               <>
                 {member.role !== 'owner' && (
                   <>
                     {member.role === 'guest' && (
-                      <button onClick={() => updateMemberStatus(member.user_id, 'approved', 'regular')} className="bg-green-50 hover:bg-green-100 text-green-700 text-xs font-bold py-2 px-3 rounded-lg transition">정회원으로 변경</button>
+                      <button onClick={() => updateMemberStatus(member.user_id, 'approved', 'regular')} className="bg-green-50 hover:bg-green-100 text-green-700 text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap">정회원으로 변경</button>
                     )}
                     {member.role === 'regular' && (
                       <>
-                        <button onClick={() => handlePromoteAdmin(member.user_id)} className="bg-forest-container hover:bg-forest hover:text-white text-forest-dark text-xs font-bold py-2 px-3 rounded-lg transition">부관리자 임명</button>
-                        <button onClick={() => updateMemberStatus(member.user_id, 'approved', 'guest')} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold py-2 px-3 rounded-lg transition">게스트로 변경</button>
+                        <button onClick={() => handlePromoteAdmin(member.user_id)} className="bg-forest-container hover:bg-forest hover:text-white text-forest-dark text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap">부관리자 임명</button>
+                        <button onClick={() => updateMemberStatus(member.user_id, 'approved', 'guest')} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap">게스트로 변경</button>
                       </>
                     )}
                     {member.role === 'admin' && (
-                      <button onClick={() => handleDemoteAdmin(member.user_id)} className="bg-orange-50 hover:bg-orange-100 text-orange-600 text-xs font-bold py-2 px-3 rounded-lg transition">권한 회수</button>
+                      <button onClick={() => handleDemoteAdmin(member.user_id)} className="bg-orange-50 hover:bg-orange-100 text-orange-600 text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap">권한 회수</button>
                     )}
-                    <button onClick={() => removeMember(member.user_id)} className="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold py-2 px-3 rounded-lg transition">강제 탈퇴</button>
+                    <button onClick={() => removeMember(member.user_id)} className="bg-red-50 hover:bg-red-100 text-red-600 text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap">강제 탈퇴</button>
                   </>
                 )}
               </>
