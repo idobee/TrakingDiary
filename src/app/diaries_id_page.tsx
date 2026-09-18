@@ -530,13 +530,14 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
             <img src={hike.cover_image_url} alt="Cover" className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay" />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-          <div className="absolute top-4 left-4">
-            <button onClick={onBack} className="bg-white/20 hover:bg-white/40 text-white p-2 px-4 text-sm font-bold rounded-full backdrop-blur-sm transition">
-              ← 돌아가기
-            </button>
-          </div>
-          <div className="absolute bottom-6 left-6 md:left-8 right-6 md:right-8">
-            <span className="text-terracotta font-bold text-xs bg-white px-2 py-1 rounded-sm uppercase tracking-wide">Vol {hikeId}</span>
+
+          <div className="absolute bottom-6 left-6 md:left-8 right-6 md:right-8 flex flex-col">
+            <div className="flex items-center justify-between w-full mb-1">
+              <span className="text-terracotta font-bold text-xs bg-white px-2 py-1 rounded-sm uppercase tracking-wide">Vol {hikeId}</span>
+              <button onClick={onBack} className="bg-white/20 hover:bg-white/40 text-white py-1 px-3 text-xs md:text-sm font-bold rounded-full backdrop-blur-sm transition whitespace-nowrap">
+                ← 돌아가기
+              </button>
+            </div>
             <h1 className="text-2xl sm:text-3xl md:text-5xl font-heading font-extrabold text-white mt-1 md:mt-2 drop-shadow-md leading-tight">{hike.title}</h1>
             <p className="text-paper/80 font-body text-xs sm:text-sm mt-2 flex items-center space-x-2 md:space-x-3">
               <span>⛰️ {hike.mountain_name}</span>
