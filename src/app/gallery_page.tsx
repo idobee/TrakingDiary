@@ -86,7 +86,9 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
         .in('hike_id', hikeIds)
         .order('created_at', { ascending: false })
 
-      if (filterHikeId !== 'all') {
+      if (filterHikeId === 'my_hikes') {
+        query = query.in('hike_id', myJoinedHikeIds.length > 0 ? myJoinedHikeIds : [-1])
+      } else if (filterHikeId !== 'all') {
         query = query.eq('hike_id', filterHikeId)
       }
 
@@ -195,8 +197,8 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
   }
 
   const handleUploadClick = () => {
-    if (filterHikeId === 'all') {
-      alert('사진을 올릴 행사를 선택하세요.')
+    if (filterHikeId === 'all' || filterHikeId === 'my_hikes') {
+      alert('사진을 올릴 단일 행사를 먼저 선택해주세요.')
       return
     }
     fileInputRef.current?.click()
@@ -278,10 +280,11 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
           <label className="text-[10px] sm:text-xs font-bold text-gray-500">{t('gallery.filterHike')}</label>
           <select
             value={filterHikeId}
-            onChange={(e) => setFilterHikeId(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
+            onChange={(e) => setFilterHikeId(e.target.value === 'all' || e.target.value === 'my_hikes' ? e.target.value : parseInt(e.target.value))}
             className="w-full px-2 sm:px-3 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
           >
             <option value="all">{t('gallery.filterAllHikes')}</option>
+            {myJoinedHikeIds.length > 0 && <option value="my_hikes">내가 참여한 행사 전체</option>}
             {(() => {
               const myHikes = hikes.filter(h => myJoinedHikeIds.includes(h.id))
               const otherHikes = hikes.filter(h => !myJoinedHikeIds.includes(h.id))

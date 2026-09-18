@@ -35,6 +35,12 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
   const [isSavingDrive, setIsSavingDrive] = useState(false)
   const supabase = createClient()
 
+  const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([])
+
+  useEffect(() => {
+    setSelectedMemberIds([])
+  }, [activeTab])
+
   useEffect(() => {
     fetchCustomBadges()
   }, [clubId])
@@ -176,6 +182,56 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
     }
   }
 
+  const handleToggleSelect = (userId: string) => {
+    setSelectedMemberIds(prev => 
+      prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
+    )
+  }
+
+  const handleSelectAll = (members: any[]) => {
+    const ids = members.map(m => m.user_id)
+    if (selectedMemberIds.length === ids.length) {
+      setSelectedMemberIds([])
+    } else {
+      setSelectedMemberIds(ids)
+    }
+  }
+
+  const handleBulkAction = async (action: string) => {
+    if (selectedMemberIds.length === 0) {
+      alert('회원을 선택해주세요.')
+      return
+    }
+    
+    if (!window.confirm(`선택한 ${selectedMemberIds.length}명의 회원을 일괄 처리하시겠습니까?`)) return
+    
+    setIsLoading(true)
+    try {
+      if (action === 'approve_regular') {
+        await supabase.from('club_members').update({ status: 'approved', role: 'regular' }).in('user_id', selectedMemberIds).eq('club_id', clubId)
+      } else if (action === 'approve_guest') {
+        await supabase.from('club_members').update({ status: 'approved', role: 'guest' }).in('user_id', selectedMemberIds).eq('club_id', clubId)
+      } else if (action === 'reject') {
+        await supabase.from('club_members').update({ status: 'rejected' }).in('user_id', selectedMemberIds).eq('club_id', clubId)
+      } else if (action === 'promote_admin') {
+        await supabase.from('club_members').update({ role: 'admin' }).in('user_id', selectedMemberIds).eq('club_id', clubId)
+      } else if (action === 'demote_regular') {
+        await supabase.from('club_members').update({ role: 'regular' }).in('user_id', selectedMemberIds).eq('club_id', clubId)
+      } else if (action === 'demote_guest') {
+        await supabase.from('club_members').update({ role: 'guest' }).in('user_id', selectedMemberIds).eq('club_id', clubId)
+      } else if (action === 'remove') {
+        await supabase.from('club_members').delete().in('user_id', selectedMemberIds).eq('club_id', clubId)
+      }
+      setSelectedMemberIds([])
+      await fetchMembers()
+    } catch (e) {
+      console.error(e)
+      alert('일괄 처리 중 오류가 발생했습니다.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const renderMemberRow = (member: any, isPending: boolean) => {
     const name = member.users?.nickname || 'Unknown'
     const email = member.users?.email || ''
@@ -184,6 +240,14 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
     return (
       <div key={member.user_id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white border border-gray-100 rounded-2xl shadow-sm mb-3 gap-4">
         <div className="flex items-center space-x-4">
+          {isClubAdmin && member.role !== 'owner' && (
+            <input 
+              type="checkbox" 
+              className="w-5 h-5 rounded border-gray-300 text-forest focus:ring-forest cursor-pointer"
+              checked={selectedMemberIds.includes(member.user_id)}
+              onChange={() => handleToggleSelect(member.user_id)}
+            />
+          )}
           <div className="w-12 h-12 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
             {avatar ? <img src={avatar} alt={name} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-forest text-white flex items-center justify-center font-bold text-xl">{name.charAt(0)}</div>}
           </div>
@@ -207,39 +271,6 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
               </span>
             )}
           </div>
-        </div>
-        
-        
-        <div className="flex flex-wrap gap-2 justify-end w-full sm:w-auto">
-          {isClubAdmin && (
-            isPending ? (
-              <>
-                <button onClick={() => updateMemberStatus(member.user_id, 'approved', 'regular')} className="bg-forest hover:bg-forest-light text-white text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap">정회원 승인</button>
-                <button onClick={() => updateMemberStatus(member.user_id, 'approved', 'guest')} className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap">게스트 승인</button>
-                <button onClick={() => updateMemberStatus(member.user_id, 'rejected')} className="bg-red-50 hover:bg-red-100 text-red-600 text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap">거절</button>
-              </>
-            ) : (
-              <>
-                {member.role !== 'owner' && (
-                  <>
-                    {member.role === 'guest' && (
-                      <button onClick={() => updateMemberStatus(member.user_id, 'approved', 'regular')} className="bg-green-50 hover:bg-green-100 text-green-700 text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap">정회원으로 변경</button>
-                    )}
-                    {member.role === 'regular' && (
-                      <>
-                        <button onClick={() => handlePromoteAdmin(member.user_id)} className="bg-forest-container hover:bg-forest hover:text-white text-forest-dark text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap">부관리자 임명</button>
-                        <button onClick={() => updateMemberStatus(member.user_id, 'approved', 'guest')} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap">게스트로 변경</button>
-                      </>
-                    )}
-                    {member.role === 'admin' && (
-                      <button onClick={() => handleDemoteAdmin(member.user_id)} className="bg-orange-50 hover:bg-orange-100 text-orange-600 text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap">권한 회수</button>
-                    )}
-                    <button onClick={() => removeMember(member.user_id)} className="bg-red-50 hover:bg-red-100 text-red-600 text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap">강제 탈퇴</button>
-                  </>
-                )}
-              </>
-            )
-          )}
         </div>
       </div>
     )
@@ -357,6 +388,21 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
           <>
             {activeTab === 'pending' && (
               <div>
+                {isClubAdmin && pendingMembers.length > 0 && (
+                  <div className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 p-4 rounded-xl mb-4 gap-4 border border-gray-100">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                      <input type="checkbox" className="w-5 h-5 rounded border-gray-300 text-forest cursor-pointer" 
+                        checked={selectedMemberIds.length === pendingMembers.length && pendingMembers.length > 0} 
+                        onChange={() => handleSelectAll(pendingMembers)} />
+                      <span className="text-sm font-bold text-gray-700">전체 선택 ({selectedMemberIds.length}명)</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2 justify-end w-full sm:w-auto">
+                      <button onClick={() => handleBulkAction('approve_regular')} className="bg-forest hover:bg-forest-light text-white text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap shadow-sm">정회원 승인</button>
+                      <button onClick={() => handleBulkAction('approve_guest')} className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap shadow-sm">게스트 승인</button>
+                      <button onClick={() => handleBulkAction('reject')} className="bg-red-50 hover:bg-red-100 text-red-600 text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap shadow-sm">거절</button>
+                    </div>
+                  </div>
+                )}
                 {pendingMembers.length === 0 ? (
                   <div className="text-center py-12">
                     <span className="text-4xl mb-4 block">📭</span>
@@ -370,6 +416,22 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
             
             {activeTab === 'approved' && (
               <div>
+                {isClubAdmin && approvedMembers.length > 0 && (
+                  <div className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 p-4 rounded-xl mb-4 gap-4 border border-gray-100">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                      <input type="checkbox" className="w-5 h-5 rounded border-gray-300 text-forest cursor-pointer" 
+                        checked={selectedMemberIds.length === approvedMembers.filter(m => m.role !== 'owner').length && approvedMembers.filter(m => m.role !== 'owner').length > 0} 
+                        onChange={() => handleSelectAll(approvedMembers.filter(m => m.role !== 'owner'))} />
+                      <span className="text-sm font-bold text-gray-700">전체 선택 ({selectedMemberIds.length}명)</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2 justify-end w-full sm:w-auto">
+                      <button onClick={() => handleBulkAction('promote_admin')} className="bg-forest-container hover:bg-forest text-forest-dark hover:text-white text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap shadow-sm">부관리자 임명</button>
+                      <button onClick={() => handleBulkAction('demote_regular')} className="bg-green-50 hover:bg-green-100 text-green-700 text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap shadow-sm">정회원으로 변경</button>
+                      <button onClick={() => handleBulkAction('demote_guest')} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap shadow-sm">게스트로 변경</button>
+                      <button onClick={() => handleBulkAction('remove')} className="bg-red-50 hover:bg-red-100 text-red-600 text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg transition whitespace-nowrap shadow-sm">강제 탈퇴</button>
+                    </div>
+                  </div>
+                )}
                 {approvedMembers.length === 0 ? (
                   <div className="text-center py-12">
                     <span className="text-4xl mb-4 block">👥</span>
