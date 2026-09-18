@@ -525,7 +525,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
     <>
       <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-paper-high print:hidden">
         {/* Header */}
-        <div className="relative h-48 md:h-64 bg-forest overflow-hidden">
+        <div className="relative h-36 md:h-48 bg-forest overflow-hidden">
           {hike.cover_image_url && (
             <img src={hike.cover_image_url} alt="Cover" className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay" />
           )}
