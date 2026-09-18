@@ -253,9 +253,9 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h4 className="font-heading font-bold text-forest text-lg">{name}</h4>
-              {member.role_title && (
-                <span className="text-xs bg-forest text-white px-2 py-0.5 rounded-full font-bold">
+              <h4 className="font-heading font-bold text-forest text-lg whitespace-nowrap">{name}</h4>
+              {member.role_title && !['정회원', '게스트'].includes(member.role_title) && (
+                <span className="text-xs bg-forest text-white px-2 py-0.5 rounded-full font-bold whitespace-nowrap shrink-0">
                   {member.role_title}
                 </span>
               )}

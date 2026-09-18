@@ -54,7 +54,7 @@ export function useClubMembers(clubId: number | null) {
       updateData.role = newRole
       // If role_title isn't explicitly provided, infer it from the newRole if it's regular/guest
       if (newRoleTitle === undefined && (newRole === 'regular' || newRole === 'guest')) {
-        updateData.role_title = newRole === 'guest' ? '게스트' : '정회원'
+        updateData.role_title = null
       }
     }
     if (newRoleTitle !== undefined) {
