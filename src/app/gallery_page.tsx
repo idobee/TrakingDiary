@@ -25,6 +25,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
   const [filterHikeId, setFilterHikeId] = useState<string | number>(initialHikeId || 'all')
   const [filterStartDate, setFilterStartDate] = useState<string>('')
   const [filterEndDate, setFilterEndDate] = useState<string>('')
+  const [searchHikeText, setSearchHikeText] = useState('')
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -83,13 +84,15 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
           hikes ( title ),
           users ( nickname )
         `)
-        .in('hike_id', hikeIds)
         .order('created_at', { ascending: false })
 
       if (filterHikeId === 'my_hikes') {
-        query = query.in('hike_id', myJoinedHikeIds.length > 0 ? myJoinedHikeIds : [-1])
+        const validHikeIds = hikeIds.filter((id: number) => myJoinedHikeIds.includes(id))
+        query = query.in('hike_id', validHikeIds.length > 0 ? validHikeIds : [-1])
       } else if (filterHikeId !== 'all') {
         query = query.eq('hike_id', filterHikeId)
+      } else {
+        query = query.in('hike_id', hikeIds)
       }
 
       if (filterStartDate) {
@@ -277,7 +280,16 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
 
       <div className="w-full xl:w-3/4 bg-gray-50/50 p-3 sm:p-4 rounded-xl border border-gray-100 grid grid-cols-2 md:flex md:flex-row md:items-end gap-3 sm:gap-4">
         <div className="space-y-1 col-span-2 md:flex-1 md:min-w-[150px]">
-          <label className="text-[10px] sm:text-xs font-bold text-gray-500">{t('gallery.filterHike')}</label>
+          <div className="flex justify-between items-center mb-1">
+            <label className="text-[10px] sm:text-xs font-bold text-gray-500">{t('gallery.filterHike')}</label>
+            <input 
+              type="text" 
+              placeholder="🔍 행사명 검색" 
+              value={searchHikeText} 
+              onChange={e => setSearchHikeText(e.target.value)} 
+              className="text-[10px] sm:text-xs border-b border-gray-300 focus:outline-none focus:border-forest px-1 py-0.5 w-24 sm:w-32 bg-transparent text-right"
+            />
+          </div>
           <select
             value={filterHikeId}
             onChange={(e) => setFilterHikeId(e.target.value === 'all' || e.target.value === 'my_hikes' ? e.target.value : parseInt(e.target.value))}
@@ -286,8 +298,9 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
             <option value="all">{t('gallery.filterAllHikes')}</option>
             {myJoinedHikeIds.length > 0 && <option value="my_hikes">{t('gallery.filterMyHikes')}</option>}
             {(() => {
-              const myHikes = hikes.filter(h => myJoinedHikeIds.includes(h.id))
-              const otherHikes = hikes.filter(h => !myJoinedHikeIds.includes(h.id))
+              const filteredHikes = searchHikeText ? hikes.filter(h => h.title.includes(searchHikeText)) : hikes
+              const myHikes = filteredHikes.filter(h => myJoinedHikeIds.includes(h.id))
+              const otherHikes = filteredHikes.filter(h => !myJoinedHikeIds.includes(h.id))
               return (
                 <>
                   {myHikes.length > 0 && (
