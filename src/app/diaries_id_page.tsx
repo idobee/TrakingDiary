@@ -525,7 +525,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
     <>
       <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-paper-high print:hidden">
         {/* Header */}
-        <div className="relative h-64 bg-forest overflow-hidden">
+        <div className="relative h-48 md:h-64 bg-forest overflow-hidden">
           {hike.cover_image_url && (
             <img src={hike.cover_image_url} alt="Cover" className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay" />
           )}
@@ -535,10 +535,10 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
               ← 돌아가기
             </button>
           </div>
-          <div className="absolute bottom-6 left-8 right-8">
+          <div className="absolute bottom-6 left-6 md:left-8 right-6 md:right-8">
             <span className="text-terracotta font-bold text-xs bg-white px-2 py-1 rounded-sm uppercase tracking-wide">Vol {hikeId}</span>
-            <h1 className="text-4xl md:text-5xl font-heading font-extrabold text-white mt-2 drop-shadow-md">{hike.title}</h1>
-            <p className="text-paper/80 font-body text-sm mt-2 flex items-center space-x-3">
+            <h1 className="text-2xl sm:text-3xl md:text-5xl font-heading font-extrabold text-white mt-1 md:mt-2 drop-shadow-md leading-tight">{hike.title}</h1>
+            <p className="text-paper/80 font-body text-xs sm:text-sm mt-2 flex items-center space-x-2 md:space-x-3">
               <span>⛰️ {hike.mountain_name}</span>
               <span>•</span>
               <span>📅 {new Date(hike.hike_date).toLocaleDateString()}</span>
@@ -1099,50 +1099,59 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                   <span>💾</span> 에피소드로 등록
                 </button>
               )}
-              <button
-                onClick={handleDownloadHtml}
-                className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-blue-700 transition shadow-md flex items-center gap-2"
-                disabled={isGeneratingBook}
-              >
-                <span>🌐</span> HTML 저장
-              </button>
-              <button
-                onClick={handleCopyForBlog}
-                className="bg-purple-600 text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-purple-700 transition shadow-md flex items-center gap-2"
-                disabled={isGeneratingBook}
-              >
-                <span>📝</span> 블로그용 복사
-              </button>
-              {/* 참가자만 공유 기능 접근 가능 */}
-              {user && participants.some(p => p.user_id === user.id) && (
+              {/* Print / Save Actions */}
+              <div className="flex gap-2 print:hidden ml-auto">
                 <button
-                  onClick={handleShareNative}
-                  className="bg-yellow-400 text-black px-4 py-2 rounded-full text-sm font-bold hover:bg-yellow-500 transition shadow-md flex items-center gap-2"
+                  onClick={handleDownloadHtml}
+                  className="group relative bg-blue-600 text-white w-10 h-10 flex items-center justify-center rounded-full text-lg hover:bg-blue-700 transition shadow-md"
                   disabled={isGeneratingBook}
                 >
-                  <span>📲</span> 카톡/공유
+                  <span>🌐</span>
+                  <span className="absolute -bottom-8 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none z-50">HTML 저장</span>
                 </button>
-              )}
-              <button
-                onClick={() => window.print()}
-                className="bg-terracotta text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-terracotta-dark transition shadow-md flex items-center gap-2"
-                disabled={isGeneratingBook}
-              >
-                <span>🖨️</span> PDF 저장
-              </button>
-              <button
-                onClick={() => setShowBookModal(false)}
-                className="bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-full text-sm font-bold hover:bg-gray-50 transition shadow-sm"
-              >
-                닫기
-              </button>
+                <button
+                  onClick={handleCopyForBlog}
+                  className="group relative bg-purple-600 text-white w-10 h-10 flex items-center justify-center rounded-full text-lg hover:bg-purple-700 transition shadow-md"
+                  disabled={isGeneratingBook}
+                >
+                  <span>📝</span>
+                  <span className="absolute -bottom-8 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none z-50">블로그용 복사</span>
+                </button>
+                {/* 참가자만 공유 기능 접근 가능 */}
+                {user && participants.some(p => p.user_id === user.id) && (
+                  <button
+                    onClick={handleShareNative}
+                    className="group relative bg-yellow-400 text-black w-10 h-10 flex items-center justify-center rounded-full text-lg hover:bg-yellow-500 transition shadow-md"
+                    disabled={isGeneratingBook}
+                  >
+                    <span>📲</span>
+                    <span className="absolute -bottom-8 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none z-50">카톡/공유</span>
+                  </button>
+                )}
+                <button
+                  onClick={() => window.print()}
+                  className="group relative bg-terracotta text-white w-10 h-10 flex items-center justify-center rounded-full text-lg hover:bg-terracotta-dark transition shadow-md"
+                  disabled={isGeneratingBook}
+                >
+                  <span>🖨️</span>
+                  <span className="absolute -bottom-8 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none z-50">PDF 저장</span>
+                </button>
+                <div className="w-px h-6 bg-gray-200 my-auto mx-1"></div>
+                <button
+                  onClick={() => setShowBookModal(false)}
+                  className="group relative bg-white text-gray-600 border border-gray-200 w-10 h-10 flex items-center justify-center rounded-full text-sm font-bold hover:bg-gray-50 transition shadow-sm"
+                >
+                  ✕
+                  <span className="absolute -bottom-8 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none z-50">닫기</span>
+                </button>
+              </div>
             </div>
 
             <div className="space-y-12">
               {/* Book Cover Header */}
-              <div className="text-center space-y-6 pb-12 border-b-2 border-forest/20 mt-12 print:mt-0">
-                <div className="text-terracotta font-bold tracking-[0.2em] text-sm uppercase">Traking Diary Vol. {hikeId}</div>
-                <h1 className="font-heading font-extrabold text-5xl md:text-6xl text-forest drop-shadow-sm leading-tight">
+              <div className="text-center space-y-4 md:space-y-6 pb-8 md:pb-12 border-b-2 border-forest/20 mt-8 md:mt-12 print:mt-0">
+                <div className="text-terracotta font-bold tracking-[0.2em] text-xs md:text-sm uppercase">Traking Diary Vol. {hikeId}</div>
+                <h1 className="font-heading font-extrabold text-3xl sm:text-4xl md:text-6xl text-forest drop-shadow-sm leading-tight px-4">
                   {hike?.title}
                 </h1>
                 <p className="text-gray-500 font-body text-lg md:text-xl flex items-center justify-center gap-4">
