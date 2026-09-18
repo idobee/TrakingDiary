@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/auth'
+import imageCompression from 'browser-image-compression'
 
 const supabase = createClient()
 
@@ -120,8 +121,18 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
     try {
       let successCount = 0
       for (const file of files) {
+        // 압축 옵션: Vercel 페이로드 제한(4.5MB)을 우회하기 위해 최대 2MB로 압축
+        const options = {
+          maxSizeMB: 2,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        }
+
+        // 브라우저에서 이미지 압축
+        const compressedFile = await imageCompression(file, options)
+
         const formData = new FormData()
-        formData.append('file', file)
+        formData.append('file', compressedFile, file.name)
         formData.append('club_id', String(hike.club_id))
         formData.append('hike_date', hike.hike_date)
         formData.append('hike_id', String(hike.id))
@@ -134,11 +145,20 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
           method: 'POST',
           body: formData
         })
-        const uploadData = await uploadRes.json()
-        
-        if (!uploadRes.ok) {
-          console.error('Upload failed for a file:', uploadData.error)
-          continue
+
+        const contentType = uploadRes.headers.get('content-type')
+        if (contentType && contentType.includes('application/json')) {
+          const uploadData = await uploadRes.json()
+          if (!uploadRes.ok) {
+            console.error('Upload failed for a file:', uploadData.error)
+            continue
+          }
+        } else {
+          // HTML이나 다른 형식으로 에러가 반환될 때 (예: 413 Request Entity Too Large)
+          if (!uploadRes.ok) {
+            console.error('Upload failed with non-JSON response (likely payload too large)')
+            throw new Error('서버 응답 오류 (파일 용량이 너무 클 수 있습니다)')
+          }
         }
         successCount++
       }
@@ -307,9 +327,9 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
     try {
       const hikeDate = new Date(hike.hike_date).toLocaleDateString()
       let prompt = `다음은 '${hike.title}' (${hike.mountain_name}, ${hikeDate}) 트레킹에 참가한 크루들이 남긴 짧은 에피소드 조각들입니다.\n\n`
-      
+
       const targetIds = selectedIds || selectedAiEpisodes
-      
+
       episodes.forEach(ep => {
         if ((ep.episode_type === 'general' || !ep.episode_type) && targetIds.includes(ep.id)) {
           prompt += `[작성자: ${ep.users?.nickname || '익명'}]\n제목: ${ep.title}\n내용: ${ep.content}\n\n`
@@ -328,7 +348,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ provider, apiKey, prompt })
       })
-      
+
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || '생성 실패')
       const aiContent = data.text
@@ -417,7 +437,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
   const handleSaveAsEpisode = async () => {
     if (!user || !hike || !aiBookContent) return
     if (!confirm('현재 작성된 단행본 내용을 새로운 에피소드로 등록하시겠습니까?')) return
-    
+
     try {
       const { error } = await supabase.from('episodes').insert({
         hike_id: hike.id,
@@ -444,7 +464,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
     if (!aiBookContent) return null
     const parts = aiBookContent.split(/(\[PHOTO_\d+\])/g)
     let photoIndex = 0
-    
+
     return (
       <div className="max-w-4xl mx-auto font-body text-black leading-[2.2] text-lg print:text-black print:leading-[2.0] flow-root">
         {parts.map((part, index) => {
@@ -464,7 +484,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
             }
             return null
           }
-          
+
           // Mini Markdown Parser for Text Parts
           return (
             <div key={index} className="mb-4">
@@ -482,10 +502,10 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                   const boldParts = tLine.split(/(\*\*.*?\*\*)/g)
                   return (
                     <p key={i} className="mb-4">
-                      {boldParts.map((p, j) => 
-                        p.startsWith('**') && p.endsWith('**') ? 
-                        <strong key={j} className="text-forest font-bold">{p.slice(2, -2)}</strong> : 
-                        p
+                      {boldParts.map((p, j) =>
+                        p.startsWith('**') && p.endsWith('**') ?
+                          <strong key={j} className="text-forest font-bold">{p.slice(2, -2)}</strong> :
+                          p
                       )}
                     </p>
                   )
@@ -503,553 +523,555 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
 
   return (
     <>
-    <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-paper-high print:hidden">
-      {/* Header */}
-      <div className="relative h-64 bg-forest overflow-hidden">
-        {hike.cover_image_url && (
-          <img src={hike.cover_image_url} alt="Cover" className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-        <div className="absolute top-4 left-4">
-          <button onClick={onBack} className="bg-white/20 hover:bg-white/40 text-white p-2 px-4 text-sm font-bold rounded-full backdrop-blur-sm transition">
-            ← 돌아가기
-          </button>
-        </div>
-        <div className="absolute bottom-6 left-8 right-8">
-          <span className="text-terracotta font-bold text-xs bg-white px-2 py-1 rounded-sm uppercase tracking-wide">Vol {hikeId}</span>
-          <h1 className="text-4xl md:text-5xl font-heading font-extrabold text-white mt-2 drop-shadow-md">{hike.title}</h1>
-          <p className="text-paper/80 font-body text-sm mt-2 flex items-center space-x-3">
-            <span>⛰️ {hike.mountain_name}</span>
-            <span>•</span>
-            <span>📅 {new Date(hike.hike_date).toLocaleDateString()}</span>
-          </p>
-        </div>
-      </div>
-
-      <div className="p-4 sm:p-8 space-y-8 sm:space-y-12">
-        
-        {/* Participants & Badges (UC6) */}
-        <section className="space-y-4 border-b border-gray-100 pb-8">
-          <h2 className="font-heading font-bold text-xl text-forest flex items-center justify-between">
-            <span>참가자 명단</span>
-            {isAdmin && <span className="text-[10px] text-gray-400 font-normal">* 관리자는 완주 처리 및 뱃지를 수여할 수 있습니다.</span>}
-          </h2>
-          <div className="flex flex-row flex-nowrap overflow-x-auto gap-4 pb-2">
-            {participants.length === 0 && <div className="text-sm text-gray-500">참가자가 없습니다.</div>}
-            {participants.map((p: any) => (
-              <div 
-                key={p.user_id} 
-                className="flex flex-col items-center flex-shrink-0 min-w-[70px] space-y-1 group relative pb-4"
-              >
-                <div className="w-14 h-14 rounded-full bg-forest-container text-white overflow-hidden border-2 border-transparent transition shadow-sm relative">
-                  {p.users.avatar_url ? (
-                    <img src={p.users.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center font-bold text-xl">{p.users.nickname?.[0]}</div>
-                  )}
-                  {p.status === 'completed' && (
-                    <div className="absolute bottom-0 right-0 bg-emerald-500 text-white rounded-full p-0.5 shadow-sm">
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                    </div>
-                  )}
-                </div>
-                <span className="text-xs font-label text-gray-600 font-bold text-center w-full truncate">{p.users.nickname}</span>
-                {isAdmin && (
-                  <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition absolute bottom-0 z-10 bg-white shadow-md p-1 rounded-md border border-gray-100">
-                    <button 
-                      onClick={() => handleToggleComplete(p.user_id, p.status)} 
-                      className={`text-[9px] px-1.5 py-1 rounded font-bold whitespace-nowrap ${p.status === 'completed' ? 'bg-gray-200 text-gray-600 hover:bg-gray-300' : 'bg-emerald-500 text-white hover:bg-emerald-600'}`}
-                    >
-                      {p.status === 'completed' ? '취소' : '완주'}
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setSelectedParticipantId(p.user_id)
-                        setShowBadgeModal(true)
-                      }}
-                      className="bg-terracotta text-white text-[9px] px-1.5 py-1 rounded font-bold hover:bg-terracotta-dark whitespace-nowrap"
-                    >
-                      뱃지
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
+      <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-paper-high print:hidden">
+        {/* Header */}
+        <div className="relative h-64 bg-forest overflow-hidden">
+          {hike.cover_image_url && (
+            <img src={hike.cover_image_url} alt="Cover" className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay" />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+          <div className="absolute top-4 left-4">
+            <button onClick={onBack} className="bg-white/20 hover:bg-white/40 text-white p-2 px-4 text-sm font-bold rounded-full backdrop-blur-sm transition">
+              ← 돌아가기
+            </button>
           </div>
-        </section>
+          <div className="absolute bottom-6 left-8 right-8">
+            <span className="text-terracotta font-bold text-xs bg-white px-2 py-1 rounded-sm uppercase tracking-wide">Vol {hikeId}</span>
+            <h1 className="text-4xl md:text-5xl font-heading font-extrabold text-white mt-2 drop-shadow-md">{hike.title}</h1>
+            <p className="text-paper/80 font-body text-sm mt-2 flex items-center space-x-3">
+              <span>⛰️ {hike.mountain_name}</span>
+              <span>•</span>
+              <span>📅 {new Date(hike.hike_date).toLocaleDateString()}</span>
+            </p>
+          </div>
+        </div>
 
-        {/* Photo Gallery (UC9) */}
-        <section className="space-y-4">
-          <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-            <h2 className="font-heading font-bold text-xl text-forest flex items-center space-x-2">
-              <span>📷 사진첩</span>
-              <span className="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-bold">Google Drive 연동됨</span>
+        <div className="p-4 sm:p-8 space-y-8 sm:space-y-12">
+
+          {/* Participants & Badges (UC6) */}
+          <section className="space-y-4 border-b border-gray-100 pb-8">
+            <h2 className="font-heading font-bold text-xl text-forest flex items-center justify-between">
+              <span>참가자 명단</span>
+              {isAdmin && <span className="text-[10px] text-gray-400 font-normal">* 관리자는 완주 처리 및 뱃지를 수여할 수 있습니다.</span>}
             </h2>
-            <div className="flex items-center space-x-2">
-              <button 
-                onClick={() => onOpenGallery && onOpenGallery(hike.id)}
-                className="text-gray-500 hover:text-forest text-xs font-bold transition mr-2"
-              >
-                전체보기 &gt;
-              </button>
-              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple onChange={handlePhotoUpload} />
-              <button 
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="bg-forest text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-forest-light transition disabled:opacity-50"
-              >
-                {isUploading ? '업로드 중...' : '+ 사진 등록하기'}
-              </button>
-            </div>
-          </div>
-
-          {photos.length === 0 ? (
-            <div className="bg-paper p-8 rounded-2xl text-center text-gray-500 text-sm font-body border border-dashed border-gray-300">
-              아직 등록된 사진이 없습니다. 첫 번째 사진을 올려보세요!
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
-              {photos.slice(0, 5).map((photo) => {
-                const fileId = photo.google_drive_file_id
-                const imgSrc = `/api/drive/image?id=${fileId}`
-                return (
-                  <div key={photo.id} className="w-full aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition border border-gray-200">
-                    <img src={imgSrc} alt="Hike Photo" className="w-full h-full object-cover" />
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </section>
-
-        {/* Episodes (UC10/UC11) */}
-        <section className="space-y-6 pt-8 border-t border-gray-100">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-100 pb-2 gap-3 sm:gap-0">
-            <h2 className="font-heading font-bold text-xl text-forest">📝 에피소드</h2>
-            <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
-              <button onClick={() => setShowAiKeyModal(true)} className="bg-gray-100 text-gray-500 hover:bg-gray-200 p-3 rounded-xl transition shadow-sm" title="AI 설정">
-                ⚙️
-              </button>
-              <button onClick={handleGenerateBookClick} className="bg-emerald-600 text-white px-4 sm:px-5 py-3 rounded-xl text-xs sm:text-sm font-bold hover:bg-emerald-700 transition shadow-md flex items-center gap-1 sm:gap-2">
-                <span>🤖</span> 단행본 만들기
-              </button>
-              {!showEpisodeForm && (
-                <button 
-                  onClick={() => {
-                    setEpisodeTitle('')
-                    setEpisodeContent('')
-                    setEpisodeType('general')
-                    setIsPublished(true)
-                    setEditingEpisodeId(null)
-                    setSelectedPhotoIds([])
-                    setShowEpisodeForm(true)
-                  }}
-                  className="bg-terracotta text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-terracotta-dark transition shadow-sm"
+            <div className="flex flex-row flex-nowrap overflow-x-auto gap-4 pb-2">
+              {participants.length === 0 && <div className="text-sm text-gray-500">참가자가 없습니다.</div>}
+              {participants.map((p: any) => (
+                <div
+                  key={p.user_id}
+                  className="flex flex-col items-center flex-shrink-0 min-w-[70px] space-y-1 group relative pb-4"
                 >
-                  + 에피소드 남기기
-                </button>
-              )}
-            </div>
-          </div>
-
-          {showEpisodeForm && (
-            <form onSubmit={handleSubmitEpisode} className="bg-orange-50/50 p-6 rounded-2xl border border-orange-200 shadow-sm space-y-4">
-              {isAdmin && (
-                <div className="flex gap-4 pb-2 border-b border-orange-200/50 mb-2">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" value="general" checked={episodeType === 'general'} onChange={() => setEpisodeType('general')} className="text-forest focus:ring-forest" />
-                    <span className="text-sm font-bold text-forest">일반 에피소드</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" value="notice" checked={episodeType === 'notice'} onChange={() => setEpisodeType('notice')} className="text-terracotta focus:ring-terracotta" />
-                    <span className="text-sm font-bold text-terracotta">공지 / 감사의 글</span>
-                  </label>
-                </div>
-              )}
-              <input
-                type="text"
-                required
-                placeholder="에피소드 제목"
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl font-heading text-sm text-forest focus:outline-none focus:ring-2 focus:ring-orange-300"
-                value={episodeTitle}
-                onChange={e => setEpisodeTitle(e.target.value)}
-              />
-              <textarea
-                required
-                placeholder="이번 산행에서 무슨 일이 있었나요?"
-                rows={4}
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl font-body text-sm text-gray-700 resize-none focus:outline-none focus:ring-2 focus:ring-orange-300"
-                value={episodeContent}
-                onChange={e => setEpisodeContent(e.target.value)}
-              />
-
-              {/* Photo Selector for Episode */}
-              {photos.length > 0 && (
-                <div className="space-y-2 pb-2">
-                  <span className="text-sm font-bold text-forest block">사진 첨부 (선택)</span>
-                  <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
-                    {photos.map(photo => {
-                      const isSelected = selectedPhotoIds.includes(photo.id)
-                      const fileId = photo.google_drive_file_id
-                      const imgSrc = `/api/drive/image?id=${fileId}`
-                      return (
-                        <div 
-                          key={photo.id} 
-                          className={`flex-none w-20 h-20 rounded-lg overflow-hidden cursor-pointer border-2 transition ${isSelected ? 'border-terracotta ring-2 ring-terracotta ring-opacity-50' : 'border-transparent'}`}
-                          onClick={() => {
-                            if (isSelected) setSelectedPhotoIds(prev => prev.filter(id => id !== photo.id))
-                            else setSelectedPhotoIds(prev => [...prev, photo.id])
-                          }}
-                        >
-                          <img src={imgSrc} className="w-full h-full object-cover" />
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-
-              <div className="flex justify-between items-center pt-2">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={isPublished} 
-                    onChange={(e) => setIsPublished(e.target.checked)} 
-                    className="w-4 h-4 text-forest rounded border-gray-300 focus:ring-forest"
-                  />
-                  <span className="text-xs font-bold text-gray-700">전체 공유 (대시보드 노출)</span>
-                </label>
-                <div className="flex gap-2">
-                  <button type="button" onClick={() => { setShowEpisodeForm(false); setEditingEpisodeId(null); setEpisodeTitle(''); setEpisodeContent(''); setEpisodeType('general'); setIsPublished(true); }} className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700">취소</button>
-                  <button type="submit" className="bg-forest text-white px-6 py-2 rounded-xl text-xs font-bold shadow hover:bg-forest-light">{editingEpisodeId ? '수정 완료' : '등록 완료'}</button>
-                </div>
-              </div>
-            </form>
-          )}
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-              {episodes.filter(ep => ep.episode_type === 'general' || !ep.episode_type).length === 0 && !showEpisodeForm && (
-                <div className="md:col-span-2 text-center text-gray-500 text-sm py-8 font-body">등록된 에피소드가 없습니다.</div>
-              )}
-              {episodes.map(ep => {
-                const isAiBook = ep.episode_type === 'ai_book'
-                if (ep.episode_type !== 'general' && !ep.episode_type && !isAiBook) return null;
-                
-                return (
-                <div key={ep.id} className={`bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-3 relative hover:shadow-md transition ${isAiBook ? 'md:col-span-2' : ''}`}>
-                  {isAiBook ? (
-                    <div className="flex flex-col items-center justify-center py-6 space-y-3 text-center">
-                      <div className="text-4xl animate-pulse">🤖📚</div>
-                      <div>
-                        <h3 className="font-heading font-extrabold text-lg text-forest">{ep.title}</h3>
-                        <p className="text-xs text-gray-500 font-body mt-1">AI 작가가 크루들의 에피소드를 모아 작성한 특별한 단행본입니다.</p>
-                      </div>
-                      <button 
-                        onClick={() => { setAiBookContent(ep.content); setShowBookModal(true); }} 
-                        className="px-6 py-2.5 mt-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold hover:bg-emerald-100 transition shadow-sm"
-                      >
-                        단행본 열어보기 &gt;
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <h3 className="font-heading font-extrabold text-lg text-forest">{ep.title}</h3>
-                      <div className={`text-sm text-gray-700 font-body whitespace-pre-line leading-relaxed break-words break-all sm:break-normal ${expandedEpisodes[ep.id] ? '' : 'line-clamp-3'}`}>
-                        {ep.content}
-                      </div>
-                      {ep.content.length > 150 && (
-                        <button onClick={() => setExpandedEpisodes(prev => ({...prev, [ep.id]: !prev[ep.id]}))} className="text-xs font-bold text-emerald-600 hover:text-emerald-700 transition">
-                          {expandedEpisodes[ep.id] ? '접기 ▲' : '더보기 ▼'}
-                        </button>
-                      )}
-                      {ep.photo_urls && ep.photo_urls.length > 0 && (
-                        <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-3">
-                          {ep.photo_urls.map((url: string, idx: number) => (
-                            <div key={idx} className="rounded-xl overflow-hidden aspect-square border border-gray-200">
-                              <img src={url} className="w-full h-full object-cover" />
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  )}
-                  
-                  <div className="pt-4 mt-2 border-t border-gray-50 flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 rounded-full bg-gray-200 overflow-hidden">
-                        {ep.users?.avatar_url ? (
-                          <img src={ep.users.avatar_url} className="w-full h-full object-cover"/>
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center font-bold text-[10px]">{ep.users?.nickname?.[0]}</div>
-                        )}
-                      </div>
-                      <span className="text-xs text-gray-500 font-bold">{ep.users?.nickname || 'Unknown'}</span>
-                      <span className="text-[10px] text-gray-400 font-label ml-2">{new Date(ep.created_at).toLocaleString()}</span>
-                    </div>
-                    {(user?.id === ep.author_id || user?.id === hike?.organizer_id) && (
-                      <div className="flex items-center space-x-3">
-                        {!isAiBook && user?.id === ep.author_id && (
-                          <button onClick={() => handleEditEpisode(ep)} className="text-[10px] text-gray-400 hover:text-forest transition font-bold">수정</button>
-                        )}
-                        <button onClick={() => handleDeleteEpisode(ep.id)} className="text-[10px] text-gray-400 hover:text-red-500 transition font-bold">삭제</button>
+                  <div className="w-14 h-14 rounded-full bg-forest-container text-white overflow-hidden border-2 border-transparent transition shadow-sm relative">
+                    {p.users.avatar_url ? (
+                      <img src={p.users.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center font-bold text-xl">{p.users.nickname?.[0]}</div>
+                    )}
+                    {p.status === 'completed' && (
+                      <div className="absolute bottom-0 right-0 bg-emerald-500 text-white rounded-full p-0.5 shadow-sm">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                       </div>
                     )}
                   </div>
+                  <span className="text-xs font-label text-gray-600 font-bold text-center w-full truncate">{p.users.nickname}</span>
+                  {isAdmin && (
+                    <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition absolute bottom-0 z-10 bg-white shadow-md p-1 rounded-md border border-gray-100">
+                      <button
+                        onClick={() => handleToggleComplete(p.user_id, p.status)}
+                        className={`text-[9px] px-1.5 py-1 rounded font-bold whitespace-nowrap ${p.status === 'completed' ? 'bg-gray-200 text-gray-600 hover:bg-gray-300' : 'bg-emerald-500 text-white hover:bg-emerald-600'}`}
+                      >
+                        {p.status === 'completed' ? '취소' : '완주'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedParticipantId(p.user_id)
+                          setShowBadgeModal(true)
+                        }}
+                        className="bg-terracotta text-white text-[9px] px-1.5 py-1 rounded font-bold hover:bg-terracotta-dark whitespace-nowrap"
+                      >
+                        뱃지
+                      </button>
+                    </div>
+                  )}
                 </div>
-                )
-              })}
+              ))}
+            </div>
+          </section>
+
+          {/* Photo Gallery (UC9) */}
+          <section className="space-y-4">
+            <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+              <h2 className="font-heading font-bold text-xl text-forest flex items-center space-x-2">
+                <span>📷 사진첩</span>
+                <span title="Google Drive 연동됨" className="text-emerald-500 text-sm cursor-help">
+                  ☁️
+                </span>
+              </h2>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => onOpenGallery && onOpenGallery(hike.id)}
+                  className="text-gray-500 hover:text-forest text-xs font-bold transition mr-2"
+                >
+                  전체 &gt;
+                </button>
+                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple onChange={handlePhotoUpload} />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="bg-forest text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-forest-light transition disabled:opacity-50"
+                >
+                  {isUploading ? '업로드 중...' : '+ 사진등록'}
+                </button>
+              </div>
             </div>
 
-            <div className="lg:col-span-1 space-y-4">
-              <h3 className="font-heading font-bold text-lg text-forest flex items-center space-x-2 border-b border-gray-100 pb-2">
-                <span>📌 공지 / 감사의 글</span>
-              </h3>
-              <div className="max-h-[600px] overflow-y-auto hide-scrollbar space-y-4 pb-4">
-                {episodes.filter(ep => ep.episode_type === 'notice').length === 0 ? (
-                  <div className="text-center text-gray-400 text-xs py-8 font-body">아직 등록된 공지가 없습니다.</div>
-                ) : (
-                  episodes.filter(ep => ep.episode_type === 'notice').map(ep => (
-                    <div key={ep.id} className="bg-yellow-100/80 p-5 rounded-lg shadow-sm border border-yellow-200/50 space-y-2 relative rotate-1 hover:rotate-0 hover:shadow-md transition duration-300">
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-3 bg-red-400/20 backdrop-blur-sm shadow-sm rounded-sm z-10" />
-                      <h4 className="font-heading font-extrabold text-sm text-amber-900">{ep.title}</h4>
-                      <p className="text-xs text-amber-900/80 font-body whitespace-pre-line leading-relaxed">{ep.content}</p>
-                      {ep.photo_urls && ep.photo_urls.length > 0 && (
-                        <div className="mt-2 grid grid-cols-2 gap-2">
-                          {ep.photo_urls.map((url: string, idx: number) => (
-                            <div key={idx} className="rounded-lg overflow-hidden aspect-square border border-yellow-200/50 shadow-sm">
-                              <img src={url} className="w-full h-full object-cover opacity-90" />
-                            </div>
-                          ))}
+            {photos.length === 0 ? (
+              <div className="bg-paper p-8 rounded-2xl text-center text-gray-500 text-sm font-body border border-dashed border-gray-300">
+                아직 등록된 사진이 없습니다. 첫 번째 사진을 올려보세요!
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
+                {photos.slice(0, 5).map((photo) => {
+                  const fileId = photo.google_drive_file_id
+                  const imgSrc = `/api/drive/image?id=${fileId}`
+                  return (
+                    <div key={photo.id} className="w-full aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition border border-gray-200">
+                      <img src={imgSrc} alt="Hike Photo" className="w-full h-full object-cover" />
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </section>
+
+          {/* Episodes (UC10/UC11) */}
+          <section className="space-y-6 pt-8 border-t border-gray-100">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-100 pb-2 gap-3 sm:gap-0">
+              <h2 className="font-heading font-bold text-xl text-forest">📝 에피소드</h2>
+              <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+                <button onClick={() => setShowAiKeyModal(true)} className="bg-gray-100 text-gray-500 hover:bg-gray-200 p-3 rounded-xl transition shadow-sm" title="AI 설정">
+                  ⚙️
+                </button>
+                <button onClick={handleGenerateBookClick} className="bg-emerald-600 text-white px-4 sm:px-5 py-3 rounded-xl text-xs sm:text-sm font-bold hover:bg-emerald-700 transition shadow-md flex items-center gap-1 sm:gap-2">
+                  <span>🤖</span> 단행본 만들기
+                </button>
+                {!showEpisodeForm && (
+                  <button
+                    onClick={() => {
+                      setEpisodeTitle('')
+                      setEpisodeContent('')
+                      setEpisodeType('general')
+                      setIsPublished(true)
+                      setEditingEpisodeId(null)
+                      setSelectedPhotoIds([])
+                      setShowEpisodeForm(true)
+                    }}
+                    className="bg-terracotta text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-terracotta-dark transition shadow-sm"
+                  >
+                    + 에피소드 남기기
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {showEpisodeForm && (
+              <form onSubmit={handleSubmitEpisode} className="bg-orange-50/50 p-6 rounded-2xl border border-orange-200 shadow-sm space-y-4">
+                {isAdmin && (
+                  <div className="flex gap-4 pb-2 border-b border-orange-200/50 mb-2">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="radio" value="general" checked={episodeType === 'general'} onChange={() => setEpisodeType('general')} className="text-forest focus:ring-forest" />
+                      <span className="text-sm font-bold text-forest">일반 에피소드</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="radio" value="notice" checked={episodeType === 'notice'} onChange={() => setEpisodeType('notice')} className="text-terracotta focus:ring-terracotta" />
+                      <span className="text-sm font-bold text-terracotta">공지 / 감사의 글</span>
+                    </label>
+                  </div>
+                )}
+                <input
+                  type="text"
+                  required
+                  placeholder="에피소드 제목"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl font-heading text-sm text-forest focus:outline-none focus:ring-2 focus:ring-orange-300"
+                  value={episodeTitle}
+                  onChange={e => setEpisodeTitle(e.target.value)}
+                />
+                <textarea
+                  required
+                  placeholder="이번 산행에서 무슨 일이 있었나요?"
+                  rows={4}
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl font-body text-sm text-gray-700 resize-none focus:outline-none focus:ring-2 focus:ring-orange-300"
+                  value={episodeContent}
+                  onChange={e => setEpisodeContent(e.target.value)}
+                />
+
+                {/* Photo Selector for Episode */}
+                {photos.length > 0 && (
+                  <div className="space-y-2 pb-2">
+                    <span className="text-sm font-bold text-forest block">사진 첨부 (선택)</span>
+                    <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
+                      {photos.map(photo => {
+                        const isSelected = selectedPhotoIds.includes(photo.id)
+                        const fileId = photo.google_drive_file_id
+                        const imgSrc = `/api/drive/image?id=${fileId}`
+                        return (
+                          <div
+                            key={photo.id}
+                            className={`flex-none w-20 h-20 rounded-lg overflow-hidden cursor-pointer border-2 transition ${isSelected ? 'border-terracotta ring-2 ring-terracotta ring-opacity-50' : 'border-transparent'}`}
+                            onClick={() => {
+                              if (isSelected) setSelectedPhotoIds(prev => prev.filter(id => id !== photo.id))
+                              else setSelectedPhotoIds(prev => [...prev, photo.id])
+                            }}
+                          >
+                            <img src={imgSrc} className="w-full h-full object-cover" />
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-between items-center pt-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={isPublished}
+                      onChange={(e) => setIsPublished(e.target.checked)}
+                      className="w-4 h-4 text-forest rounded border-gray-300 focus:ring-forest"
+                    />
+                    <span className="text-xs font-bold text-gray-700">전체 공유 (대시보드 노출)</span>
+                  </label>
+                  <div className="flex gap-2">
+                    <button type="button" onClick={() => { setShowEpisodeForm(false); setEditingEpisodeId(null); setEpisodeTitle(''); setEpisodeContent(''); setEpisodeType('general'); setIsPublished(true); }} className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700">취소</button>
+                    <button type="submit" className="bg-forest text-white px-6 py-2 rounded-xl text-xs font-bold shadow hover:bg-forest-light">{editingEpisodeId ? '수정 완료' : '등록 완료'}</button>
+                  </div>
+                </div>
+              </form>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                {episodes.filter(ep => ep.episode_type === 'general' || !ep.episode_type).length === 0 && !showEpisodeForm && (
+                  <div className="md:col-span-2 text-center text-gray-500 text-sm py-8 font-body">등록된 에피소드가 없습니다.</div>
+                )}
+                {episodes.map(ep => {
+                  const isAiBook = ep.episode_type === 'ai_book'
+                  if (ep.episode_type !== 'general' && !ep.episode_type && !isAiBook) return null;
+
+                  return (
+                    <div key={ep.id} className={`bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-3 relative hover:shadow-md transition ${isAiBook ? 'md:col-span-2' : ''}`}>
+                      {isAiBook ? (
+                        <div className="flex flex-col items-center justify-center py-6 space-y-3 text-center">
+                          <div className="text-4xl animate-pulse">🤖📚</div>
+                          <div>
+                            <h3 className="font-heading font-extrabold text-lg text-forest">{ep.title}</h3>
+                            <p className="text-xs text-gray-500 font-body mt-1">AI 작가가 크루들의 에피소드를 모아 작성한 특별한 단행본입니다.</p>
+                          </div>
+                          <button
+                            onClick={() => { setAiBookContent(ep.content); setShowBookModal(true); }}
+                            className="px-6 py-2.5 mt-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold hover:bg-emerald-100 transition shadow-sm"
+                          >
+                            단행본 열어보기 &gt;
+                          </button>
                         </div>
+                      ) : (
+                        <>
+                          <h3 className="font-heading font-extrabold text-lg text-forest">{ep.title}</h3>
+                          <div className={`text-sm text-gray-700 font-body whitespace-pre-line leading-relaxed break-words break-all sm:break-normal ${expandedEpisodes[ep.id] ? '' : 'line-clamp-3'}`}>
+                            {ep.content}
+                          </div>
+                          {ep.content.length > 150 && (
+                            <button onClick={() => setExpandedEpisodes(prev => ({ ...prev, [ep.id]: !prev[ep.id] }))} className="text-xs font-bold text-emerald-600 hover:text-emerald-700 transition">
+                              {expandedEpisodes[ep.id] ? '접기 ▲' : '더보기 ▼'}
+                            </button>
+                          )}
+                          {ep.photo_urls && ep.photo_urls.length > 0 && (
+                            <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-3">
+                              {ep.photo_urls.map((url: string, idx: number) => (
+                                <div key={idx} className="rounded-xl overflow-hidden aspect-square border border-gray-200">
+                                  <img src={url} className="w-full h-full object-cover" />
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </>
                       )}
-                      <div className="pt-2 mt-2 border-t border-amber-900/10 flex items-center justify-between">
-                        <span className="text-[10px] text-amber-800/60 font-bold">{ep.users?.nickname || '관리자'}</span>
-                        {(user?.id === ep.author_id || user?.id === hike?.organizer_id) && (
-                          <div className="flex items-center space-x-2">
-                            {user?.id === ep.author_id && (
-                              <button onClick={() => handleEditEpisode(ep)} className="text-[10px] text-amber-800/40 hover:text-amber-800 transition font-bold">수정</button>
+
+                      <div className="pt-4 mt-2 border-t border-gray-50 flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-6 h-6 rounded-full bg-gray-200 overflow-hidden">
+                            {ep.users?.avatar_url ? (
+                              <img src={ep.users.avatar_url} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center font-bold text-[10px]">{ep.users?.nickname?.[0]}</div>
                             )}
-                            <button onClick={() => handleDeleteEpisode(ep.id)} className="text-[10px] text-amber-800/40 hover:text-red-500 transition font-bold">삭제</button>
+                          </div>
+                          <span className="text-xs text-gray-500 font-bold">{ep.users?.nickname || 'Unknown'}</span>
+                          <span className="text-[10px] text-gray-400 font-label ml-2">{new Date(ep.created_at).toLocaleString()}</span>
+                        </div>
+                        {(user?.id === ep.author_id || user?.id === hike?.organizer_id) && (
+                          <div className="flex items-center space-x-3">
+                            {!isAiBook && user?.id === ep.author_id && (
+                              <button onClick={() => handleEditEpisode(ep)} className="text-[10px] text-gray-400 hover:text-forest transition font-bold">수정</button>
+                            )}
+                            <button onClick={() => handleDeleteEpisode(ep.id)} className="text-[10px] text-gray-400 hover:text-red-500 transition font-bold">삭제</button>
                           </div>
                         )}
                       </div>
                     </div>
+                  )
+                })}
+              </div>
+
+              <div className="lg:col-span-1 space-y-4">
+                <h3 className="font-heading font-bold text-lg text-forest flex items-center space-x-2 border-b border-gray-100 pb-2">
+                  <span>📌 공지 / 감사의 글</span>
+                </h3>
+                <div className="max-h-[600px] overflow-y-auto hide-scrollbar space-y-4 pb-4">
+                  {episodes.filter(ep => ep.episode_type === 'notice').length === 0 ? (
+                    <div className="text-center text-gray-400 text-xs py-8 font-body">아직 등록된 공지가 없습니다.</div>
+                  ) : (
+                    episodes.filter(ep => ep.episode_type === 'notice').map(ep => (
+                      <div key={ep.id} className="bg-yellow-100/80 p-5 rounded-lg shadow-sm border border-yellow-200/50 space-y-2 relative rotate-1 hover:rotate-0 hover:shadow-md transition duration-300">
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-3 bg-red-400/20 backdrop-blur-sm shadow-sm rounded-sm z-10" />
+                        <h4 className="font-heading font-extrabold text-sm text-amber-900">{ep.title}</h4>
+                        <p className="text-xs text-amber-900/80 font-body whitespace-pre-line leading-relaxed">{ep.content}</p>
+                        {ep.photo_urls && ep.photo_urls.length > 0 && (
+                          <div className="mt-2 grid grid-cols-2 gap-2">
+                            {ep.photo_urls.map((url: string, idx: number) => (
+                              <div key={idx} className="rounded-lg overflow-hidden aspect-square border border-yellow-200/50 shadow-sm">
+                                <img src={url} className="w-full h-full object-cover opacity-90" />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <div className="pt-2 mt-2 border-t border-amber-900/10 flex items-center justify-between">
+                          <span className="text-[10px] text-amber-800/60 font-bold">{ep.users?.nickname || '관리자'}</span>
+                          {(user?.id === ep.author_id || user?.id === hike?.organizer_id) && (
+                            <div className="flex items-center space-x-2">
+                              {user?.id === ep.author_id && (
+                                <button onClick={() => handleEditEpisode(ep)} className="text-[10px] text-amber-800/40 hover:text-amber-800 transition font-bold">수정</button>
+                              )}
+                              <button onClick={() => handleDeleteEpisode(ep.id)} className="text-[10px] text-amber-800/40 hover:text-red-500 transition font-bold">삭제</button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        {/* Badge Grant Modal */}
+        {showBadgeModal && isAdmin && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm print:hidden">
+            <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-6">
+              <h3 className="font-heading font-bold text-xl text-forest border-b border-gray-100 pb-3">뱃지 수여하기</h3>
+              <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+                {badges.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center font-body py-4">부여할 수 있는 뱃지가 없습니다.<br />동호회 관리 센터에서 뱃지를 생성해주세요.</p>
+                ) : (
+                  badges.map(b => (
+                    <button
+                      key={b.id}
+                      onClick={() => handleGrantBadge(b.id)}
+                      className="w-full text-left flex items-center space-x-3 p-3 rounded-xl border border-gray-100 hover:bg-forest hover:text-white transition group"
+                    >
+                      <span className="text-2xl group-hover:scale-110 transition-transform">{b.icon_name}</span>
+                      <div>
+                        <p className="font-bold text-forest group-hover:text-white text-sm">{b.name}</p>
+                        <p className="text-[10px] text-gray-500 group-hover:text-gray-200 line-clamp-1">{b.description}</p>
+                      </div>
+                    </button>
                   ))
                 )}
               </div>
+              <div className="flex justify-end pt-4 border-t border-gray-100">
+                <button onClick={() => setShowBadgeModal(false)} className="bg-gray-100 text-gray-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-200 transition">닫기</button>
+              </div>
             </div>
           </div>
-        </section>
+        )}
+
+        {/* AI Episode Select Modal */}
+        {showAiEpisodeSelectModal && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm print:hidden">
+            <div className="bg-white rounded-3xl w-full max-w-lg p-8 shadow-2xl space-y-6 border border-gray-100">
+              <div>
+                <h3 className="font-heading font-extrabold text-2xl text-forest mb-2">📑 에피소드 선택</h3>
+                <p className="text-sm text-gray-500 font-body leading-relaxed">
+                  단행본에 포함할 에피소드를 선택해주세요.
+                </p>
+              </div>
+              <div className="max-h-80 overflow-y-auto space-y-3 pr-2">
+                {episodes.filter(ep => ep.episode_type === 'general' || !ep.episode_type).map(ep => (
+                  <label key={ep.id} className="flex items-start space-x-3 p-3 rounded-xl border border-gray-100 hover:bg-gray-50 cursor-pointer transition">
+                    <input
+                      type="checkbox"
+                      checked={selectedAiEpisodes.includes(ep.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedAiEpisodes(prev => [...prev, ep.id])
+                        } else {
+                          setSelectedAiEpisodes(prev => prev.filter(id => id !== ep.id))
+                        }
+                      }}
+                      className="mt-1 w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500"
+                    />
+                    <div className="flex-1">
+                      <h4 className="font-bold text-sm text-gray-800 line-clamp-1">{ep.title}</h4>
+                      <p className="text-xs text-gray-500 line-clamp-2 mt-1">{ep.content}</p>
+                      <span className="text-[10px] text-gray-400 mt-1 block">작성자: {ep.users?.nickname || '익명'}</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+              <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+                <label className="flex items-center space-x-2 text-sm text-gray-600 cursor-pointer pl-1 mt-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedAiEpisodes.length === episodes.filter(ep => ep.episode_type === 'general' || !ep.episode_type).length && selectedAiEpisodes.length > 0}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedAiEpisodes(episodes.filter(ep => ep.episode_type === 'general' || !ep.episode_type).map(ep => ep.id))
+                      } else {
+                        setSelectedAiEpisodes([])
+                      }
+                    }}
+                    className="w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500"
+                  />
+                  <span className="font-bold">전체 선택</span>
+                </label>
+                <div className="flex gap-3 mt-2">
+                  <button
+                    onClick={() => setShowAiEpisodeSelectModal(false)}
+                    className="bg-gray-100 text-gray-600 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-200 transition"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (selectedAiEpisodes.length === 0) {
+                        alert('최소 1개의 에피소드를 선택해주세요.')
+                        return
+                      }
+                      if (!confirm('선택한 에피소드로 AI 단행본 생성을 진행하시겠습니까?')) {
+                        return;
+                      }
+                      setShowAiEpisodeSelectModal(false)
+                      proceedWithGeneration(selectedAiEpisodes)
+                    }}
+                    className="bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-emerald-700 transition shadow-sm"
+                  >
+                    선택 완료
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* AI Provider & Key Input Modal */}
+        {showAiKeyModal && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm print:hidden">
+            <div className="bg-white rounded-3xl w-full max-w-md p-8 shadow-2xl space-y-6 border border-gray-100">
+              <div>
+                <h3 className="font-heading font-extrabold text-2xl text-forest mb-2">🔑 AI 단행본 만들기</h3>
+                <p className="text-sm text-gray-500 font-body leading-relaxed">
+                  단행본을 작성할 AI 모델을 선택하고 해당 API Key를 입력해주세요. 입력하신 키는 서버 데이터베이스에 전송 및 저장되지 않으며, 편의를 위해 사용자 브라우저 안전 영역(Local Storage)에만 보관됩니다.
+                </p>
+              </div>
+
+              <div className="flex gap-2 p-1 bg-gray-100 rounded-xl">
+                <button
+                  onClick={() => setAiProvider('gemini')}
+                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition ${aiProvider === 'gemini' ? 'bg-white shadow-sm text-emerald-600' : 'text-gray-500 hover:bg-gray-200'}`}
+                >
+                  Google Gemini
+                </button>
+                <button
+                  onClick={() => setAiProvider('openai')}
+                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition ${aiProvider === 'openai' ? 'bg-white shadow-sm text-emerald-600' : 'text-gray-500 hover:bg-gray-200'}`}
+                >
+                  ChatGPT
+                </button>
+                <button
+                  onClick={() => setAiProvider('claude')}
+                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition ${aiProvider === 'claude' ? 'bg-white shadow-sm text-emerald-600' : 'text-gray-500 hover:bg-gray-200'}`}
+                >
+                  Claude
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-forest">
+                  {aiProvider === 'gemini' && 'Gemini API Key'}
+                  {aiProvider === 'openai' && 'OpenAI API Key'}
+                  {aiProvider === 'claude' && 'Anthropic API Key'}
+                </label>
+                <input
+                  type="password"
+                  value={aiKeyInput}
+                  onChange={(e) => setAiKeyInput(e.target.value)}
+                  placeholder={
+                    aiProvider === 'gemini' ? 'AIzaSy...' :
+                      aiProvider === 'openai' ? 'sk-proj-...' : 'sk-ant-...'
+                  }
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-body text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+                <div className="text-[11px] text-gray-500 font-body mt-2 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                  {aiProvider === 'gemini' && (
+                    <>
+                      <p className="font-bold text-gray-700 mb-1">💡 Gemini API Key 발급 방법</p>
+                      <ol className="list-decimal pl-4 space-y-1">
+                        <li><a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-bold">Google AI Studio (링크)</a>에 로그인합니다.</li>
+                        <li>'Get API key' 또는 'Create API key' 버튼을 클릭합니다.</li>
+                        <li>프로젝트를 선택하여 키를 생성하고 복사합니다. (현재 무료 티어 제공)</li>
+                      </ol>
+                    </>
+                  )}
+                  {aiProvider === 'openai' && (
+                    <>
+                      <p className="font-bold text-gray-700 mb-1">💡 OpenAI API Key 발급 방법</p>
+                      <ol className="list-decimal pl-4 space-y-1">
+                        <li><a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-bold">OpenAI Platform (링크)</a>에 로그인합니다.</li>
+                        <li>좌측 'API keys' 메뉴에서 'Create new secret key'를 클릭합니다.</li>
+                        <li>생성된 키를 복사합니다. (사용을 위해 결제 수단 등록 필요)</li>
+                      </ol>
+                    </>
+                  )}
+                  {aiProvider === 'claude' && (
+                    <>
+                      <p className="font-bold text-gray-700 mb-1">💡 Anthropic Claude API Key 발급 방법</p>
+                      <ol className="list-decimal pl-4 space-y-1">
+                        <li><a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-bold">Anthropic Console (링크)</a>에 로그인합니다.</li>
+                        <li>우측 상단 프로필에서 Settings ➔ 'API Keys'로 이동합니다.</li>
+                        <li>'Create Key'를 눌러 키를 생성하고 복사합니다.</li>
+                      </ol>
+                    </>
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button onClick={() => setShowAiKeyModal(false)} className="bg-gray-100 text-gray-600 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-200 transition">취소</button>
+                <button onClick={saveAiKeyAndGenerate} className="bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-emerald-700 transition shadow-sm">
+                  저장 및 단행본 생성
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
 
-      {/* Badge Grant Modal */}
-      {showBadgeModal && isAdmin && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm print:hidden">
-          <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-6">
-            <h3 className="font-heading font-bold text-xl text-forest border-b border-gray-100 pb-3">뱃지 수여하기</h3>
-            <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
-              {badges.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center font-body py-4">부여할 수 있는 뱃지가 없습니다.<br/>동호회 관리 센터에서 뱃지를 생성해주세요.</p>
-              ) : (
-                badges.map(b => (
-                  <button
-                    key={b.id}
-                    onClick={() => handleGrantBadge(b.id)}
-                    className="w-full text-left flex items-center space-x-3 p-3 rounded-xl border border-gray-100 hover:bg-forest hover:text-white transition group"
-                  >
-                    <span className="text-2xl group-hover:scale-110 transition-transform">{b.icon_name}</span>
-                    <div>
-                      <p className="font-bold text-forest group-hover:text-white text-sm">{b.name}</p>
-                      <p className="text-[10px] text-gray-500 group-hover:text-gray-200 line-clamp-1">{b.description}</p>
-                    </div>
-                  </button>
-                ))
-              )}
-            </div>
-            <div className="flex justify-end pt-4 border-t border-gray-100">
-              <button onClick={() => setShowBadgeModal(false)} className="bg-gray-100 text-gray-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-200 transition">닫기</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* AI Episode Select Modal */}
-      {showAiEpisodeSelectModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm print:hidden">
-          <div className="bg-white rounded-3xl w-full max-w-lg p-8 shadow-2xl space-y-6 border border-gray-100">
-            <div>
-              <h3 className="font-heading font-extrabold text-2xl text-forest mb-2">📑 에피소드 선택</h3>
-              <p className="text-sm text-gray-500 font-body leading-relaxed">
-                단행본에 포함할 에피소드를 선택해주세요.
-              </p>
-            </div>
-            <div className="max-h-80 overflow-y-auto space-y-3 pr-2">
-              {episodes.filter(ep => ep.episode_type === 'general' || !ep.episode_type).map(ep => (
-                <label key={ep.id} className="flex items-start space-x-3 p-3 rounded-xl border border-gray-100 hover:bg-gray-50 cursor-pointer transition">
-                  <input 
-                    type="checkbox" 
-                    checked={selectedAiEpisodes.includes(ep.id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedAiEpisodes(prev => [...prev, ep.id])
-                      } else {
-                        setSelectedAiEpisodes(prev => prev.filter(id => id !== ep.id))
-                      }
-                    }}
-                    className="mt-1 w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500"
-                  />
-                  <div className="flex-1">
-                    <h4 className="font-bold text-sm text-gray-800 line-clamp-1">{ep.title}</h4>
-                    <p className="text-xs text-gray-500 line-clamp-2 mt-1">{ep.content}</p>
-                    <span className="text-[10px] text-gray-400 mt-1 block">작성자: {ep.users?.nickname || '익명'}</span>
-                  </div>
-                </label>
-              ))}
-            </div>
-            <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-              <label className="flex items-center space-x-2 text-sm text-gray-600 cursor-pointer pl-1 mt-2">
-                <input 
-                  type="checkbox" 
-                  checked={selectedAiEpisodes.length === episodes.filter(ep => ep.episode_type === 'general' || !ep.episode_type).length && selectedAiEpisodes.length > 0}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setSelectedAiEpisodes(episodes.filter(ep => ep.episode_type === 'general' || !ep.episode_type).map(ep => ep.id))
-                    } else {
-                      setSelectedAiEpisodes([])
-                    }
-                  }}
-                  className="w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500"
-                />
-                <span className="font-bold">전체 선택</span>
-              </label>
-              <div className="flex gap-3 mt-2">
-                <button 
-                  onClick={() => setShowAiEpisodeSelectModal(false)} 
-                  className="bg-gray-100 text-gray-600 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-200 transition"
-                >
-                  취소
-                </button>
-                <button 
-                  onClick={() => {
-                    if (selectedAiEpisodes.length === 0) {
-                      alert('최소 1개의 에피소드를 선택해주세요.')
-                      return
-                    }
-                    if (!confirm('선택한 에피소드로 AI 단행본 생성을 진행하시겠습니까?')) {
-                      return;
-                    }
-                    setShowAiEpisodeSelectModal(false)
-                    proceedWithGeneration(selectedAiEpisodes)
-                  }} 
-                  className="bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-emerald-700 transition shadow-sm"
-                >
-                  선택 완료
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* AI Provider & Key Input Modal */}
-      {showAiKeyModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm print:hidden">
-          <div className="bg-white rounded-3xl w-full max-w-md p-8 shadow-2xl space-y-6 border border-gray-100">
-            <div>
-              <h3 className="font-heading font-extrabold text-2xl text-forest mb-2">🔑 AI 단행본 만들기</h3>
-              <p className="text-sm text-gray-500 font-body leading-relaxed">
-                단행본을 작성할 AI 모델을 선택하고 해당 API Key를 입력해주세요. 입력하신 키는 서버 데이터베이스에 전송 및 저장되지 않으며, 편의를 위해 사용자 브라우저 안전 영역(Local Storage)에만 보관됩니다.
-              </p>
-            </div>
-            
-            <div className="flex gap-2 p-1 bg-gray-100 rounded-xl">
-              <button 
-                onClick={() => setAiProvider('gemini')}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition ${aiProvider === 'gemini' ? 'bg-white shadow-sm text-emerald-600' : 'text-gray-500 hover:bg-gray-200'}`}
-              >
-                Google Gemini
-              </button>
-              <button 
-                onClick={() => setAiProvider('openai')}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition ${aiProvider === 'openai' ? 'bg-white shadow-sm text-emerald-600' : 'text-gray-500 hover:bg-gray-200'}`}
-              >
-                ChatGPT
-              </button>
-              <button 
-                onClick={() => setAiProvider('claude')}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition ${aiProvider === 'claude' ? 'bg-white shadow-sm text-emerald-600' : 'text-gray-500 hover:bg-gray-200'}`}
-              >
-                Claude
-              </button>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-forest">
-                {aiProvider === 'gemini' && 'Gemini API Key'}
-                {aiProvider === 'openai' && 'OpenAI API Key'}
-                {aiProvider === 'claude' && 'Anthropic API Key'}
-              </label>
-              <input 
-                type="password"
-                value={aiKeyInput}
-                onChange={(e) => setAiKeyInput(e.target.value)}
-                placeholder={
-                  aiProvider === 'gemini' ? 'AIzaSy...' :
-                  aiProvider === 'openai' ? 'sk-proj-...' : 'sk-ant-...'
-                }
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-body text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-              <div className="text-[11px] text-gray-500 font-body mt-2 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                {aiProvider === 'gemini' && (
-                  <>
-                    <p className="font-bold text-gray-700 mb-1">💡 Gemini API Key 발급 방법</p>
-                    <ol className="list-decimal pl-4 space-y-1">
-                      <li><a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-bold">Google AI Studio (링크)</a>에 로그인합니다.</li>
-                      <li>'Get API key' 또는 'Create API key' 버튼을 클릭합니다.</li>
-                      <li>프로젝트를 선택하여 키를 생성하고 복사합니다. (현재 무료 티어 제공)</li>
-                    </ol>
-                  </>
-                )}
-                {aiProvider === 'openai' && (
-                  <>
-                    <p className="font-bold text-gray-700 mb-1">💡 OpenAI API Key 발급 방법</p>
-                    <ol className="list-decimal pl-4 space-y-1">
-                      <li><a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-bold">OpenAI Platform (링크)</a>에 로그인합니다.</li>
-                      <li>좌측 'API keys' 메뉴에서 'Create new secret key'를 클릭합니다.</li>
-                      <li>생성된 키를 복사합니다. (사용을 위해 결제 수단 등록 필요)</li>
-                    </ol>
-                  </>
-                )}
-                {aiProvider === 'claude' && (
-                  <>
-                    <p className="font-bold text-gray-700 mb-1">💡 Anthropic Claude API Key 발급 방법</p>
-                    <ol className="list-decimal pl-4 space-y-1">
-                      <li><a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-bold">Anthropic Console (링크)</a>에 로그인합니다.</li>
-                      <li>우측 상단 프로필에서 Settings ➔ 'API Keys'로 이동합니다.</li>
-                      <li>'Create Key'를 눌러 키를 생성하고 복사합니다.</li>
-                    </ol>
-                  </>
-                )}
-              </div>
-            </div>
-            <div className="flex justify-end gap-3 pt-2">
-              <button onClick={() => setShowAiKeyModal(false)} className="bg-gray-100 text-gray-600 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-200 transition">취소</button>
-              <button onClick={saveAiKeyAndGenerate} className="bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-emerald-700 transition shadow-sm">
-                저장 및 단행본 생성
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-    </div>
-    
-    {/* Book Viewer Modal (Rendered outside the main hidden wrapper for print) */}
-    {showBookModal && (
-      <div className="fixed inset-0 z-[70] bg-black/80 backdrop-blur-md overflow-y-auto print:static print:bg-white print:backdrop-blur-none print:block print:p-0">
-        <style>{`
+      {/* Book Viewer Modal (Rendered outside the main hidden wrapper for print) */}
+      {showBookModal && (
+        <div className="fixed inset-0 z-[70] bg-black/80 backdrop-blur-md overflow-y-auto print:static print:bg-white print:backdrop-blur-none print:block print:p-0">
+          <style>{`
           @media print {
             html, body { 
               background: white !important; 
@@ -1064,106 +1086,106 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
             }
           }
         `}</style>
-        <div className="w-full max-w-5xl mx-auto bg-white min-h-screen my-0 md:my-8 p-8 md:p-20 shadow-2xl relative border-t-8 border-forest print:m-0 print:border-none print:shadow-none print:w-full print:max-w-none print:bg-white">
-          
-          {/* Actions - Hidden on print */}
-          <div className="absolute top-8 right-8 flex gap-2 flex-wrap justify-end print:hidden max-w-lg">
-            {!episodes.some(ep => ep.episode_type === 'ai_book') && (
-              <button 
-                onClick={handleSaveAsEpisode} 
-                className="bg-emerald-600 text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-emerald-700 transition shadow-md flex items-center gap-2"
-                disabled={isGeneratingBook}
-              >
-                <span>💾</span> 에피소드로 등록
-              </button>
-            )}
-            <button 
-              onClick={handleDownloadHtml} 
-              className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-blue-700 transition shadow-md flex items-center gap-2"
-              disabled={isGeneratingBook}
-            >
-              <span>🌐</span> HTML 저장
-            </button>
-            <button 
-              onClick={handleCopyForBlog} 
-              className="bg-purple-600 text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-purple-700 transition shadow-md flex items-center gap-2"
-              disabled={isGeneratingBook}
-            >
-              <span>📝</span> 블로그용 복사
-            </button>
-            {/* 참가자만 공유 기능 접근 가능 */}
-            {user && participants.some(p => p.user_id === user.id) && (
-              <button 
-                onClick={handleShareNative} 
-                className="bg-yellow-400 text-black px-4 py-2 rounded-full text-sm font-bold hover:bg-yellow-500 transition shadow-md flex items-center gap-2"
-                disabled={isGeneratingBook}
-              >
-                <span>📲</span> 카톡/공유
-              </button>
-            )}
-            <button 
-              onClick={() => window.print()} 
-              className="bg-terracotta text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-terracotta-dark transition shadow-md flex items-center gap-2"
-              disabled={isGeneratingBook}
-            >
-              <span>🖨️</span> PDF 저장
-            </button>
-            <button 
-              onClick={() => setShowBookModal(false)} 
-              className="bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-full text-sm font-bold hover:bg-gray-50 transition shadow-sm"
-            >
-              닫기
-            </button>
-          </div>
+          <div className="w-full max-w-5xl mx-auto bg-white min-h-screen my-0 md:my-8 p-8 md:p-20 shadow-2xl relative border-t-8 border-forest print:m-0 print:border-none print:shadow-none print:w-full print:max-w-none print:bg-white">
 
-          <div className="space-y-12">
-            {/* Book Cover Header */}
-            <div className="text-center space-y-6 pb-12 border-b-2 border-forest/20 mt-12 print:mt-0">
-              <div className="text-terracotta font-bold tracking-[0.2em] text-sm uppercase">Traking Diary Vol. {hikeId}</div>
-              <h1 className="font-heading font-extrabold text-5xl md:text-6xl text-forest drop-shadow-sm leading-tight">
-                {hike?.title}
-              </h1>
-              <p className="text-gray-500 font-body text-lg md:text-xl flex items-center justify-center gap-4">
-                <span>⛰️ {hike?.mountain_name}</span>
-                <span>•</span>
-                <span>📅 {new Date(hike?.hike_date).toLocaleDateString()}</span>
-              </p>
+            {/* Actions - Hidden on print */}
+            <div className="absolute top-8 right-8 flex gap-2 flex-wrap justify-end print:hidden max-w-lg">
+              {!episodes.some(ep => ep.episode_type === 'ai_book') && (
+                <button
+                  onClick={handleSaveAsEpisode}
+                  className="bg-emerald-600 text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-emerald-700 transition shadow-md flex items-center gap-2"
+                  disabled={isGeneratingBook}
+                >
+                  <span>💾</span> 에피소드로 등록
+                </button>
+              )}
+              <button
+                onClick={handleDownloadHtml}
+                className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-blue-700 transition shadow-md flex items-center gap-2"
+                disabled={isGeneratingBook}
+              >
+                <span>🌐</span> HTML 저장
+              </button>
+              <button
+                onClick={handleCopyForBlog}
+                className="bg-purple-600 text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-purple-700 transition shadow-md flex items-center gap-2"
+                disabled={isGeneratingBook}
+              >
+                <span>📝</span> 블로그용 복사
+              </button>
+              {/* 참가자만 공유 기능 접근 가능 */}
+              {user && participants.some(p => p.user_id === user.id) && (
+                <button
+                  onClick={handleShareNative}
+                  className="bg-yellow-400 text-black px-4 py-2 rounded-full text-sm font-bold hover:bg-yellow-500 transition shadow-md flex items-center gap-2"
+                  disabled={isGeneratingBook}
+                >
+                  <span>📲</span> 카톡/공유
+                </button>
+              )}
+              <button
+                onClick={() => window.print()}
+                className="bg-terracotta text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-terracotta-dark transition shadow-md flex items-center gap-2"
+                disabled={isGeneratingBook}
+              >
+                <span>🖨️</span> PDF 저장
+              </button>
+              <button
+                onClick={() => setShowBookModal(false)}
+                className="bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-full text-sm font-bold hover:bg-gray-50 transition shadow-sm"
+              >
+                닫기
+              </button>
             </div>
 
-            {/* Book Content */}
-            <div className="px-4 md:px-12 py-8">
-              {isGeneratingBook ? (
-                <div className="flex flex-col items-center justify-center py-32 space-y-6 print:hidden">
-                  <div className="text-6xl animate-bounce">🤖</div>
-                  <h3 className="font-heading font-extrabold text-2xl text-forest">AI 작가님이 에세이를 집필 중입니다...</h3>
-                  <p className="text-gray-500 font-body text-sm mb-4">크루들의 추억을 모아 멋진 글로 다듬고 있어요. (최대 30초 소요)</p>
-                  <button 
-                    onClick={() => {
-                      setIsGeneratingBook(false)
-                      setShowBookModal(false)
-                    }}
-                    className="mt-4 px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full text-sm font-bold transition border border-gray-300"
-                  >
-                    집필 취소하기
-                  </button>
+            <div className="space-y-12">
+              {/* Book Cover Header */}
+              <div className="text-center space-y-6 pb-12 border-b-2 border-forest/20 mt-12 print:mt-0">
+                <div className="text-terracotta font-bold tracking-[0.2em] text-sm uppercase">Traking Diary Vol. {hikeId}</div>
+                <h1 className="font-heading font-extrabold text-5xl md:text-6xl text-forest drop-shadow-sm leading-tight">
+                  {hike?.title}
+                </h1>
+                <p className="text-gray-500 font-body text-lg md:text-xl flex items-center justify-center gap-4">
+                  <span>⛰️ {hike?.mountain_name}</span>
+                  <span>•</span>
+                  <span>📅 {new Date(hike?.hike_date).toLocaleDateString()}</span>
+                </p>
+              </div>
+
+              {/* Book Content */}
+              <div className="px-4 md:px-12 py-8">
+                {isGeneratingBook ? (
+                  <div className="flex flex-col items-center justify-center py-32 space-y-6 print:hidden">
+                    <div className="text-6xl animate-bounce">🤖</div>
+                    <h3 className="font-heading font-extrabold text-2xl text-forest">AI 작가님이 에세이를 집필 중입니다...</h3>
+                    <p className="text-gray-500 font-body text-sm mb-4">크루들의 추억을 모아 멋진 글로 다듬고 있어요. (최대 30초 소요)</p>
+                    <button
+                      onClick={() => {
+                        setIsGeneratingBook(false)
+                        setShowBookModal(false)
+                      }}
+                      className="mt-4 px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full text-sm font-bold transition border border-gray-300"
+                    >
+                      집필 취소하기
+                    </button>
+                  </div>
+                ) : (
+                  <article id="book-article" className="prose-h2:font-heading prose-h2:text-3xl prose-h2:text-forest prose-h2:font-bold prose-h2:mt-12 prose-h2:mb-6 prose-strong:text-forest prose-strong:font-bold prose-p:text-black prose-p:leading-loose">
+                    {renderBookContent()}
+                  </article>
+                )}
+              </div>
+
+              {/* Book Footer */}
+              {!isGeneratingBook && (
+                <div className="pt-20 pb-8 text-center text-gray-400 font-label text-sm border-t border-gray-200 mt-20">
+                  Created with 🤖 {aiProvider === 'gemini' ? 'Google Gemini' : aiProvider === 'openai' ? 'OpenAI ChatGPT' : 'Anthropic Claude'} & TrakingDiary
                 </div>
-              ) : (
-                <article id="book-article" className="prose-h2:font-heading prose-h2:text-3xl prose-h2:text-forest prose-h2:font-bold prose-h2:mt-12 prose-h2:mb-6 prose-strong:text-forest prose-strong:font-bold prose-p:text-black prose-p:leading-loose">
-                  {renderBookContent()}
-                </article>
               )}
             </div>
-
-            {/* Book Footer */}
-            {!isGeneratingBook && (
-              <div className="pt-20 pb-8 text-center text-gray-400 font-label text-sm border-t border-gray-200 mt-20">
-                Created with 🤖 {aiProvider === 'gemini' ? 'Google Gemini' : aiProvider === 'openai' ? 'OpenAI ChatGPT' : 'Anthropic Claude'} & TrakingDiary
-              </div>
-            )}
           </div>
         </div>
-      </div>
-    )}
+      )}
     </>
   )
 }

@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import imageCompression from 'browser-image-compression'
 
 const supabase = createClient()
 import { useTranslation } from '@/lib/i18n'
@@ -23,6 +24,9 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
   const [filterHikeId, setFilterHikeId] = useState<string | number>(initialHikeId || 'all')
   const [filterStartDate, setFilterStartDate] = useState<string>('')
   const [filterEndDate, setFilterEndDate] = useState<string>('')
+
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isUploading, setIsUploading] = useState(false)
 
   // Instagram Share State
   const [showInstaModal, setShowInstaModal] = useState(false)
@@ -47,7 +51,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
     try {
       const { data: hikeData, error: hikeError } = await supabase
         .from('hikes')
-        .select('id, title, hike_date')
+        .select('id, title, hike_date, google_drive_folder_id')
         .eq('club_id', clubId)
         .order('hike_date', { ascending: false })
 
@@ -179,11 +183,82 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
     }
   }
 
+  const handleUploadClick = () => {
+    if (filterHikeId === 'all') {
+      alert('사진을 올릴 행사를 선택하세요.')
+      return
+    }
+    fileInputRef.current?.click()
+  }
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0 || !user || filterHikeId === 'all') return
+    const selectedHike = hikes.find(h => h.id === filterHikeId)
+    if (!selectedHike) return
+    
+    const files = Array.from(e.target.files)
+    setIsUploading(true)
+
+    try {
+      let successCount = 0
+      for (const file of files) {
+        const options = {
+          maxSizeMB: 2,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        }
+        const compressedFile = await imageCompression(file, options)
+        const formData = new FormData()
+        formData.append('file', compressedFile, file.name)
+        formData.append('club_id', String(clubId))
+        formData.append('hike_date', selectedHike.hike_date)
+        formData.append('hike_id', String(selectedHike.id))
+        formData.append('uploader_id', user.id)
+        if (selectedHike.google_drive_folder_id) {
+          formData.append('folder_id', selectedHike.google_drive_folder_id)
+        }
+
+        const uploadRes = await fetch('/api/drive/upload', {
+          method: 'POST',
+          body: formData
+        })
+
+        if (!uploadRes.ok) {
+           console.error('Upload failed')
+           continue
+        }
+        successCount++
+      }
+      
+      if (successCount > 0) {
+        alert(`${successCount}장의 사진이 성공적으로 업로드되었습니다!`)
+        fetchData()
+      } else {
+        alert('사진 업로드에 실패했습니다.')
+      }
+    } catch (err: any) {
+      alert('업로드 중 오류가 발생했습니다: ' + err.message)
+    } finally {
+      setIsUploading(false)
+      if (e.target) e.target.value = ''
+    }
+  }
+
   return (
     <div className="bg-white p-6 md:p-8 rounded-3xl border border-paper-high shadow-sm space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-100 pb-4 gap-4">
         <div className="flex items-center space-x-3">
           <h2 className="font-heading font-extrabold text-2xl text-forest">{t('gallery.title')}</h2>
+        </div>
+        <div className="flex items-center space-x-2">
+          <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple onChange={handlePhotoUpload} />
+          <button
+            onClick={handleUploadClick}
+            disabled={isUploading || !user}
+            className="bg-forest text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-forest-light transition disabled:opacity-50 shadow-sm flex items-center gap-1"
+          >
+            <span>{isUploading ? '업로드 중...' : '+ 사진등록'}</span>
+          </button>
         </div>
       </div>
 

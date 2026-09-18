@@ -68,7 +68,7 @@ export const DiariesPage: React.FC<DiariesPageProps> = ({ clubId, clubName, onOp
                 <div
                   key={hike.id}
                   onClick={() => onOpenDiaryDetail(hike.id)}
-                  className={`hardcover-book bg-gradient-to-br ${bgGradient} p-6 text-paper flex flex-col justify-between h-80 group cursor-pointer`}
+                  className={`hardcover-book bg-gradient-to-br ${bgGradient} p-4 sm:p-6 text-paper flex flex-col justify-between h-56 sm:h-80 group cursor-pointer`}
                 >
                   <div className="space-y-3">
                     <div className="flex justify-between items-center border-b border-sand/30 pb-2">
@@ -77,18 +77,18 @@ export const DiariesPage: React.FC<DiariesPageProps> = ({ clubId, clubName, onOp
                     </div>
                     <div className="pt-2">
                       <span className="text-[10px] font-label text-sand/70 block uppercase tracking-wider">{t('common.scrapbookHardcover')}</span>
-                      <h3 className="font-heading font-extrabold text-lg sm:text-xl text-amber-100 group-hover:text-white transition mt-1 leading-snug">
+                      <h3 className="font-heading font-extrabold text-base sm:text-xl text-amber-100 group-hover:text-white transition mt-1 sm:mt-2 leading-tight sm:leading-snug">
                         {hike.title}
                       </h3>
                       <p className="text-[11px] text-sand/80 font-body mt-2">{hike.mountain_name} • {new Date(hike.hike_date).toLocaleDateString()}</p>
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    <div className="p-2.5 bg-black/30 rounded-xl border border-sand/20 text-[10px] text-amber-100/90 font-body line-clamp-2 italic">
+                  <div className="space-y-2 sm:space-y-3">
+                    <div className="p-2 sm:p-2.5 bg-black/30 rounded-xl border border-sand/20 text-[10px] text-amber-100/90 font-body line-clamp-2 italic">
                       {hike.description}
                     </div>
-                    <div className="pt-2 border-t border-sand/20 flex justify-between items-center text-[10px] font-label text-amber-300">
+                    <div className="pt-2 border-t border-sand/20 flex justify-between items-center text-[9px] sm:text-[10px] font-label text-amber-300">
                       <span className="font-bold">{hike.mountain_name}</span>
                       <span className="bg-amber-400 text-amber-950 font-extrabold px-2 py-0.5 rounded-full shadow text-[9px] group-hover:bg-white transition">{t('common.openBook')}</span>
                     </div>

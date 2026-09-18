@@ -47,10 +47,17 @@ export async function POST(req: NextRequest) {
     }
 
     // Initialize Google Drive API via OAuth2
-    const origin = req.nextUrl.origin
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET || process.env.google_Autho_Client_Secret || process.env.GOOGLE_AUTHO_CLIENT_SECRET;
+    
+    if (!clientSecret) {
+      console.error('Google Client Secret is missing in environment variables.');
+      return NextResponse.json({ error: 'Server configuration error: missing client secret.' }, { status: 500 });
+    }
+
+    const origin = req.nextUrl.origin;
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
-      process.env.google_Autho_Client_Secret,
+      clientSecret,
       `${origin}/api/drive/callback`
     )
     

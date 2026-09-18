@@ -12,9 +12,16 @@ export async function GET(req: NextRequest) {
   // origin을 동적으로 가져옵니다 (로컬호스트나 실제 배포 도메인 모두 대응)
   const origin = req.nextUrl.origin
   
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET || process.env.google_Autho_Client_Secret || process.env.GOOGLE_AUTHO_CLIENT_SECRET;
+  
+  if (!clientSecret) {
+    console.error('Google Client Secret is missing in environment variables.');
+    return NextResponse.json({ error: 'Server configuration error: missing client secret.' }, { status: 500 });
+  }
+
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
-    process.env.google_Autho_Client_Secret,
+    clientSecret,
     `${origin}/api/drive/callback`
   )
 

@@ -293,7 +293,13 @@ export default function Home() {
           )}
 
           {activeTab === 'hikes' && (
-            <HikesPage onNavigateTab={(tab) => setActiveTab(tab)} />
+            <HikesPage 
+              onNavigateTab={(tab) => setActiveTab(tab)} 
+              onOpenDiaryDetail={(hikeId) => {
+                setSelectedHikeId(hikeId)
+                setActiveTab('diaries_id')
+              }}
+            />
           )}
 
           {activeTab === 'intro' && (

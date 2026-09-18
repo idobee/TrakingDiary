@@ -6,7 +6,13 @@ import { createClient } from '@/lib/supabase/client'
 import { HikeNewForm } from '@/components/hikes/HikeNewForm'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: string) => void }) {
+export default function HikesPage({ 
+  onNavigateTab,
+  onOpenDiaryDetail
+}: { 
+  onNavigateTab?: (tab: string) => void
+  onOpenDiaryDetail?: (hikeId: number) => void
+}) {
   const { t } = useTranslation()
   const supabase = createClient()
   const [hikes, setHikes] = useState<any[]>([])
@@ -344,7 +350,8 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
                           {new Date(hike.hike_date) < new Date(new Date().setHours(0,0,0,0)) || hike.status === 'completed' ? (
                             <button
                               onClick={() => {
-                                if (onNavigateTab) onNavigateTab('diaries')
+                                if (onOpenDiaryDetail) onOpenDiaryDetail(hike.id)
+                                else if (onNavigateTab) onNavigateTab('diaries')
                               }}
                               className="w-full py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-md"
                             >
@@ -507,7 +514,8 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
                       <button
                         onClick={() => {
                           setSelectedHikeToJoin(null)
-                          if (onNavigateTab) onNavigateTab('diaries')
+                          if (onOpenDiaryDetail) onOpenDiaryDetail(selectedHikeToJoin.id)
+                          else if (onNavigateTab) onNavigateTab('diaries')
                         }}
                         className="flex-1 min-w-[100px] py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-md"
                       >
@@ -519,7 +527,8 @@ export default function HikesPage({ onNavigateTab }: { onNavigateTab?: (tab: str
                   <button
                     onClick={() => {
                       setSelectedHikeToJoin(null)
-                      if (onNavigateTab) onNavigateTab('diaries')
+                      if (onOpenDiaryDetail) onOpenDiaryDetail(selectedHikeToJoin.id)
+                      else if (onNavigateTab) onNavigateTab('diaries')
                     }}
                     className="flex-1 min-w-[100px] py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-md"
                   >
