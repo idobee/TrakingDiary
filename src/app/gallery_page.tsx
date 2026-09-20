@@ -199,7 +199,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
           setIsPreparingShare(false)
           return
         }
-        const file = new File([blob], 'Happic_인스타인증샷.jpg', { type: 'image/jpeg' })
+        const file = new File([blob], 'happic_insta.jpg', { type: 'image/jpeg' })
         setShareFile(file)
         setIsPreparingShare(false)
       }, 'image/jpeg', 0.9)
@@ -215,9 +215,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
     try {
       if (navigator.canShare && navigator.canShare({ files: [shareFile] })) {
         await navigator.share({
-          files: [shareFile],
-          title: 'Happic 인스타 인증샷',
-          text: instaAiText,
+          files: [shareFile]
         })
         setShowInstaModal(false)
         setShareFile(null)
@@ -226,7 +224,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
         const dataUrl = URL.createObjectURL(shareFile)
         const a = document.createElement('a')
         a.href = dataUrl
-        a.download = `Happic_인스타인증샷.jpg`
+        a.download = `happic_insta.jpg`
         a.click()
         alert('현재 브라우저에서는 공유 기능을 지원하지 않아, 기기에 이미지가 대신 저장되었습니다.')
         setShowInstaModal(false)
@@ -239,7 +237,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
         const dataUrl = URL.createObjectURL(shareFile)
         const a = document.createElement('a')
         a.href = dataUrl
-        a.download = `Happic_인스타인증샷.jpg`
+        a.download = `happic_insta.jpg`
         a.click()
         alert('공유 창을 열 수 없어 기기에 이미지를 저장했습니다.')
         setShowInstaModal(false)

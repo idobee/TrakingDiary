@@ -502,7 +502,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
         await navigator.share({
           title: hike?.title || 'TrakingDiary',
           text: `[TrakingDiary] ${hike?.title} 에세이를 확인해보세요!`,
-          url: window.location.href
+          url: `${window.location.origin}/?diary_id=${hikeId}`
         })
       } catch (error) {
         console.log('공유 취소 또는 실패', error)

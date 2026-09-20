@@ -89,7 +89,7 @@ export const MyPage: React.FC<MyPageProps> = ({
         await navigator.share({
           title: ep.title,
           text: `[TrakingDiary] ${ep.title} 에세이를 확인해보세요!`,
-          url: `${window.location.origin}/diaries/${ep.hikeId}`
+          url: `${window.location.origin}/?diary_id=${ep.hikeId}`
         })
       } catch (error) {
         console.log('공유 취소 또는 실패', error)

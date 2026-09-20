@@ -95,6 +95,7 @@ export default function Home() {
     const clubIdStr = params.get('invite_club_id')
     const role = params.get('invite_role')
     const hikeIdStr = params.get('invite_hike_id')
+    const diaryIdStr = params.get('diary_id')
     
     if (clubIdStr) {
       setInviteClubId(parseInt(clubIdStr, 10))
@@ -103,6 +104,11 @@ export default function Home() {
 
     if (hikeIdStr) {
       setInviteHikeId(parseInt(hikeIdStr, 10))
+    }
+
+    if (diaryIdStr) {
+      setSelectedHikeId(parseInt(diaryIdStr, 10))
+      setActiveTab('diaries_id')
     }
   }, [])
 
