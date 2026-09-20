@@ -35,6 +35,10 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
   const [selectedInstaPhoto, setSelectedInstaPhoto] = useState<any>(null)
   const [instaAiText, setInstaAiText] = useState('')
   const [isGeneratingInstaAi, setIsGeneratingInstaAi] = useState(false)
+  
+  // States for native sharing
+  const [shareFile, setShareFile] = useState<File | null>(null)
+  const [isPreparingShare, setIsPreparingShare] = useState(false)
 
   useEffect(() => {
     if (initialHikeId) {
@@ -121,6 +125,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
     setSelectedInstaPhoto(photo)
     setShowInstaModal(true)
     setInstaAiText('')
+    setShareFile(null)
     setIsGeneratingInstaAi(true)
 
     const fallbackText = `⛰️ ${photo.hikes?.mountain_name || photo.hikes?.title || '행복한 산행'}\n\n도심을 벗어나 자연이 주는 여유와 위로를 듬뿍 받았던 하루 🍃\n함께라서 더 즐거웠어요!\n\n#등산스타그램 #산행기록 #자연이주는선물 #아웃도어라이프`
@@ -176,55 +181,70 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
     }
   }
 
-  const handleShareInstaShot = async () => {
+  const handlePrepareShare = async () => {
     try {
+      setIsPreparingShare(true)
       const html2canvas = (await import('html2canvas')).default
       const captureEl = document.getElementById('insta-capture-area')
-      if (!captureEl) return
+      if (!captureEl) {
+        setIsPreparingShare(false)
+        return
+      }
       
       const canvas = await html2canvas(captureEl as HTMLElement, { useCORS: true, scale: 2 })
       
-      canvas.toBlob(async (blob) => {
+      canvas.toBlob((blob) => {
         if (!blob) {
           alert('이미지 생성에 실패했습니다.')
+          setIsPreparingShare(false)
           return
         }
         const file = new File([blob], 'Happic_인스타인증샷.jpg', { type: 'image/jpeg' })
-        const dataUrl = URL.createObjectURL(blob)
-
-        const fallbackDownload = () => {
-          const a = document.createElement('a')
-          a.href = dataUrl
-          a.download = `Happic_인스타인증샷.jpg`
-          a.click()
-          alert('현재 브라우저에서는 공유 기능이 제한되어, 기기에 이미지가 대신 저장되었습니다.')
-          setShowInstaModal(false)
-        }
-
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({
-              files: [file],
-              title: 'Happic 인스타 인증샷',
-              text: instaAiText,
-            })
-            setShowInstaModal(false)
-          } catch (shareErr: any) {
-            console.error('Share error:', shareErr)
-            if (shareErr.name !== 'AbortError') {
-              // Share failed (e.g. gesture timeout), fallback to download
-              fallbackDownload()
-            }
-          }
-        } else {
-          // canShare is false (e.g. PC or unsupported browser)
-          fallbackDownload()
-        }
+        setShareFile(file)
+        setIsPreparingShare(false)
       }, 'image/jpeg', 0.9)
-      
     } catch (err: any) {
       console.error(err)
-      alert('이미지 캡처 중 오류가 발생했습니다: ' + err.message)
+      alert('공유 준비 중 오류가 발생했습니다: ' + err.message)
+      setIsPreparingShare(false)
+    }
+  }
+
+  const handleNativeShare = async () => {
+    if (!shareFile) return
+    try {
+      if (navigator.canShare && navigator.canShare({ files: [shareFile] })) {
+        await navigator.share({
+          files: [shareFile],
+          title: 'Happic 인스타 인증샷',
+          text: instaAiText,
+        })
+        setShowInstaModal(false)
+        setShareFile(null)
+      } else {
+        // Fallback to download
+        const dataUrl = URL.createObjectURL(shareFile)
+        const a = document.createElement('a')
+        a.href = dataUrl
+        a.download = `Happic_인스타인증샷.jpg`
+        a.click()
+        alert('현재 브라우저에서는 공유 기능을 지원하지 않아, 기기에 이미지가 대신 저장되었습니다.')
+        setShowInstaModal(false)
+        setShareFile(null)
+      }
+    } catch (shareErr: any) {
+      console.error('Share error:', shareErr)
+      if (shareErr.name !== 'AbortError') {
+        // Fallback
+        const dataUrl = URL.createObjectURL(shareFile)
+        const a = document.createElement('a')
+        a.href = dataUrl
+        a.download = `Happic_인스타인증샷.jpg`
+        a.click()
+        alert('공유 창을 열 수 없어 기기에 이미지를 저장했습니다.')
+        setShowInstaModal(false)
+        setShareFile(null)
+      }
     }
   }
 
@@ -509,10 +529,13 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
                 </label>
                 <textarea
                   value={instaAiText}
-                  onChange={(e) => setInstaAiText(e.target.value)}
+                  onChange={(e) => {
+                    setInstaAiText(e.target.value)
+                    setShareFile(null) // clear prepared file on edit
+                  }}
                   placeholder="인스타그램에 올릴 멋진 멘트를 적어보세요!"
                   className="w-full h-24 p-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-forest"
-                  disabled={isGeneratingInstaAi}
+                  disabled={isGeneratingInstaAi || isPreparingShare}
                 />
               </div>
             </div>
@@ -521,18 +544,27 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
               <button onClick={() => setShowInstaModal(false)} className="px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-200 rounded-xl">취소</button>
               <button
                 onClick={handleDownloadInstaShot}
-                disabled={isGeneratingInstaAi}
+                disabled={isGeneratingInstaAi || isPreparingShare}
                 className="bg-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-bold hover:bg-gray-300 transition shadow disabled:opacity-50"
               >
                 📥 저장
               </button>
-              <button
-                onClick={handleShareInstaShot}
-                disabled={isGeneratingInstaAi}
-                className="bg-gradient-to-tr from-pink-500 to-orange-400 text-white px-6 py-2 rounded-xl text-sm font-bold hover:from-pink-600 hover:to-orange-500 transition shadow disabled:opacity-50"
-              >
-                🚀 공유하기
-              </button>
+              {shareFile ? (
+                <button
+                  onClick={handleNativeShare}
+                  className="bg-gradient-to-tr from-blue-500 to-indigo-500 text-white px-6 py-2 rounded-xl text-sm font-bold shadow animate-pulse hover:scale-105 transition"
+                >
+                  ✨ 탭해서 공유창 열기
+                </button>
+              ) : (
+                <button
+                  onClick={handlePrepareShare}
+                  disabled={isGeneratingInstaAi || isPreparingShare}
+                  className="bg-gradient-to-tr from-pink-500 to-orange-400 text-white px-6 py-2 rounded-xl text-sm font-bold hover:from-pink-600 hover:to-orange-500 transition shadow disabled:opacity-50"
+                >
+                  {isPreparingShare ? '⏳ 준비 중...' : '🚀 공유하기'}
+                </button>
+              )}
             </div>
           </div>
         </div>
