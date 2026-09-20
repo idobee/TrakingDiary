@@ -372,7 +372,9 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
 
             return (
               <div key={photo.id} className="break-inside-avoid relative group rounded-xl overflow-hidden bg-gray-100 shadow-sm border border-gray-200">
-                <img src={photo.thumbnail_url || imgSrc} alt="Gallery Photo" loading="lazy" className="w-full h-auto object-cover group-hover:scale-105 transition duration-500" />
+                <a href={photo.google_drive_web_link || imgSrc} target="_blank" rel="noopener noreferrer" className="block cursor-pointer">
+                  <img src={photo.thumbnail_url || imgSrc} alt="Gallery Photo" loading="lazy" className="w-full h-auto object-cover group-hover:scale-105 transition duration-500" />
+                </a>
 
                 {/* Publish Toggle Button */}
                 {isUploaderOrAdmin && (
