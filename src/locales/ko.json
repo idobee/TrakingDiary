@@ -315,7 +315,7 @@
     "resetFilters": "초기화",
     "loading": "로딩 중...",
     "empty": "조건에 맞는 사진이 없습니다.",
-    "published": "공개 중",
+    "published": "공개",
     "unpublished": "비공개",
     "toggleFail": "공유 상태 변경에 실패했습니다."
   },

@@ -16,7 +16,7 @@ interface DiariesIdPageProps {
 
 export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: DiariesIdPageProps) {
   const { user } = useAuth()
-  const isAdmin = user?.system_role === 'admin' || user?.system_role === 'sys_admin'
+  const [isAdmin, setIsAdmin] = useState(false)
 
   const [hike, setHike] = useState<any>(null)
   const [participants, setParticipants] = useState<any[]>([])
@@ -42,6 +42,12 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
   // Badge Modal State
   const [showBadgeModal, setShowBadgeModal] = useState(false)
   const [selectedParticipantId, setSelectedParticipantId] = useState<string | null>(null)
+
+  // Add Participant Modal State
+  const [showAddParticipantModal, setShowAddParticipantModal] = useState(false)
+  const [clubMembers, setClubMembers] = useState<any[]>([])
+  const [selectedNewParticipantIds, setSelectedNewParticipantIds] = useState<string[]>([])
+  const [isAddingParticipant, setIsAddingParticipant] = useState(false)
 
   // AI Book Feature State
   const [showAiKeyModal, setShowAiKeyModal] = useState(false)
@@ -105,6 +111,17 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
         const { data: badgeData } = await supabase.from('badges').select('*').or(`club_id.is.null,club_id.eq.${hikeAny.club_id}`)
         setBadges(badgeData || [])
       }
+
+      // 6. Check Admin Status
+      let isSystemAdmin = user?.system_role === 'admin' || user?.system_role === 'sys_admin'
+      let isClubAdmin = false
+      if (user && hikeAny?.club_id) {
+        const { data: member } = await supabase.from('club_members').select('role').eq('club_id', hikeAny.club_id).eq('user_id', user.id).single()
+        if (member && (member.role === 'admin' || member.role === 'owner')) {
+          isClubAdmin = true
+        }
+      }
+      setIsAdmin(isSystemAdmin || isClubAdmin)
 
     } catch (error) {
       console.error(error)
@@ -275,6 +292,59 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
     } catch (err) {
       console.error(err)
       alert('뱃지 수여 중 오류가 발생했거나 이미 수여된 뱃지입니다.')
+    }
+  }
+
+  const handleOpenAddParticipantModal = async () => {
+    if (!hike) return
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('club_members')
+        .select(`
+          user_id,
+          users!club_members_user_id_fkey ( id, nickname, avatar_url )
+        `)
+        .eq('club_id', hike.club_id)
+        .eq('status', 'approved')
+      
+      if (error) throw error
+      
+      const existingIds = participants.map((p: any) => p.user_id)
+      const availableMembers = (data || []).filter((m: any) => !existingIds.includes(m.user_id))
+      setClubMembers(availableMembers)
+      setSelectedNewParticipantIds([])
+      setShowAddParticipantModal(true)
+    } catch (err) {
+      console.error('Failed to fetch club members:', err)
+      alert('동호회 회원을 불러오는 데 실패했습니다.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleAddParticipants = async () => {
+    if (selectedNewParticipantIds.length === 0) return
+    setIsAddingParticipant(true)
+    try {
+      const insertData = selectedNewParticipantIds.map(userId => ({
+        hike_id: hikeId,
+        user_id: userId,
+        role: 'member',
+        status: 'approved'
+      }))
+      
+      const { error } = await supabase.from('hike_members').upsert(insertData)
+      if (error) throw error
+      
+      alert(`${selectedNewParticipantIds.length}명의 회원이 등록되었습니다.`)
+      setShowAddParticipantModal(false)
+      fetchData()
+    } catch (err) {
+      console.error('Failed to add participants:', err)
+      alert('참가자 등록에 실패했습니다.')
+    } finally {
+      setIsAddingParticipant(false)
     }
   }
 
@@ -552,8 +622,18 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
           {/* Participants & Badges (UC6) */}
           <section className="space-y-4 border-b border-gray-100 pb-8">
             <h2 className="font-heading font-bold text-xl text-forest flex items-center justify-between">
-              <span>참가자 명단</span>
-              {isAdmin && <span className="text-[10px] text-gray-400 font-normal">* 관리자는 완주 처리 및 뱃지를 수여할 수 있습니다.</span>}
+              <div className="flex items-center gap-4">
+                <span>참가자 명단</span>
+                {isAdmin && (
+                  <button
+                    onClick={handleOpenAddParticipantModal}
+                    className="text-xs px-3 py-1 bg-forest text-white rounded-full hover:bg-forest-dark transition shadow-sm font-bold flex items-center gap-1"
+                  >
+                    <span>+</span> 참가자 등록
+                  </button>
+                )}
+              </div>
+              {isAdmin && <span className="text-[10px] text-gray-400 font-normal hidden sm:inline">* 관리자는 완주 처리 및 뱃지를 수여할 수 있습니다.</span>}
             </h2>
             <div className="flex flex-row flex-nowrap overflow-x-auto gap-4 pb-2">
               {participants.length === 0 && <div className="text-sm text-gray-500">참가자가 없습니다.</div>}
@@ -1192,6 +1272,76 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                   Created with 🤖 {aiProvider === 'gemini' ? 'Google Gemini' : aiProvider === 'openai' ? 'OpenAI ChatGPT' : 'Anthropic Claude'} & TrakingDiary
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Add Participant Modal */}
+      {showAddParticipantModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm print:hidden">
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-fade-in-up">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-heading font-bold text-xl text-forest">참가자 수동 등록</h3>
+                <button onClick={() => setShowAddParticipantModal(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+              </div>
+
+              <div className="max-h-[60vh] overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                {clubMembers.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500 font-label">
+                    추가할 수 있는 동호회 회원이 없습니다.
+                  </div>
+                ) : (
+                  clubMembers.map(member => {
+                    const isSelected = selectedNewParticipantIds.includes(member.user_id)
+                    return (
+                      <div
+                        key={member.user_id}
+                        onClick={() => {
+                          if (isSelected) {
+                            setSelectedNewParticipantIds(prev => prev.filter(id => id !== member.user_id))
+                          } else {
+                            setSelectedNewParticipantIds(prev => [...prev, member.user_id])
+                          }
+                        }}
+                        className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer border transition ${isSelected ? 'border-terracotta bg-terracotta/5' : 'border-gray-100 hover:border-terracotta/30 hover:bg-gray-50'}`}
+                      >
+                        <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+                          {member.users.avatar_url ? (
+                            <img src={member.users.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center font-bold text-gray-500 bg-gray-200">
+                              {member.users.nickname?.[0]}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-gray-900 truncate">{member.users.nickname}</p>
+                        </div>
+                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition ${isSelected ? 'bg-terracotta border-terracotta' : 'border-gray-300'}`}>
+                          {isSelected && <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                        </div>
+                      </div>
+                    )
+                  })
+                )}
+              </div>
+
+              <div className="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <button
+                  onClick={() => setShowAddParticipantModal(false)}
+                  className="px-4 py-2 font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleAddParticipants}
+                  disabled={selectedNewParticipantIds.length === 0 || isAddingParticipant}
+                  className="px-6 py-2 bg-terracotta hover:bg-terracotta-dark text-white font-bold rounded-lg transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isAddingParticipant ? '등록 중...' : `${selectedNewParticipantIds.length}명 등록하기`}
+                </button>
+              </div>
             </div>
           </div>
         </div>
