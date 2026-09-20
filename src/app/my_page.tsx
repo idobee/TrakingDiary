@@ -78,7 +78,6 @@ export const MyPage: React.FC<MyPageProps> = ({
   }
 
   const handleShareEpisode = async (ep: MyEpisode) => {
-    // Check participation
     const isParticipant = activities.some(a => a.id === ep.hikeId)
     if (!isParticipant) {
       alert('참여한 산행의 에피소드만 공유할 수 있습니다.')
@@ -96,6 +95,55 @@ export const MyPage: React.FC<MyPageProps> = ({
       }
     } else {
       alert('이 브라우저에서는 기본 공유 기능을 지원하지 않습니다.')
+    }
+  }
+
+  const handleKakaoShare = (ep: MyEpisode) => {
+    const isParticipant = activities.some(a => a.id === ep.hikeId)
+    if (!isParticipant) {
+      alert('참여한 산행의 에피소드만 공유할 수 있습니다.')
+      return
+    }
+    
+    if (typeof window === 'undefined') return
+    const Kakao = (window as any).Kakao
+    if (!Kakao) {
+      alert('카카오 공유 스크립트를 불러올 수 없습니다.')
+      return
+    }
+
+    try {
+      if (!Kakao.isInitialized()) {
+        Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY)
+      }
+      
+      const shareUrl = `${window.location.origin}/?diary_id=${ep.hikeId}`
+      const imageUrl = ep.photoUrl || 'https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1000&auto=format&fit=crop'
+      
+      Kakao.Share.sendDefault({
+        objectType: 'feed',
+        content: {
+          title: ep.title,
+          description: `함께 쓴 산행 추억 에세이를 확인해보세요!`,
+          imageUrl: imageUrl,
+          link: {
+            mobileWebUrl: shareUrl,
+            webUrl: shareUrl,
+          },
+        },
+        buttons: [
+          {
+            title: '에피소드 읽기',
+            link: {
+              mobileWebUrl: shareUrl,
+              webUrl: shareUrl,
+            },
+          },
+        ],
+      })
+    } catch (error) {
+      console.error('Kakao share error:', error)
+      alert('카카오톡 공유 중 오류가 발생했습니다.')
     }
   }
 
@@ -339,12 +387,21 @@ export const MyPage: React.FC<MyPageProps> = ({
                     </div>
                     
                     {!isBlogMode && (
-                      <div className="pt-2 flex justify-end">
+                      <div className="pt-2 flex justify-end gap-2">
+                        <button
+                          onClick={() => handleKakaoShare(ep)}
+                          className="px-3 py-1 bg-[#FEE500] text-[#000000] rounded-full text-xs font-bold hover:bg-[#FEE500]/80 transition shadow-sm flex items-center gap-1"
+                        >
+                          <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
+                            <path d="M12 3c-5.52 0-10 3.58-10 8 0 2.87 1.83 5.4 4.67 6.84-.4.15-1.29 4.31-1.33 4.54-.05.21.16.2.29.11.1-.07 5.17-3.4 5.95-3.92.79.11 1.59.16 2.42.16 5.52 0 10-3.58 10-8s-4.48-8-10-8z" />
+                          </svg>
+                          카카오톡
+                        </button>
                         <button
                           onClick={() => handleShareEpisode(ep)}
-                          className="px-3 py-1 bg-yellow-400 text-black rounded-full text-xs font-bold hover:bg-yellow-500 transition shadow-sm flex items-center gap-1"
+                          className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-bold hover:bg-gray-200 transition shadow-sm flex items-center gap-1"
                         >
-                          <span>📲</span> 카톡/공유
+                          <span>🔗</span> 공유
                         </button>
                       </div>
                     )}

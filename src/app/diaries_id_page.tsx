@@ -512,6 +512,49 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
     }
   }
 
+  const handleKakaoShare = () => {
+    if (typeof window === 'undefined') return
+    const Kakao = (window as any).Kakao
+    if (!Kakao) {
+      alert('카카오 공유 스크립트를 불러올 수 없습니다.')
+      return
+    }
+
+    try {
+      if (!Kakao.isInitialized()) {
+        Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY)
+      }
+      
+      const shareUrl = `${window.location.origin}/?diary_id=${hikeId}`
+      const imageUrl = hike?.cover_image_url || 'https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1000&auto=format&fit=crop'
+      
+      Kakao.Share.sendDefault({
+        objectType: 'feed',
+        content: {
+          title: hike?.title || 'TrakingDiary',
+          description: `함께 쓴 산행 추억 에세이를 확인해보세요!`,
+          imageUrl: imageUrl,
+          link: {
+            mobileWebUrl: shareUrl,
+            webUrl: shareUrl,
+          },
+        },
+        buttons: [
+          {
+            title: '에피소드 읽기',
+            link: {
+              mobileWebUrl: shareUrl,
+              webUrl: shareUrl,
+            },
+          },
+        ],
+      })
+    } catch (error) {
+      console.error('Kakao share error:', error)
+      alert('카카오톡 공유 중 오류가 발생했습니다.')
+    }
+  }
+
   const handleSaveAsEpisode = async () => {
     if (!user || !hike || !aiBookContent) return
     if (!confirm('현재 작성된 단행본 내용을 새로운 에피소드로 등록하시겠습니까?')) return
@@ -1212,14 +1255,26 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                 </button>
                 {/* 참가자만 공유 기능 접근 가능 */}
                 {user && participants.some(p => p.user_id === user.id) && (
-                  <button
-                    onClick={handleShareNative}
-                    className="group relative bg-yellow-400 text-black w-10 h-10 flex items-center justify-center rounded-full text-lg hover:bg-yellow-500 transition shadow-md"
-                    disabled={isGeneratingBook}
-                  >
-                    <span>📲</span>
-                    <span className="absolute -bottom-8 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none z-50">카톡/공유</span>
-                  </button>
+                  <>
+                    <button
+                      onClick={handleKakaoShare}
+                      className="group relative bg-[#FEE500] text-[#000000] w-10 h-10 flex items-center justify-center rounded-full text-lg hover:bg-[#FEE500]/80 transition shadow-md"
+                      disabled={isGeneratingBook}
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                        <path d="M12 3c-5.52 0-10 3.58-10 8 0 2.87 1.83 5.4 4.67 6.84-.4.15-1.29 4.31-1.33 4.54-.05.21.16.2.29.11.1-.07 5.17-3.4 5.95-3.92.79.11 1.59.16 2.42.16 5.52 0 10-3.58 10-8s-4.48-8-10-8z" />
+                      </svg>
+                      <span className="absolute -bottom-8 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none z-50">카카오톡</span>
+                    </button>
+                    <button
+                      onClick={handleShareNative}
+                      className="group relative bg-gray-100 text-gray-700 w-10 h-10 flex items-center justify-center rounded-full text-lg hover:bg-gray-200 transition shadow-md"
+                      disabled={isGeneratingBook}
+                    >
+                      <span>🔗</span>
+                      <span className="absolute -bottom-8 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none z-50">다른 앱 공유</span>
+                    </button>
+                  </>
                 )}
                 <button
                   onClick={() => window.print()}
