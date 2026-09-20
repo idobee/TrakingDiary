@@ -184,12 +184,16 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
 
   const handleTogglePublish = async (photoId: number, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
-        .from('photos')
-        .update({ is_published: !currentStatus })
-        .eq('id', photoId)
+      const res = await fetch('/api/photos/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoId, isPublished: !currentStatus })
+      })
 
-      if (error) throw error
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.error || 'Failed to toggle')
+      }
 
       // Update local state
       setPhotos(photos.map(p => p.id === photoId ? { ...p, is_published: !currentStatus } : p))

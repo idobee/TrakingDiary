@@ -334,8 +334,16 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
         status: 'approved'
       }))
       
-      const { error } = await supabase.from('hike_members').upsert(insertData)
-      if (error) throw error
+      const res = await fetch('/api/hikes/members', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ insertData })
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.error || 'Failed to insert')
+      }
       
       alert(`${selectedNewParticipantIds.length}명의 회원이 등록되었습니다.`)
       setShowAddParticipantModal(false)
