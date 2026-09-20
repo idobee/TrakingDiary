@@ -253,6 +253,7 @@
     "adminBtn": "⚙️ 동호회 종합 관리",
     "createBtn": "➕ 신규 동호회 개설 신청",
     "openAdminCenter": "⚙️ 동호회 라운지 입장 ",
+    "openClub": "동호회 라운지 입장",
     "club1": {
       "category": "카테고리: 등산/hiking",
       "role": "👑 개설자 (Owner)",
