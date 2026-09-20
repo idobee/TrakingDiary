@@ -181,34 +181,50 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
       const html2canvas = (await import('html2canvas')).default
       const captureEl = document.getElementById('insta-capture-area')
       if (!captureEl) return
-      const canvas = await html2canvas(captureEl as HTMLElement, { useCORS: true, scale: 2 })
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.9)
       
-      const res = await fetch(dataUrl)
-      const blob = await res.blob()
-      const file = new File([blob], 'Happic_인스타인증샷.jpg', { type: 'image/jpeg' })
+      const canvas = await html2canvas(captureEl as HTMLElement, { useCORS: true, scale: 2 })
+      
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          alert('이미지 생성에 실패했습니다.')
+          return
+        }
+        const file = new File([blob], 'Happic_인스타인증샷.jpg', { type: 'image/jpeg' })
+        const dataUrl = URL.createObjectURL(blob)
 
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: 'Happic 인스타 인증샷',
-          text: instaAiText,
-        })
-        setShowInstaModal(false)
-      } else {
-        // Fallback to download
-        const a = document.createElement('a')
-        a.href = dataUrl
-        a.download = `Happic_인스타인증샷.jpg`
-        a.click()
-        alert('공유 기능이 지원되지 않는 환경이거나 PC입니다. 앨범에 이미지가 저장되었습니다!')
-        setShowInstaModal(false)
-      }
+        const fallbackDownload = () => {
+          const a = document.createElement('a')
+          a.href = dataUrl
+          a.download = `Happic_인스타인증샷.jpg`
+          a.click()
+          alert('현재 브라우저에서는 공유 기능이 제한되어, 기기에 이미지가 대신 저장되었습니다.')
+          setShowInstaModal(false)
+        }
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: 'Happic 인스타 인증샷',
+              text: instaAiText,
+            })
+            setShowInstaModal(false)
+          } catch (shareErr: any) {
+            console.error('Share error:', shareErr)
+            if (shareErr.name !== 'AbortError') {
+              // Share failed (e.g. gesture timeout), fallback to download
+              fallbackDownload()
+            }
+          }
+        } else {
+          // canShare is false (e.g. PC or unsupported browser)
+          fallbackDownload()
+        }
+      }, 'image/jpeg', 0.9)
+      
     } catch (err: any) {
       console.error(err)
-      if (err.name !== 'AbortError') {
-        alert('이미지 처리에 실패했습니다.')
-      }
+      alert('이미지 캡처 중 오류가 발생했습니다: ' + err.message)
     }
   }
 
