@@ -286,24 +286,30 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
             <div className="flex space-x-2">
               <button 
                 onClick={handleOpenDriveModal}
-                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-xl transition shadow-sm flex items-center space-x-2"
+                title="구글 드라이브 연동"
+                className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold py-2 px-3 sm:px-4 rounded-xl transition shadow-sm flex items-center space-x-1 sm:space-x-2"
               >
                 <span>📁</span>
-                <span>구글 드라이브 연동</span>
+                <span className="hidden sm:inline">구글 드라이브 연동</span>
+                <span className="inline sm:hidden">구글</span>
               </button>
               <button 
                 onClick={() => copyInviteLink('regular')}
-                className="bg-forest-container hover:bg-forest text-white text-sm font-bold py-2 px-4 rounded-xl transition shadow-sm flex items-center space-x-2"
+                title="정회원 초대 링크 복사"
+                className="bg-forest-container hover:bg-forest text-white text-xs sm:text-sm font-bold py-2 px-3 sm:px-4 rounded-xl transition shadow-sm flex items-center space-x-1 sm:space-x-2"
               >
                 <span>🔗</span>
-                <span>정회원 초대 링크 복사</span>
+                <span className="hidden sm:inline">정회원 초대 링크 복사</span>
+                <span className="inline sm:hidden">정회원</span>
               </button>
               <button 
                 onClick={() => copyInviteLink('guest')}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold py-2 px-4 rounded-xl transition shadow-sm flex items-center space-x-2"
+                title="게스트 초대 링크 복사"
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-bold py-2 px-3 sm:px-4 rounded-xl transition shadow-sm flex items-center space-x-1 sm:space-x-2"
               >
                 <span>🔗</span>
-                <span>게스트 초대 링크 복사</span>
+                <span className="hidden sm:inline">게스트 초대 링크 복사</span>
+                <span className="inline sm:hidden">게스트</span>
               </button>
             </div>
             {copyFeedback && (

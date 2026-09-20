@@ -47,6 +47,57 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
     return hike.status === 'recruiting' || (hikeDate >= sixDaysAgo && hikeDate <= now)
   }).slice(0, 3)
 
+  const recentHikesContent = (
+    <div className="bg-white p-6 rounded-3xl border border-paper-high shadow-md space-y-4">
+      <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+        <div className="flex items-center space-x-2">
+          <h3 className="font-heading font-bold text-lg text-forest">{t('dashboard.recentHikesTitle')}</h3>
+        </div>
+        <button onClick={() => onNavigateTab('hikes')} className="text-xs font-label text-terracotta hover:underline font-bold">
+          {t('common.viewAll')} &rarr;
+        </button>
+      </div>
+
+      <div className="space-y-3">
+        {recentHikes.length > 0 ? (
+          recentHikes.map((hike) => {
+            const hikeDate = new Date(hike.hike_date)
+            const isPast = hikeDate < now
+
+            return (
+              <div
+                key={hike.id}
+                onClick={() => {
+                  if (isPast) {
+                    if (onOpenDiaryDetail) onOpenDiaryDetail(hike.id)
+                  } else {
+                    onNavigateTab('hikes')
+                  }
+                }}
+                className="p-4 bg-paper-low hover:bg-sand-light/50 rounded-2xl border border-paper-high transition cursor-pointer flex justify-between items-center"
+              >
+                <div>
+                  <span className="bg-forest text-white text-[10px] font-label font-bold px-2 py-0.5 rounded-full">
+                    {hikeDate.toLocaleDateString()}
+                  </span>
+                  <h4 className="font-heading font-bold text-base text-forest mt-1">{hike.title}</h4>
+                  <p className="text-xs text-gray-500 font-body line-clamp-1">{hike.description}</p>
+                </div>
+                <span className="bg-terracotta text-white font-label text-[10px] px-3 py-1 rounded-full font-bold ml-2 shrink-0">
+                  {isPast ? t('common.viewDetail') : t('common.apply')}
+                </span>
+              </div>
+            )
+          })
+        ) : (
+          <div className="p-4 text-center text-sm text-gray-500 font-body">
+            {t('dashboard.hikesEmpty')}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
@@ -131,6 +182,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Recent Hikes Card (Mobile Only) */}
+        <div className="block lg:hidden">
+          {recentHikesContent}
         </div>
 
         {/* Public Episodes Section */}
@@ -295,55 +351,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
         )}
 
-        {/* Recent Hikes Preview Card */}
-        <div className="bg-white p-6 rounded-3xl border border-paper-high shadow-md space-y-4">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-            <div className="flex items-center space-x-2">
-              <h3 className="font-heading font-bold text-lg text-forest">{t('dashboard.recentHikesTitle')}</h3>
-
-            </div>
-            <button onClick={() => onNavigateTab('hikes')} className="text-xs font-label text-terracotta hover:underline font-bold">
-              {t('common.viewAll')} &rarr;
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {recentHikes.length > 0 ? (
-              recentHikes.map((hike) => {
-                const hikeDate = new Date(hike.hike_date)
-                const isPast = hikeDate < now
-
-                return (
-                  <div
-                    key={hike.id}
-                    onClick={() => {
-                      if (isPast) {
-                        if (onOpenDiaryDetail) onOpenDiaryDetail(hike.id)
-                      } else {
-                        onNavigateTab('hikes')
-                      }
-                    }}
-                    className="p-4 bg-paper-low hover:bg-sand-light/50 rounded-2xl border border-paper-high transition cursor-pointer flex justify-between items-center"
-                  >
-                    <div>
-                      <span className="bg-forest text-white text-[10px] font-label font-bold px-2 py-0.5 rounded-full">
-                        {hikeDate.toLocaleDateString()}
-                      </span>
-                      <h4 className="font-heading font-bold text-base text-forest mt-1">{hike.title}</h4>
-                      <p className="text-xs text-gray-500 font-body line-clamp-1">{hike.description}</p>
-                    </div>
-                    <span className="bg-terracotta text-white font-label text-[10px] px-3 py-1 rounded-full font-bold ml-2 shrink-0">
-                      {isPast ? t('common.viewDetail') : t('common.apply')}
-                    </span>
-                  </div>
-                )
-              })
-            ) : (
-              <div className="p-4 text-center text-sm text-gray-500 font-body">
-                모집 중인 일정이 없습니다.
-              </div>
-            )}
-          </div>
+        {/* Recent Hikes Card (Desktop Only) */}
+        <div className="hidden lg:block">
+          {recentHikesContent}
         </div>
 
         {/* All Clubs List Card */}
