@@ -161,9 +161,9 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
   const handleDownloadInstaShot = async () => {
     try {
       const html2canvas = (await import('html2canvas')).default
-      const modalEl = document.querySelector('.max-w-lg')
-      if (!modalEl) return
-      const canvas = await html2canvas(modalEl as HTMLElement, { useCORS: true, scale: 2 })
+      const captureEl = document.getElementById('insta-capture-area')
+      if (!captureEl) return
+      const canvas = await html2canvas(captureEl as HTMLElement, { useCORS: true, scale: 2 })
       const dataUrl = canvas.toDataURL('image/jpeg', 0.9)
       const a = document.createElement('a')
       a.href = dataUrl
@@ -173,6 +173,42 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
       setShowInstaModal(false)
     } catch (err) {
       alert('이미지 저장에 실패했습니다.')
+    }
+  }
+
+  const handleShareInstaShot = async () => {
+    try {
+      const html2canvas = (await import('html2canvas')).default
+      const captureEl = document.getElementById('insta-capture-area')
+      if (!captureEl) return
+      const canvas = await html2canvas(captureEl as HTMLElement, { useCORS: true, scale: 2 })
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.9)
+      
+      const res = await fetch(dataUrl)
+      const blob = await res.blob()
+      const file = new File([blob], 'Happic_인스타인증샷.jpg', { type: 'image/jpeg' })
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'Happic 인스타 인증샷',
+          text: instaAiText,
+        })
+        setShowInstaModal(false)
+      } else {
+        // Fallback to download
+        const a = document.createElement('a')
+        a.href = dataUrl
+        a.download = `Happic_인스타인증샷.jpg`
+        a.click()
+        alert('공유 기능이 지원되지 않는 환경이거나 PC입니다. 앨범에 이미지가 저장되었습니다!')
+        setShowInstaModal(false)
+      }
+    } catch (err: any) {
+      console.error(err)
+      if (err.name !== 'AbortError') {
+        alert('이미지 처리에 실패했습니다.')
+      }
     }
   }
 
@@ -433,7 +469,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
             </div>
 
             <div className="p-6 space-y-4">
-              <div className="aspect-square w-full max-w-sm mx-auto rounded-xl overflow-hidden shadow-inner relative bg-gray-100">
+              <div id="insta-capture-area" className="aspect-square w-full max-w-sm mx-auto rounded-xl overflow-hidden shadow-inner relative bg-gray-100">
                 <img
                   src={selectedInstaPhoto.thumbnail_url || `/api/drive/image?id=${selectedInstaPhoto.google_drive_file_id}`}
                   alt="preview"
@@ -470,9 +506,16 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
               <button
                 onClick={handleDownloadInstaShot}
                 disabled={isGeneratingInstaAi}
+                className="bg-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-bold hover:bg-gray-300 transition shadow disabled:opacity-50"
+              >
+                📥 저장
+              </button>
+              <button
+                onClick={handleShareInstaShot}
+                disabled={isGeneratingInstaAi}
                 className="bg-gradient-to-tr from-pink-500 to-orange-400 text-white px-6 py-2 rounded-xl text-sm font-bold hover:from-pink-600 hover:to-orange-500 transition shadow disabled:opacity-50"
               >
-                📥 이미지 저장
+                🚀 공유하기
               </button>
             </div>
           </div>
