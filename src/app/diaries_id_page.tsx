@@ -798,7 +798,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                 {photos.length > 0 && (
                   <div className="space-y-2 pb-2">
                     <span className="text-sm font-bold text-forest block">사진 첨부 (선택)</span>
-                    <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
+                    <div className="flex gap-2 overflow-x-auto pb-2">
                       {photos.map(photo => {
                         const isSelected = selectedPhotoIds.includes(photo.id)
                         const fileId = photo.google_drive_file_id
@@ -828,11 +828,15 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                       onChange={(e) => setIsPublished(e.target.checked)}
                       className="w-4 h-4 text-forest rounded border-gray-300 focus:ring-forest"
                     />
-                    <span className="text-xs font-bold text-gray-700">전체 공유 (대시보드 노출)</span>
+                    <span className="hidden sm:inline text-xs font-bold text-gray-700">전체 공유 (대시보드 노출)</span>
+                    <span className="inline sm:hidden text-xs font-bold text-gray-700">전체공유</span>
                   </label>
                   <div className="flex gap-2">
-                    <button type="button" onClick={() => { setShowEpisodeForm(false); setEditingEpisodeId(null); setEpisodeTitle(''); setEpisodeContent(''); setEpisodeType('general'); setIsPublished(true); }} className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700">취소</button>
-                    <button type="submit" className="bg-forest text-white px-6 py-2 rounded-xl text-xs font-bold shadow hover:bg-forest-light">{editingEpisodeId ? '수정 완료' : '등록 완료'}</button>
+                    <button type="button" onClick={() => { setShowEpisodeForm(false); setEditingEpisodeId(null); setEpisodeTitle(''); setEpisodeContent(''); setEpisodeType('general'); setIsPublished(true); }} className="px-3 sm:px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700">취소</button>
+                    <button type="submit" className="bg-forest text-white px-4 sm:px-6 py-2 rounded-xl text-xs font-bold shadow hover:bg-forest-light">
+                      <span className="hidden sm:inline">{editingEpisodeId ? '수정 완료' : '등록 완료'}</span>
+                      <span className="inline sm:hidden">{editingEpisodeId ? '수정' : '등록'}</span>
+                    </button>
                   </div>
                 </div>
               </form>
