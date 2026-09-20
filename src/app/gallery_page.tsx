@@ -378,7 +378,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
 
                 {/* Publish Toggle Button */}
                 {isUploaderOrAdmin && (
-                  <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute top-2 right-2 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={(e) => { e.stopPropagation(); handleTogglePublish(photo.id, photo.is_published); }}
                       className={`px-3 py-1 text-xs font-bold rounded-full shadow backdrop-blur-md border ${photo.is_published ? 'bg-forest/80 text-white border-forest' : 'bg-white/80 text-gray-600 border-gray-300 hover:bg-white'}`}
@@ -389,7 +389,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
                 )}
 
                 {/* Download Original Button & Insta Share Button */}
-                <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-2">
+                <div className="absolute top-2 left-2 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col gap-2">
                   {photo.google_drive_web_link && (
                     <a
                       href={photo.google_drive_web_link}
@@ -410,7 +410,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
                   </button>
                 </div>
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex flex-col justify-end p-3 pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition duration-300 flex flex-col justify-end p-3 pointer-events-none">
                   <span className="text-white font-bold text-xs line-clamp-1">{photo.hikes?.title}</span>
                   <div className="flex items-center justify-between mt-1">
                     <span className="text-gray-300 text-[10px]">{photo.users?.nickname}</span>
