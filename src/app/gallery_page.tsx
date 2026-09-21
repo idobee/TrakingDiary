@@ -191,7 +191,13 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
         return
       }
       
-      const canvas = await html2canvas(captureEl as HTMLElement, { useCORS: true, scale: 2 })
+      const html2canvasPromise = html2canvas(captureEl as HTMLElement, { useCORS: true, scale: 2 })
+      
+      // 10초 타임아웃 추가하여 무한 준비중 방지
+      const canvas = await Promise.race([
+        html2canvasPromise,
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('이미지 렌더링 시간 초과')), 10000))
+      ])
       
       canvas.toBlob((blob) => {
         if (!blob) {
@@ -505,7 +511,8 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
             <div className="p-6 space-y-4">
               <div id="insta-capture-area" className="aspect-square w-full max-w-sm mx-auto rounded-xl overflow-hidden shadow-inner relative bg-gray-100">
                 <img
-                  src={selectedInstaPhoto.thumbnail_url || `/api/drive/image?id=${selectedInstaPhoto.google_drive_file_id}`}
+                  crossOrigin="anonymous"
+                  src={`/api/drive/image?id=${selectedInstaPhoto.google_drive_file_id}`}
                   alt="preview"
                   className="w-full h-full object-cover"
                 />
