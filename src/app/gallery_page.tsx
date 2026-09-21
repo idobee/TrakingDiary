@@ -165,14 +165,14 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
 
   const handleDownloadInstaShot = async () => {
     try {
-      const html2canvas = (await import('html2canvas')).default
+      const { toJpeg } = await import('html-to-image')
       const captureEl = document.getElementById('insta-capture-area')
       if (!captureEl) return
-      const canvas = await html2canvas(captureEl as HTMLElement, { useCORS: true, scale: 2 })
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.9)
+      
+      const dataUrl = await toJpeg(captureEl, { quality: 0.9, pixelRatio: 2 })
       const a = document.createElement('a')
       a.href = dataUrl
-      a.download = `Happic_인스타인증샷.jpg`
+      a.download = `happic_insta.jpg`
       a.click()
       alert('인스타 인증샷이 저장되었습니다!')
       setShowInstaModal(false)
@@ -184,31 +184,29 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
   const handlePrepareShare = async () => {
     try {
       setIsPreparingShare(true)
-      const html2canvas = (await import('html2canvas')).default
+      const { toBlob } = await import('html-to-image')
       const captureEl = document.getElementById('insta-capture-area')
       if (!captureEl) {
         setIsPreparingShare(false)
         return
       }
       
-      const html2canvasPromise = html2canvas(captureEl as HTMLElement, { useCORS: true, scale: 2 })
+      const blobPromise = toBlob(captureEl, { pixelRatio: 2 })
       
       // 10초 타임아웃 추가하여 무한 준비중 방지
-      const canvas = await Promise.race([
-        html2canvasPromise,
+      const blob = await Promise.race([
+        blobPromise,
         new Promise<never>((_, reject) => setTimeout(() => reject(new Error('이미지 렌더링 시간 초과')), 10000))
       ])
       
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          alert('이미지 생성에 실패했습니다.')
-          setIsPreparingShare(false)
-          return
-        }
-        const file = new File([blob], 'happic_insta.jpg', { type: 'image/jpeg' })
-        setShareFile(file)
+      if (!blob) {
+        alert('이미지 생성에 실패했습니다.')
         setIsPreparingShare(false)
-      }, 'image/jpeg', 0.9)
+        return
+      }
+      const file = new File([blob], 'happic_insta.jpg', { type: 'image/jpeg' })
+      setShareFile(file)
+      setIsPreparingShare(false)
     } catch (err: any) {
       console.error(err)
       alert('공유 준비 중 오류가 발생했습니다: ' + err.message)
