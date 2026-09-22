@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const id = searchParams.get('id')
+  const isDownload = searchParams.get('download') === 'true'
 
   if (!id) {
     return new NextResponse('Missing id parameter', { status: 400 })
@@ -33,7 +34,7 @@ export async function GET(req: NextRequest) {
     return new NextResponse(buffer, {
       headers: {
         'Content-Type': response.headers.get('content-type') || 'image/jpeg',
-        'Content-Disposition': 'inline', // Force browser to render inline instead of download
+        'Content-Disposition': isDownload ? `attachment; filename="trakingdiary_${id}.jpg"` : 'inline',
         'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=86400',
       },
     })

@@ -40,6 +40,9 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
   const [shareFile, setShareFile] = useState<File | null>(null)
   const [isPreparingShare, setIsPreparingShare] = useState(false)
 
+  // Photo Preview State
+  const [selectedPreviewPhoto, setSelectedPreviewPhoto] = useState<any>(null)
+
   useEffect(() => {
     if (initialHikeId) {
       setFilterHikeId(initialHikeId)
@@ -446,9 +449,9 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
 
             return (
               <div key={photo.id} className="break-inside-avoid relative group rounded-xl overflow-hidden bg-gray-100 shadow-sm border border-gray-200">
-                <a href={photo.google_drive_web_link || imgSrc} target="_blank" rel="noopener noreferrer" className="block cursor-pointer">
+                <div onClick={() => setSelectedPreviewPhoto(photo)} className="block cursor-pointer">
                   <img src={photo.thumbnail_url || imgSrc} alt="Gallery Photo" loading="lazy" className="w-full h-auto object-cover group-hover:scale-105 transition duration-500" />
-                </a>
+                </div>
 
                 {/* Publish Toggle Button */}
                 {isUploaderOrAdmin && (
@@ -464,17 +467,14 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
 
                 {/* Download Original Button & Insta Share Button */}
                 <div className="absolute top-2 left-2 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col gap-2">
-                  {photo.google_drive_web_link && (
-                    <a
-                      href={photo.google_drive_web_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-2.5 py-1.5 text-xs font-bold rounded-full shadow backdrop-blur-md border bg-white/80 text-gray-700 border-gray-300 hover:bg-white flex items-center justify-center space-x-1"
-                      title="원본 사진 다운로드 (Google Drive)"
-                    >
-                      <span>⬇️</span>
-                    </a>
-                  )}
+                  <a
+                    href={`/api/drive/image?id=${photo.google_drive_file_id}&download=true`}
+                    download={`trakingdiary_${photo.google_drive_file_id}.jpg`}
+                    className="px-2.5 py-1.5 text-xs font-bold rounded-full shadow backdrop-blur-md border bg-white/80 text-gray-700 border-gray-300 hover:bg-white flex items-center justify-center space-x-1"
+                    title="원본 사진 빠른 다운로드"
+                  >
+                    <span>⬇️</span>
+                  </a>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleOpenInstaModal(photo); }}
                     className="px-2.5 py-1.5 text-xs font-bold rounded-full shadow backdrop-blur-md border bg-gradient-to-tr from-pink-500 to-orange-400 text-white border-transparent hover:from-pink-600 hover:to-orange-500 flex items-center justify-center space-x-1"
@@ -601,6 +601,38 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
         </div>
       )}
 
+      {/* Photo Preview Modal */}
+      {selectedPreviewPhoto && (
+        <div className="fixed inset-0 z-[110] bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center p-4">
+          <div className="absolute top-4 right-4 flex gap-4">
+            <a
+              href={`/api/drive/image?id=${selectedPreviewPhoto.google_drive_file_id}&download=true`}
+              download={`trakingdiary_${selectedPreviewPhoto.google_drive_file_id}.jpg`}
+              className="bg-white/20 hover:bg-white/40 text-white rounded-full w-12 h-12 flex items-center justify-center backdrop-blur-md transition"
+              title="다운로드"
+            >
+              <span className="text-xl">⬇️</span>
+            </a>
+            <button
+              onClick={() => setSelectedPreviewPhoto(null)}
+              className="bg-white/20 hover:bg-white/40 text-white rounded-full w-12 h-12 flex items-center justify-center backdrop-blur-md transition"
+            >
+              <span className="text-xl">✕</span>
+            </button>
+          </div>
+          <div className="max-w-4xl w-full max-h-[85vh] relative flex items-center justify-center">
+            <img
+              src={`/api/drive/image?id=${selectedPreviewPhoto.google_drive_file_id}`}
+              alt="Preview"
+              className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+            />
+          </div>
+          <div className="mt-4 text-center text-white/80">
+            <p className="font-bold">{selectedPreviewPhoto.hikes?.title}</p>
+            <p className="text-sm">{selectedPreviewPhoto.users?.nickname} • {new Date(selectedPreviewPhoto.created_at).toLocaleDateString()}</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
