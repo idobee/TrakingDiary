@@ -307,9 +307,9 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
         `)
         .eq('club_id', hike.club_id)
         .eq('status', 'approved')
-      
+
       if (error) throw error
-      
+
       const existingIds = participants.map((p: any) => p.user_id)
       const availableMembers = (data || []).filter((m: any) => !existingIds.includes(m.user_id))
       setClubMembers(availableMembers)
@@ -333,7 +333,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
         role: 'member',
         status: 'approved'
       }))
-      
+
       const res = await fetch('/api/hikes/members', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -344,7 +344,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
         const errorData = await res.json()
         throw new Error(errorData.error || 'Failed to insert')
       }
-      
+
       alert(`${selectedNewParticipantIds.length}명의 회원이 등록되었습니다.`)
       setShowAddParticipantModal(false)
       fetchData()
@@ -524,10 +524,10 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
       if (!Kakao.isInitialized()) {
         Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY)
       }
-      
+
       const shareUrl = `${window.location.origin}/?diary_id=${hikeId}`
       const imageUrl = hike?.cover_image_url || 'https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1000&auto=format&fit=crop'
-      
+
       Kakao.Share.sendDefault({
         objectType: 'feed',
         content: {
@@ -763,7 +763,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
               </div>
             ) : (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
-                {photos.slice(0, 5).map((photo) => {
+                {photos.slice(0, 10).map((photo) => {
                   const fileId = photo.google_drive_file_id
                   const imgSrc = `/api/drive/image?id=${fileId}`
                   return (
