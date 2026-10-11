@@ -299,6 +299,75 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
     }
   }
 
+  const handleTogglePin = async (photoId: number, currentPinStatus: boolean) => {
+    try {
+      const res = await fetch('/api/photos/pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoId, isPinned: !currentPinStatus })
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.error || 'Failed to toggle pin')
+      }
+
+      // Update local state (is_bside represents pinned status)
+      setPhotos(photos.map(p => p.id === photoId ? { ...p, is_bside: !currentPinStatus } : p))
+      alert(!currentPinStatus ? t('gallery.pinSuccess') : t('gallery.unpinSuccess'))
+    } catch (err) {
+      console.error('Failed to toggle pin:', err)
+      alert(t('gallery.pinFail'))
+    }
+  }
+
+  const handleDeletePhoto = async (photoId: number) => {
+    if (!confirm(t('gallery.deleteConfirm'))) return
+    try {
+      const res = await fetch('/api/photos/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoId })
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.error || 'Failed to delete')
+      }
+
+      setPhotos(photos.filter(p => p.id !== photoId))
+      setSelectedPhotoIds(prev => prev.filter(id => id !== photoId))
+      alert(t('gallery.deleteSuccess'))
+    } catch (err) {
+      console.error('Failed to delete photo:', err)
+      alert(t('gallery.deleteFail'))
+    }
+  }
+
+  const handleDeleteSelectedPhotos = async () => {
+    if (selectedPhotoIds.length === 0) return
+    if (!confirm(t('gallery.deleteSelectedConfirm', { count: selectedPhotoIds.length }))) return
+    try {
+      const res = await fetch('/api/photos/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoIds: selectedPhotoIds })
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.error || 'Failed to delete selected')
+      }
+
+      setPhotos(photos.filter(p => !selectedPhotoIds.includes(p.id)))
+      setSelectedPhotoIds([])
+      alert(t('gallery.deleteSuccess'))
+    } catch (err) {
+      console.error('Failed to delete selected photos:', err)
+      alert(t('gallery.deleteFail'))
+    }
+  }
+
   const togglePhotoSelection = (photoId: number) => {
     setSelectedPhotoIds(prev => prev.includes(photoId) ? prev.filter(id => id !== photoId) : [...prev, photoId])
   }
@@ -437,9 +506,19 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
               <button
                 onClick={handleOpenEpisodeModal}
                 disabled={selectedPhotoIds.length === 0}
-                className="bg-terracotta text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-terracotta-dark transition disabled:opacity-50 shadow-sm"
+                className="bg-terracotta text-white px-3 sm:px-4 py-2 rounded-xl text-xs font-bold hover:bg-terracotta-dark transition disabled:opacity-50 shadow-sm"
               >
                 {t('gallery.createEpisode')} ({selectedPhotoIds.length})
+              </button>
+              <button
+                onClick={handleDeleteSelectedPhotos}
+                disabled={selectedPhotoIds.length === 0}
+                className="bg-red-500 text-white px-3 sm:px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-600 transition disabled:opacity-50 shadow-sm flex items-center gap-1"
+                title={t('gallery.deleteSelected')}
+              >
+                <span>🗑️</span>
+                <span className="hidden sm:inline">{t('gallery.deleteSelected')}</span>
+                <span>({selectedPhotoIds.length})</span>
               </button>
               <button
                 onClick={handleExitSelectMode}
@@ -576,14 +655,49 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
                   <img src={photo.thumbnail_url || imgSrc} alt="Gallery Photo" loading="lazy" className="w-full h-auto object-cover group-hover:scale-105 transition duration-500" />
                 </div>
 
-                {/* Publish Toggle Button */}
+                {/* Pinned Badge (항상 상단에 표시) */}
+                {photo.is_bside && (
+                  <div className={`absolute ${selectMode ? 'top-2 left-10' : 'top-2 right-2'} z-10 pointer-events-none`}>
+                    <span className="bg-amber-500 text-white font-heading font-bold text-[10px] px-2 py-0.5 rounded-full shadow-md flex items-center gap-1 border border-amber-300 backdrop-blur-sm">
+                      <span>📌</span>
+                      <span>{t('gallery.pinnedBadge')}</span>
+                    </span>
+                  </div>
+                )}
+
+                {/* Card Action Buttons (Pin, Publish, Delete) */}
                 {isUploaderOrAdmin && (
-                  <div className="absolute top-2 right-2 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                  <div className="absolute top-2 right-2 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                    {/* Pin Toggle Button */}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleTogglePin(photo.id, photo.is_bside); }}
+                      className={`p-1 sm:px-2 sm:py-1 text-xs font-bold rounded-full shadow backdrop-blur-md border transition flex items-center gap-0.5 ${
+                        photo.is_bside
+                          ? 'bg-amber-500 text-white border-amber-600 hover:bg-amber-600'
+                          : 'bg-white/90 text-gray-700 border-gray-300 hover:bg-white hover:text-amber-600'
+                      }`}
+                      title={photo.is_bside ? t('gallery.unpinPhoto') : t('gallery.pinPhoto')}
+                    >
+                      <span>📌</span>
+                      <span className="text-[10px] hidden sm:inline">{photo.is_bside ? '선정됨' : '핀'}</span>
+                    </button>
+
+                    {/* Publish Toggle Button */}
                     <button
                       onClick={(e) => { e.stopPropagation(); handleTogglePublish(photo.id, photo.is_published); }}
-                      className={`px-3 py-1 text-xs font-bold rounded-full shadow backdrop-blur-md border ${photo.is_published ? 'bg-forest/80 text-white border-forest' : 'bg-white/80 text-gray-600 border-gray-300 hover:bg-white'}`}
+                      className={`px-2 py-1 text-xs font-bold rounded-full shadow backdrop-blur-md border transition ${photo.is_published ? 'bg-forest/80 text-white border-forest' : 'bg-white/80 text-gray-600 border-gray-300 hover:bg-white'}`}
+                      title={photo.is_published ? t('gallery.published') : t('gallery.unpublished')}
                     >
-                      {photo.is_published ? t('gallery.published') : t('gallery.unpublished')}
+                      <span className="text-[10px]">{photo.is_published ? t('gallery.published') : t('gallery.unpublished')}</span>
+                    </button>
+
+                    {/* Delete Photo Button */}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDeletePhoto(photo.id); }}
+                      className="p-1 sm:p-1.5 text-xs font-bold rounded-full shadow backdrop-blur-md border bg-red-500/90 hover:bg-red-600 text-white border-red-600 flex items-center justify-center transition"
+                      title={t('gallery.deletePhoto')}
+                    >
+                      <span>🗑️</span>
                     </button>
                   </div>
                 )}

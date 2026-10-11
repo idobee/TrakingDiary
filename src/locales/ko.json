@@ -393,7 +393,19 @@
     "empty": "조건에 맞는 사진이 없습니다.",
     "published": "공개",
     "unpublished": "비공개",
-    "toggleFail": "공유 상태 변경에 실패했습니다."
+    "toggleFail": "공유 상태 변경에 실패했습니다.",
+    "deletePhoto": "삭제",
+    "deleteConfirm": "정말 이 사진을 삭제하시겠습니까?",
+    "deleteSelected": "🗑️ 선택 삭제",
+    "deleteSelectedConfirm": "선택한 {{count}}장의 사진을 삭제하시겠습니까?",
+    "deleteSuccess": "사진이 삭제되었습니다.",
+    "deleteFail": "사진 삭제에 실패했습니다.",
+    "pinPhoto": "다이어리 대표 핀 꽂기",
+    "unpinPhoto": "다이어리 핀 해제",
+    "pinSuccess": "다이어리 선정 사진으로 핀이 꽂혔습니다.",
+    "unpinSuccess": "핀이 해제되었습니다.",
+    "pinFail": "핀 상태 변경에 실패했습니다.",
+    "pinnedBadge": "📌 다이어리 선정"
   },
   "modal": {
     "episode": {

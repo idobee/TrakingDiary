@@ -763,15 +763,31 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
               </div>
             ) : (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
-                {photos.slice(0, 10).map((photo) => {
-                  const fileId = photo.google_drive_file_id
-                  const imgSrc = `/api/drive/image?id=${fileId}`
-                  return (
-                    <div key={photo.id} className="w-full aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition border border-gray-200">
-                      <img src={imgSrc} alt="Hike Photo" className="w-full h-full object-cover" />
-                    </div>
-                  )
-                })}
+                {(() => {
+                  const sortedPhotos = [...photos].sort((a, b) => {
+                    const aPinned = a.is_bside ? 1 : 0
+                    const bPinned = b.is_bside ? 1 : 0
+                    if (aPinned !== bPinned) return bPinned - aPinned
+                    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                  }).slice(0, 10)
+
+                  return sortedPhotos.map((photo) => {
+                    const fileId = photo.google_drive_file_id
+                    const imgSrc = `/api/drive/image?id=${fileId}`
+                    return (
+                      <div key={photo.id} className="relative w-full aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition border border-gray-200 group">
+                        <img src={imgSrc} alt="Hike Photo" className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                        {photo.is_bside && (
+                          <div className="absolute top-1.5 left-1.5 z-10" title="핀 고정된 대표 사진">
+                            <span className="bg-amber-500 text-white font-bold text-[10px] px-1.5 py-0.5 rounded-full shadow flex items-center gap-0.5 border border-amber-300">
+                              <span>📌</span>
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })
+                })()}
               </div>
             )}
           </section>
