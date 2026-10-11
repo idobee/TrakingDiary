@@ -43,6 +43,25 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
   // Photo Preview State
   const [selectedPreviewPhoto, setSelectedPreviewPhoto] = useState<any>(null)
 
+  // Episode creation from selected photos (only when a single hike is selected)
+  const isSingleHike = typeof filterHikeId === 'number'
+  const [selectMode, setSelectMode] = useState(false)
+  const [selectedPhotoIds, setSelectedPhotoIds] = useState<number[]>([])
+  const [showEpisodeModal, setShowEpisodeModal] = useState(false)
+  const [episodeTitle, setEpisodeTitle] = useState('')
+  const [episodeContent, setEpisodeContent] = useState('')
+  const [episodePublished, setEpisodePublished] = useState(true)
+  const [isSavingEpisode, setIsSavingEpisode] = useState(false)
+
+  // 행사 선택이 바뀌거나 해제되면 선택 상태를 초기화합니다.
+  useEffect(() => {
+    setSelectedPhotoIds([])
+    if (typeof filterHikeId !== 'number') {
+      setSelectMode(false)
+      setShowEpisodeModal(false)
+    }
+  }, [filterHikeId])
+
   useEffect(() => {
     if (initialHikeId) {
       setFilterHikeId(initialHikeId)
@@ -280,6 +299,64 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
     }
   }
 
+  const togglePhotoSelection = (photoId: number) => {
+    setSelectedPhotoIds(prev => prev.includes(photoId) ? prev.filter(id => id !== photoId) : [...prev, photoId])
+  }
+
+  const handleExitSelectMode = () => {
+    setSelectMode(false)
+    setSelectedPhotoIds([])
+  }
+
+  const handleOpenEpisodeModal = () => {
+    if (selectedPhotoIds.length === 0) {
+      alert(t('gallery.episodeNeedPhoto'))
+      return
+    }
+    setShowEpisodeModal(true)
+  }
+
+  const handleCreateEpisode = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!user || typeof filterHikeId !== 'number') return
+
+    // 현재 선택된 행사의 사진만 에피소드에 포함합니다. (화면에 보이는 순서 유지)
+    const photoUrls = photos
+      .filter(p => selectedPhotoIds.includes(p.id) && p.hike_id === filterHikeId)
+      .map(p => `/api/drive/image?id=${p.google_drive_file_id}`)
+
+    if (photoUrls.length === 0) {
+      alert(t('gallery.episodeNeedPhoto'))
+      return
+    }
+
+    setIsSavingEpisode(true)
+    try {
+      const { error } = await (supabase as any).from('episodes').insert({
+        hike_id: filterHikeId,
+        author_id: user.id,
+        title: episodeTitle,
+        content: episodeContent,
+        episode_type: 'general',
+        is_published: episodePublished,
+        photo_urls: photoUrls
+      })
+      if (error) throw error
+
+      alert(t('gallery.episodeSuccess'))
+      setShowEpisodeModal(false)
+      setEpisodeTitle('')
+      setEpisodeContent('')
+      setEpisodePublished(true)
+      handleExitSelectMode()
+    } catch (err) {
+      console.error('Create episode from gallery failed:', err)
+      alert(t('gallery.episodeFail'))
+    } finally {
+      setIsSavingEpisode(false)
+    }
+  }
+
   const handleUploadClick = () => {
     if (filterHikeId === 'all' || filterHikeId === 'my_hikes') {
       alert('사진을 올릴 단일 행사를 먼저 선택해주세요.')
@@ -348,6 +425,39 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
           <h2 className="font-heading font-extrabold text-xl sm:text-2xl text-forest truncate">{t('gallery.title')}</h2>
         </div>
         <div className="flex items-center space-x-2">
+          {selectMode ? (
+            <>
+              <span className="text-xs font-bold text-forest hidden sm:inline">{t('gallery.selectedCount', { count: selectedPhotoIds.length })}</span>
+              <button
+                onClick={() => setSelectedPhotoIds(selectedPhotoIds.length === photos.length ? [] : photos.map(p => p.id))}
+                className="px-3 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
+              >
+                {selectedPhotoIds.length === photos.length && photos.length > 0 ? t('gallery.deselectAll') : t('gallery.selectAll')}
+              </button>
+              <button
+                onClick={handleOpenEpisodeModal}
+                disabled={selectedPhotoIds.length === 0}
+                className="bg-terracotta text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-terracotta-dark transition disabled:opacity-50 shadow-sm"
+              >
+                {t('gallery.createEpisode')} ({selectedPhotoIds.length})
+              </button>
+              <button
+                onClick={handleExitSelectMode}
+                className="px-3 py-2 rounded-xl text-xs font-bold text-gray-500 hover:text-gray-700 transition"
+              >
+                {t('gallery.selectModeCancel')}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setSelectMode(true)}
+              disabled={!isSingleHike || !user || photos.length === 0}
+              title={!isSingleHike ? t('gallery.selectModeNeedHike') : undefined}
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-white border border-forest text-forest hover:bg-forest hover:text-white transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-forest"
+            >
+              {t('gallery.selectMode')}
+            </button>
+          )}
           <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple onChange={handlePhotoUpload} />
           <button
             onClick={handleUploadClick}
@@ -448,8 +558,21 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
             const isUploaderOrAdmin = user?.id === photo.uploader_id || user?.system_role === 'admin' || user?.system_role === 'sys_admin'
 
             return (
-              <div key={photo.id} className="break-inside-avoid relative group rounded-xl overflow-hidden bg-gray-100 shadow-sm border border-gray-200">
-                <div onClick={() => setSelectedPreviewPhoto(photo)} className="block cursor-pointer">
+              <div key={photo.id} className={`break-inside-avoid relative group rounded-xl overflow-hidden bg-gray-100 shadow-sm border-2 transition ${selectMode && selectedPhotoIds.includes(photo.id) ? 'border-terracotta ring-2 ring-terracotta/40' : 'border-gray-200'}`}>
+                {selectMode && (
+                  <label
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute top-2 left-2 z-20 w-7 h-7 rounded-full bg-white/90 shadow flex items-center justify-center cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedPhotoIds.includes(photo.id)}
+                      onChange={() => togglePhotoSelection(photo.id)}
+                      className="w-4 h-4 accent-terracotta cursor-pointer"
+                    />
+                  </label>
+                )}
+                <div onClick={() => (selectMode ? togglePhotoSelection(photo.id) : setSelectedPreviewPhoto(photo))} className="block cursor-pointer">
                   <img src={photo.thumbnail_url || imgSrc} alt="Gallery Photo" loading="lazy" className="w-full h-auto object-cover group-hover:scale-105 transition duration-500" />
                 </div>
 
@@ -466,7 +589,7 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
                 )}
 
                 {/* Download Original Button & Insta Share Button */}
-                <div className="absolute top-2 left-2 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col gap-2">
+                <div className={`absolute top-2 left-2 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col gap-2 ${selectMode ? 'hidden' : ''}`}>
                   <a
                     href={`/api/drive/image?id=${photo.google_drive_file_id}&download=true`}
                     download={`trakingdiary_${photo.google_drive_file_id}.jpg`}
@@ -598,6 +721,71 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
               Happic
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Create Episode From Selected Photos Modal */}
+      {showEpisodeModal && isSingleHike && (
+        <div className="fixed inset-0 z-[105] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <form onSubmit={handleCreateEpisode} className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="p-5 border-b border-gray-100 flex justify-between items-start gap-3">
+              <div className="min-w-0">
+                <h3 className="font-heading font-bold text-lg text-forest">{t('gallery.episodeModalTitle')}</h3>
+                <p className="text-xs text-gray-500 mt-0.5 truncate">
+                  {t('gallery.episodeModalHike', { title: hikes.find(h => h.id === filterHikeId)?.title || '' })}
+                </p>
+              </div>
+              <button type="button" onClick={() => setShowEpisodeModal(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {photos.filter(p => selectedPhotoIds.includes(p.id)).map(p => (
+                  <img key={p.id} src={p.thumbnail_url || `/api/drive/image?id=${p.google_drive_file_id}`} alt="" className="flex-none w-16 h-16 rounded-lg object-cover border border-gray-200" />
+                ))}
+              </div>
+              <p className="text-xs font-bold text-terracotta">{t('gallery.selectedCount', { count: selectedPhotoIds.length })}</p>
+
+              <input
+                type="text"
+                required
+                placeholder={t('gallery.episodeTitlePlaceholder')}
+                value={episodeTitle}
+                onChange={(e) => setEpisodeTitle(e.target.value)}
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl font-heading text-sm text-forest focus:outline-none focus:ring-2 focus:ring-orange-300"
+              />
+              <textarea
+                required
+                rows={5}
+                placeholder={t('gallery.episodeContentPlaceholder')}
+                value={episodeContent}
+                onChange={(e) => setEpisodeContent(e.target.value)}
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl font-body text-sm text-gray-700 resize-none focus:outline-none focus:ring-2 focus:ring-orange-300"
+              />
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={episodePublished}
+                  onChange={(e) => setEpisodePublished(e.target.checked)}
+                  className="w-4 h-4 text-forest rounded border-gray-300 focus:ring-forest"
+                />
+                <span className="text-xs font-bold text-gray-700">{t('gallery.episodePublish')}</span>
+              </label>
+            </div>
+
+            <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-2">
+              <button type="button" onClick={() => setShowEpisodeModal(false)} className="px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-200 rounded-xl">
+                {t('gallery.episodeCancel')}
+              </button>
+              <button
+                type="submit"
+                disabled={isSavingEpisode}
+                className="bg-forest text-white px-6 py-2 rounded-xl text-sm font-bold shadow hover:bg-forest-light disabled:opacity-50"
+              >
+                {isSavingEpisode ? t('gallery.episodeSubmitting') : t('gallery.episodeSubmit')}
+              </button>
+            </div>
+          </form>
         </div>
       )}
 
