@@ -23,6 +23,12 @@ export const Footer: React.FC = () => {
           <span>•</span>
           <span>{t('footer.geminiAi')}</span>
         </div>
+        <div className="flex items-center justify-center space-x-3 text-[11px] font-label text-sand/80">
+          <a href="/privacy" className="hover:text-terracotta underline-offset-2 hover:underline transition">{t('legal.footerPrivacy')}</a>
+          <span>•</span>
+          <a href="/terms" className="hover:text-terracotta underline-offset-2 hover:underline transition">{t('legal.footerTerms')}</a>
+        </div>
+
       </div>
     </footer>
   )
