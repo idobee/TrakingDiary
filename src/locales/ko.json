@@ -54,11 +54,18 @@
   },
   "legal": {
     "backHome": "← 서비스로 돌아가기",
-    "contactEmail": "ljymygot@daum.net",
+    "contactEmail": "idobe@daum.net",
     "footerPrivacy": "개인정보 처리방침",
     "footerTerms": "서비스 약관",
     "effectiveDate": "시행일: 2026년 10월 11일",
     "contactLabel": "문의",
+    "companyInfo": {
+      "companyName": "HAPPIC (함께쓰는 Tracking 일기)-WooriwaFNB",
+      "representative": "",
+      "businessNumber": "211-88-88661",
+      "representativeLabel": "대표: ",
+      "businessNumberLabel": "사업자등록번호: "
+    },
     "privacy": {
       "title": "개인정보 처리방침",
       "intro": "「함께쓰는 Tracking 일기」(이하 '서비스')는 이용자의 개인정보를 소중히 여기며, 관련 법령을 준수합니다. 본 방침은 서비스가 어떤 정보를 수집하고, 어떻게 이용·보관·보호하는지 안내합니다.",
@@ -377,7 +384,6 @@
     "episodeSuccess": "에피소드가 등록되었습니다.",
     "episodeFail": "에피소드 저장에 실패했습니다.",
     "episodeNeedPhoto": "에피소드에 넣을 사진을 먼저 선택해주세요.",
-
     "title": "📷 사진첩",
     "ucTag": "Google Shared Drive Sync",
     "description": "Google Shared Drive (`hikes/jirisan/`)에 저장된 원본 사진 및 B컷 비하인드 앨범입니다.",

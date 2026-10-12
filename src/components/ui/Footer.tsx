@@ -29,6 +29,18 @@ export const Footer: React.FC = () => {
           <a href="/terms" className="hover:text-terracotta underline-offset-2 hover:underline transition">{t('legal.footerTerms')}</a>
         </div>
 
+        {/* 법적 고지 및 사업자 정보 */}
+        <div className="pt-3 border-t border-forest-container/50 text-[11px] font-label text-sand/70 space-y-1">
+          <p>
+            {t('legal.companyInfo.companyName')} | {t('legal.companyInfo.representativeLabel')}{t('legal.companyInfo.representative')} | {t('legal.companyInfo.businessNumberLabel')}<span className="font-semibold text-sand">{t('legal.companyInfo.businessNumber')}</span>
+          </p>
+          <p>
+            {t('legal.contactLabel')}: {t('legal.contactEmail')}
+          </p>
+          <p className="text-[10px] text-sand/50 pt-1">
+            © 2026 HAPPIC. All rights reserved.
+          </p>
+        </div>
       </div>
     </footer>
   )

@@ -59,6 +59,13 @@
     "footerTerms": "Terms of Service",
     "effectiveDate": "Effective date: October 11, 2026",
     "contactLabel": "Contact",
+    "companyInfo": {
+      "companyName": "HAPPIC (Tracking Diary Together)-WooriwaFNB",
+      "representative": "",
+      "businessNumber": "211-88-88661",
+      "representativeLabel": "CEO: KANG CHAN LYONG",
+      "businessNumberLabel": "Business Registration No: "
+    },
     "privacy": {
       "title": "Privacy Policy",
       "intro": "\"Tracking Diary Together\" (the \"Service\") values your privacy and complies with applicable laws. This policy explains what information the Service collects and how it is used, stored and protected.",
@@ -394,7 +401,6 @@
     "episodeSuccess": "Your episode has been created.",
     "episodeFail": "Failed to save the episode.",
     "episodeNeedPhoto": "Please select photos for the episode first.",
-
     "title": "📷 Gallery",
     "ucTag": "Google Shared Drive Sync",
     "description": "Original photos and behind-the-scenes B-cut album stored in Google Shared Drive (`hikes/jirisan/`).",
