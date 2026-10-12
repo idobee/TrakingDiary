@@ -665,9 +665,9 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
                   </div>
                 )}
 
-                {/* Card Action Buttons (Pin, Publish, Delete) - 항상 선명하게 표시 */}
+                {/* Card Action Buttons (Pin, Publish, Delete) - 마우스 오버 시 표시 */}
                 {user && (
-                  <div className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-black/30 p-1 rounded-full backdrop-blur-sm shadow-md">
+                  <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-black/30 p-1 rounded-full backdrop-blur-sm shadow-md">
                     {/* Pin Toggle Button */}
                     <button
                       onClick={(e) => { e.stopPropagation(); handleTogglePin(photo.id, photo.is_bside); }}

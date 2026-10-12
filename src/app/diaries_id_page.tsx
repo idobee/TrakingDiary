@@ -846,13 +846,6 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                           loading="lazy"
                           className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                         />
-                        {photo.is_bside && (
-                          <div className="absolute top-1.5 left-1.5 z-10 pointer-events-none" title="핀 고정된 대표 사진">
-                            <span className="bg-amber-500 text-white font-bold text-[10px] px-1.5 py-0.5 rounded-full shadow flex items-center gap-0.5 border border-amber-300">
-                              <span>📌</span>
-                            </span>
-                          </div>
-                        )}
                         {user && (
                           <div className="absolute top-1.5 right-1.5 z-20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-black/40 p-1 rounded-full backdrop-blur-sm shadow-md">
                             <button
@@ -1077,10 +1070,40 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                   <span>📌 공지 / 감사의 글</span>
                 </h3>
                 <div className="max-h-[600px] overflow-y-auto hide-scrollbar space-y-4 pb-4">
-                  {episodes.filter(ep => ep.episode_type === 'notice').length === 0 ? (
-                    <div className="text-center text-gray-400 text-xs py-8 font-body">아직 등록된 공지가 없습니다.</div>
-                  ) : (
-                    episodes.filter(ep => ep.episode_type === 'notice').map(ep => {
+                  {/* 일정 만들기에서 작성한 글 (제목 + 상세내용) - 항상 최상단 표시 */}
+                  {hike && (
+                    <div className="bg-amber-50/90 p-5 rounded-2xl shadow-sm border border-amber-200/80 space-y-2 relative hover:shadow-md transition duration-300">
+                      <div className="flex items-center justify-between pb-1.5 border-b border-amber-200/50">
+                        <span className="bg-amber-600 text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
+                          <span>⛰️</span>
+                          <span>일정 모집 안내</span>
+                        </span>
+                        <span className="text-[10px] text-amber-800/70 font-label">
+                          {hike.created_at ? new Date(hike.created_at).toLocaleDateString() : ''}
+                        </span>
+                      </div>
+                      <h4 className="font-heading font-extrabold text-sm text-forest">{hike.title}</h4>
+                      {hike.description ? (
+                        <p className="text-xs text-gray-700 font-body whitespace-pre-line leading-relaxed">
+                          {hike.description}
+                        </p>
+                      ) : (
+                        <p className="text-xs text-gray-400 font-body italic">
+                          상세 내용이 등록되지 않았습니다.
+                        </p>
+                      )}
+                      <div className="pt-2 mt-2 border-t border-amber-200/50 flex items-center justify-between">
+                        <span className="text-[10px] text-gray-500 font-bold">
+                          주최: {participants.find(p => p.role === 'organizer' || p.user_id === hike.organizer_id)?.users?.nickname || '주최자'}
+                        </span>
+                        <span className="text-[10px] text-forest font-bold bg-white/70 px-2 py-0.5 rounded-md border border-amber-200">
+                          {hike.mountain_name} • {new Date(hike.hike_date).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {episodes.filter(ep => ep.episode_type === 'notice').map(ep => {
                       const isAuthor = Boolean(user?.id && ep.author_id && user.id === ep.author_id)
                       const canEdit = isAuthor || user?.id === hike?.organizer_id || isAdmin
                       const canDelete = isAuthor || user?.id === hike?.organizer_id || isAdmin
@@ -1114,8 +1137,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                           </div>
                         </div>
                       )
-                    })
-                  )}
+                    })}
                 </div>
               </div>
             </div>
