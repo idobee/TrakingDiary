@@ -29,6 +29,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
   // Photo Upload State
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [selectedPreviewPhoto, setSelectedPreviewPhoto] = useState<any>(null)
 
   // Episode Form State
   const [showEpisodeForm, setShowEpisodeForm] = useState(false)
@@ -101,7 +102,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
 
       // 4. Fetch Episodes
       const { data: epData } = await supabase.from('episodes').select(`
-        id, title, content, created_at, photo_urls, episode_type,
+        id, author_id, title, content, created_at, photo_urls, episode_type, is_published,
         users ( nickname, avatar_url )
       `).eq('hike_id', hikeId).order('created_at', { ascending: false })
       setEpisodes(epData || [])
@@ -275,7 +276,21 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
     setEpisodeType(ep.episode_type || 'general')
     setIsPublished(ep.is_published ?? true)
     setEditingEpisodeId(ep.id)
+
+    // Match photo selection if any
+    if (ep.photo_urls && Array.isArray(ep.photo_urls)) {
+      const matchedIds = photos
+        .filter(p => ep.photo_urls.includes(`/api/drive/image?id=${p.google_drive_file_id}`))
+        .map(p => p.id)
+      setSelectedPhotoIds(matchedIds)
+    } else {
+      setSelectedPhotoIds([])
+    }
+
     setShowEpisodeForm(true)
+    setTimeout(() => {
+      document.getElementById('episode-form-section')?.scrollIntoView({ behavior: 'smooth' })
+    }, 100)
   }
 
   const handleDeleteEpisode = async (epId: number) => {
@@ -801,14 +816,36 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                     const bPinned = b.is_bside ? 1 : 0
                     if (aPinned !== bPinned) return bPinned - aPinned
                     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-                  }).slice(0, 10)
+                  }).slice(0, 12)
 
-                  return sortedPhotos.map((photo) => {
+                  return sortedPhotos.map((photo, idx) => {
                     const fileId = photo.google_drive_file_id
                     const imgSrc = `/api/drive/image?id=${fileId}`
+
+                    // Responsive visibility classes to prevent empty slots in the grid:
+                    // 3 cols (mobile): items 0..8 shown (9 items)
+                    // 4 cols (sm): items 0..11 shown (12 items)
+                    // 5 cols (md): items 0..9 shown (10 items, 10th & 11th hidden)
+                    // 6 cols (lg): items 0..11 shown (12 items)
+                    let visibilityClass = 'block'
+                    if (idx === 9) {
+                      visibilityClass = 'hidden sm:block'
+                    } else if (idx >= 10) {
+                      visibilityClass = 'hidden sm:block md:hidden lg:block'
+                    }
+
                     return (
-                      <div key={photo.id} className="relative w-full aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition border border-gray-200 group">
-                        <img src={imgSrc} alt="Hike Photo" className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                      <div
+                        key={photo.id}
+                        onClick={() => setSelectedPreviewPhoto(photo)}
+                        className={`${visibilityClass} relative w-full aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition border border-gray-200 group cursor-pointer`}
+                      >
+                        <img
+                          src={imgSrc}
+                          alt="Hike Photo"
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                        />
                         {photo.is_bside && (
                           <div className="absolute top-1.5 left-1.5 z-10 pointer-events-none" title="핀 고정된 대표 사진">
                             <span className="bg-amber-500 text-white font-bold text-[10px] px-1.5 py-0.5 rounded-full shadow flex items-center gap-0.5 border border-amber-300">
@@ -817,7 +854,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                           </div>
                         )}
                         {user && (
-                          <div className="absolute top-1.5 right-1.5 z-20 flex items-center gap-1 bg-black/40 p-1 rounded-full backdrop-blur-sm shadow-md">
+                          <div className="absolute top-1.5 right-1.5 z-20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-black/40 p-1 rounded-full backdrop-blur-sm shadow-md">
                             <button
                               onClick={(e) => { e.stopPropagation(); handleTogglePin(photo.id, photo.is_bside); }}
                               className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full text-[10px] font-bold flex items-center justify-center transition ${
@@ -877,7 +914,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
             </div>
 
             {showEpisodeForm && (
-              <form onSubmit={handleSubmitEpisode} className="bg-orange-50/50 p-6 rounded-2xl border border-orange-200 shadow-sm space-y-4">
+              <form id="episode-form-section" onSubmit={handleSubmitEpisode} className="bg-orange-50/50 p-6 rounded-2xl border border-orange-200 shadow-sm space-y-4">
                 {isAdmin && (
                   <div className="flex gap-4 pb-2 border-b border-orange-200/50 mb-2">
                     <label className="flex items-center gap-2 cursor-pointer">
@@ -964,6 +1001,10 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                   const isAiBook = ep.episode_type === 'ai_book'
                   if (ep.episode_type !== 'general' && !ep.episode_type && !isAiBook) return null;
 
+                  const isAuthor = Boolean(user?.id && ep.author_id && user.id === ep.author_id)
+                  const canEdit = !isAiBook && (isAuthor || user?.id === hike?.organizer_id || isAdmin)
+                  const canDelete = isAuthor || user?.id === hike?.organizer_id || isAdmin
+
                   return (
                     <div key={ep.id} className={`bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-3 relative hover:shadow-md transition ${isAiBook ? 'md:col-span-2' : ''}`}>
                       {isAiBook ? (
@@ -1015,12 +1056,14 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                           <span className="text-xs text-gray-500 font-bold">{ep.users?.nickname || 'Unknown'}</span>
                           <span className="text-[10px] text-gray-400 font-label ml-2">{new Date(ep.created_at).toLocaleString()}</span>
                         </div>
-                        {(user?.id === ep.author_id || user?.id === hike?.organizer_id) && (
+                        {(canEdit || canDelete) && (
                           <div className="flex items-center space-x-3">
-                            {!isAiBook && user?.id === ep.author_id && (
-                              <button onClick={() => handleEditEpisode(ep)} className="text-[10px] text-gray-400 hover:text-forest transition font-bold">수정</button>
+                            {canEdit && (
+                              <button onClick={() => handleEditEpisode(ep)} className="text-xs text-forest hover:text-emerald-700 transition font-bold px-1.5 py-0.5 rounded hover:bg-forest/5">수정</button>
                             )}
-                            <button onClick={() => handleDeleteEpisode(ep.id)} className="text-[10px] text-gray-400 hover:text-red-500 transition font-bold">삭제</button>
+                            {canDelete && (
+                              <button onClick={() => handleDeleteEpisode(ep.id)} className="text-xs text-red-500 hover:text-red-700 transition font-bold px-1.5 py-0.5 rounded hover:bg-red-50">삭제</button>
+                            )}
                           </div>
                         )}
                       </div>
@@ -1037,33 +1080,41 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                   {episodes.filter(ep => ep.episode_type === 'notice').length === 0 ? (
                     <div className="text-center text-gray-400 text-xs py-8 font-body">아직 등록된 공지가 없습니다.</div>
                   ) : (
-                    episodes.filter(ep => ep.episode_type === 'notice').map(ep => (
-                      <div key={ep.id} className="bg-yellow-100/80 p-5 rounded-lg shadow-sm border border-yellow-200/50 space-y-2 relative rotate-1 hover:rotate-0 hover:shadow-md transition duration-300">
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-3 bg-red-400/20 backdrop-blur-sm shadow-sm rounded-sm z-10" />
-                        <h4 className="font-heading font-extrabold text-sm text-amber-900">{ep.title}</h4>
-                        <p className="text-xs text-amber-900/80 font-body whitespace-pre-line leading-relaxed">{ep.content}</p>
-                        {ep.photo_urls && ep.photo_urls.length > 0 && (
-                          <div className="mt-2 grid grid-cols-2 gap-2">
-                            {ep.photo_urls.map((url: string, idx: number) => (
-                              <div key={idx} className="rounded-lg overflow-hidden aspect-square border border-yellow-200/50 shadow-sm">
-                                <img src={url} className="w-full h-full object-cover opacity-90" />
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        <div className="pt-2 mt-2 border-t border-amber-900/10 flex items-center justify-between">
-                          <span className="text-[10px] text-amber-800/60 font-bold">{ep.users?.nickname || '관리자'}</span>
-                          {(user?.id === ep.author_id || user?.id === hike?.organizer_id) && (
-                            <div className="flex items-center space-x-2">
-                              {user?.id === ep.author_id && (
-                                <button onClick={() => handleEditEpisode(ep)} className="text-[10px] text-amber-800/40 hover:text-amber-800 transition font-bold">수정</button>
-                              )}
-                              <button onClick={() => handleDeleteEpisode(ep.id)} className="text-[10px] text-amber-800/40 hover:text-red-500 transition font-bold">삭제</button>
+                    episodes.filter(ep => ep.episode_type === 'notice').map(ep => {
+                      const isAuthor = Boolean(user?.id && ep.author_id && user.id === ep.author_id)
+                      const canEdit = isAuthor || user?.id === hike?.organizer_id || isAdmin
+                      const canDelete = isAuthor || user?.id === hike?.organizer_id || isAdmin
+
+                      return (
+                        <div key={ep.id} className="bg-yellow-100/80 p-5 rounded-lg shadow-sm border border-yellow-200/50 space-y-2 relative rotate-1 hover:rotate-0 hover:shadow-md transition duration-300">
+                          <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-3 bg-red-400/20 backdrop-blur-sm shadow-sm rounded-sm z-10" />
+                          <h4 className="font-heading font-extrabold text-sm text-amber-900">{ep.title}</h4>
+                          <p className="text-xs text-amber-900/80 font-body whitespace-pre-line leading-relaxed">{ep.content}</p>
+                          {ep.photo_urls && ep.photo_urls.length > 0 && (
+                            <div className="mt-2 grid grid-cols-2 gap-2">
+                              {ep.photo_urls.map((url: string, idx: number) => (
+                                <div key={idx} className="rounded-lg overflow-hidden aspect-square border border-yellow-200/50 shadow-sm">
+                                  <img src={url} className="w-full h-full object-cover opacity-90" />
+                                </div>
+                              ))}
                             </div>
                           )}
+                          <div className="pt-2 mt-2 border-t border-amber-900/10 flex items-center justify-between">
+                            <span className="text-[10px] text-amber-800/60 font-bold">{ep.users?.nickname || '관리자'}</span>
+                            {(canEdit || canDelete) && (
+                              <div className="flex items-center space-x-2">
+                                {canEdit && (
+                                  <button onClick={() => handleEditEpisode(ep)} className="text-xs text-amber-900 hover:text-amber-950 transition font-bold px-1.5 py-0.5 rounded hover:bg-amber-200/50">수정</button>
+                                )}
+                                {canDelete && (
+                                  <button onClick={() => handleDeleteEpisode(ep.id)} className="text-xs text-red-600 hover:text-red-700 transition font-bold px-1.5 py-0.5 rounded hover:bg-red-100/50">삭제</button>
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      )
+                    })
                   )}
                 </div>
               </div>
@@ -1480,6 +1531,38 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Photo Preview Modal (High-Res Google Drive) */}
+      {selectedPreviewPhoto && (
+        <div className="fixed inset-0 z-[110] bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center p-4">
+          <div className="absolute top-4 right-4 flex gap-3 z-10">
+            <a
+              href={`/api/drive/image?id=${selectedPreviewPhoto.google_drive_file_id}&download=true`}
+              download={`trakingdiary_${selectedPreviewPhoto.google_drive_file_id}.jpg`}
+              className="bg-white/20 hover:bg-white/40 text-white rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center backdrop-blur-md transition shadow"
+              title="고해상도 원본 다운로드"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span className="text-lg sm:text-xl">⬇️</span>
+            </a>
+            <button
+              onClick={() => setSelectedPreviewPhoto(null)}
+              className="bg-white/20 hover:bg-white/40 text-white rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center backdrop-blur-md transition text-xl sm:text-2xl font-bold"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="max-w-4xl max-h-[85vh] flex items-center justify-center p-2" onClick={() => setSelectedPreviewPhoto(null)}>
+            <img
+              src={`/api/drive/image?id=${selectedPreviewPhoto.google_drive_file_id}`}
+              alt="Photo Full View"
+              className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
           </div>
         </div>
       )}
