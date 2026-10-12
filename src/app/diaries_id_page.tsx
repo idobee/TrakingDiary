@@ -286,11 +286,6 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
     } else {
       setSelectedPhotoIds([])
     }
-
-    setShowEpisodeForm(true)
-    setTimeout(() => {
-      document.getElementById('episode-form-section')?.scrollIntoView({ behavior: 'smooth' })
-    }, 100)
   }
 
   const handleDeleteEpisode = async (epId: number) => {
@@ -906,7 +901,7 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
               </div>
             </div>
 
-            {showEpisodeForm && (
+            {showEpisodeForm && !editingEpisodeId && (
               <form id="episode-form-section" onSubmit={handleSubmitEpisode} className="bg-orange-50/50 p-6 rounded-2xl border border-orange-200 shadow-sm space-y-4">
                 {isAdmin && (
                   <div className="flex gap-4 pb-2 border-b border-orange-200/50 mb-2">
@@ -977,8 +972,8 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                   <div className="flex gap-2">
                     <button type="button" onClick={() => { setShowEpisodeForm(false); setEditingEpisodeId(null); setEpisodeTitle(''); setEpisodeContent(''); setEpisodeType('general'); setIsPublished(true); }} className="px-3 sm:px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700">취소</button>
                     <button type="submit" className="bg-forest text-white px-4 sm:px-6 py-2 rounded-xl text-xs font-bold shadow hover:bg-forest-light">
-                      <span className="hidden sm:inline">{editingEpisodeId ? '수정 완료' : '등록 완료'}</span>
-                      <span className="inline sm:hidden">{editingEpisodeId ? '수정' : '등록'}</span>
+                      <span className="hidden sm:inline">등록 완료</span>
+                      <span className="inline sm:hidden">등록</span>
                     </button>
                   </div>
                 </div>
@@ -1585,6 +1580,139 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
               className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Edit Episode Modal Popup */}
+      {editingEpisodeId !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100 p-6 sm:p-8 space-y-5 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+              <h3 className="font-heading font-extrabold text-xl text-forest flex items-center gap-2">
+                <span>✏️</span> 에피소드 수정
+              </h3>
+              <button
+                onClick={() => {
+                  setEditingEpisodeId(null)
+                  setEpisodeTitle('')
+                  setEpisodeContent('')
+                  setSelectedPhotoIds([])
+                }}
+                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold flex items-center justify-center transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitEpisode} className="space-y-4">
+              {isAdmin && (
+                <div className="flex gap-4 pb-2 border-b border-gray-100">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      value="general"
+                      checked={episodeType === 'general'}
+                      onChange={() => setEpisodeType('general')}
+                      className="text-forest focus:ring-forest"
+                    />
+                    <span className="text-sm font-bold text-forest">일반 에피소드</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      value="notice"
+                      checked={episodeType === 'notice'}
+                      onChange={() => setEpisodeType('notice')}
+                      className="text-terracotta focus:ring-terracotta"
+                    />
+                    <span className="text-sm font-bold text-terracotta">공지 / 감사의 글</span>
+                  </label>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">제목</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="에피소드 제목"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl font-heading text-sm text-forest focus:outline-none focus:ring-2 focus:ring-orange-300"
+                  value={episodeTitle}
+                  onChange={e => setEpisodeTitle(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">내용</label>
+                <textarea
+                  required
+                  placeholder="이번 산행에서 무슨 일이 있었나요?"
+                  rows={5}
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl font-body text-sm text-gray-700 resize-none focus:outline-none focus:ring-2 focus:ring-orange-300"
+                  value={episodeContent}
+                  onChange={e => setEpisodeContent(e.target.value)}
+                />
+              </div>
+
+              {/* Photo Selector for Episode */}
+              {photos.length > 0 && (
+                <div className="space-y-2 pb-2">
+                  <span className="text-xs font-bold text-forest block">사진 첨부 (선택)</span>
+                  <div className="flex gap-2 overflow-x-auto pb-2">
+                    {photos.map(photo => {
+                      const isSelected = selectedPhotoIds.includes(photo.id)
+                      const fileId = photo.google_drive_file_id
+                      const imgSrc = `/api/drive/image?id=${fileId}`
+                      return (
+                        <div
+                          key={photo.id}
+                          className={`flex-none w-20 h-20 rounded-lg overflow-hidden cursor-pointer border-2 transition ${isSelected ? 'border-terracotta ring-2 ring-terracotta ring-opacity-50' : 'border-transparent'}`}
+                          onClick={() => {
+                            if (isSelected) setSelectedPhotoIds(prev => prev.filter(id => id !== photo.id))
+                            else setSelectedPhotoIds(prev => [...prev, photo.id])
+                          }}
+                        >
+                          <img src={imgSrc} className="w-full h-full object-cover" />
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isPublished}
+                    onChange={(e) => setIsPublished(e.target.checked)}
+                    className="w-4 h-4 text-forest rounded border-gray-300 focus:ring-forest"
+                  />
+                  <span className="text-xs font-bold text-gray-700">전체 공유 (대시보드 노출)</span>
+                </label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingEpisodeId(null)
+                      setEpisodeTitle('')
+                      setEpisodeContent('')
+                      setSelectedPhotoIds([])
+                    }}
+                    className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700 rounded-xl hover:bg-gray-100 transition"
+                  >
+                    취소
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-forest text-white px-5 py-2 rounded-xl text-xs font-bold shadow hover:bg-forest-light transition"
+                  >
+                    수정 완료
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
       )}

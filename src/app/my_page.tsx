@@ -614,6 +614,74 @@ export const MyPage: React.FC<MyPageProps> = ({
           </div>
         </div>
       )}
+
+      {/* Edit Episode Modal */}
+      {editingEpisode && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100 p-6 sm:p-8 space-y-5 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+              <h3 className="font-heading font-extrabold text-xl text-forest flex items-center gap-2">
+                <span>✏️</span> 에피소드 수정
+              </h3>
+              <button
+                onClick={() => setEditingEpisode(null)}
+                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold flex items-center justify-center transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                handleUpdateEpisode()
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">제목</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="에피소드 제목"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl font-heading text-sm text-forest focus:outline-none focus:ring-2 focus:ring-orange-300"
+                  value={editTitle}
+                  onChange={e => setEditTitle(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">내용</label>
+                <textarea
+                  required
+                  placeholder="에피소드 내용을 입력하세요"
+                  rows={6}
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl font-body text-sm text-gray-700 resize-none focus:outline-none focus:ring-2 focus:ring-orange-300"
+                  value={editContent}
+                  onChange={e => setEditContent(e.target.value)}
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setEditingEpisode(null)}
+                  className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700 rounded-xl hover:bg-gray-100 transition"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdating}
+                  className="bg-forest text-white px-5 py-2 rounded-xl text-xs font-bold shadow hover:bg-forest-light transition disabled:opacity-50"
+                >
+                  {isUpdating ? '수정 중...' : '수정 완료'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
