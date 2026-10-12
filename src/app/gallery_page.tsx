@@ -665,36 +665,38 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
                   </div>
                 )}
 
-                {/* Card Action Buttons (Pin, Publish, Delete) */}
-                {isUploaderOrAdmin && (
-                  <div className="absolute top-2 right-2 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                {/* Card Action Buttons (Pin, Publish, Delete) - 항상 선명하게 표시 */}
+                {user && (
+                  <div className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-black/30 p-1 rounded-full backdrop-blur-sm shadow-md">
                     {/* Pin Toggle Button */}
                     <button
                       onClick={(e) => { e.stopPropagation(); handleTogglePin(photo.id, photo.is_bside); }}
-                      className={`p-1 sm:px-2 sm:py-1 text-xs font-bold rounded-full shadow backdrop-blur-md border transition flex items-center gap-0.5 ${
+                      className={`px-2 py-1 text-xs font-bold rounded-full shadow transition flex items-center gap-1 ${
                         photo.is_bside
-                          ? 'bg-amber-500 text-white border-amber-600 hover:bg-amber-600'
-                          : 'bg-white/90 text-gray-700 border-gray-300 hover:bg-white hover:text-amber-600'
+                          ? 'bg-amber-500 text-white border border-amber-300 hover:bg-amber-600'
+                          : 'bg-white/90 text-gray-800 border border-gray-200 hover:bg-amber-500 hover:text-white'
                       }`}
                       title={photo.is_bside ? t('gallery.unpinPhoto') : t('gallery.pinPhoto')}
                     >
                       <span>📌</span>
-                      <span className="text-[10px] hidden sm:inline">{photo.is_bside ? '선정됨' : '핀'}</span>
+                      <span className="text-[10px]">{photo.is_bside ? '선정됨' : '핀'}</span>
                     </button>
 
                     {/* Publish Toggle Button */}
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleTogglePublish(photo.id, photo.is_published); }}
-                      className={`px-2 py-1 text-xs font-bold rounded-full shadow backdrop-blur-md border transition ${photo.is_published ? 'bg-forest/80 text-white border-forest' : 'bg-white/80 text-gray-600 border-gray-300 hover:bg-white'}`}
-                      title={photo.is_published ? t('gallery.published') : t('gallery.unpublished')}
-                    >
-                      <span className="text-[10px]">{photo.is_published ? t('gallery.published') : t('gallery.unpublished')}</span>
-                    </button>
+                    {isUploaderOrAdmin && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleTogglePublish(photo.id, photo.is_published); }}
+                        className={`px-2 py-1 text-xs font-bold rounded-full shadow transition ${photo.is_published ? 'bg-forest text-white' : 'bg-white/90 text-gray-700 hover:bg-white'}`}
+                        title={photo.is_published ? t('gallery.published') : t('gallery.unpublished')}
+                      >
+                        <span className="text-[10px]">{photo.is_published ? t('gallery.published') : t('gallery.unpublished')}</span>
+                      </button>
+                    )}
 
                     {/* Delete Photo Button */}
                     <button
                       onClick={(e) => { e.stopPropagation(); handleDeletePhoto(photo.id); }}
-                      className="p-1 sm:p-1.5 text-xs font-bold rounded-full shadow backdrop-blur-md border bg-red-500/90 hover:bg-red-600 text-white border-red-600 flex items-center justify-center transition"
+                      className="w-6 h-6 text-xs font-bold rounded-full shadow bg-red-500 hover:bg-red-600 text-white flex items-center justify-center transition hover:scale-110"
                       title={t('gallery.deletePhoto')}
                     >
                       <span>🗑️</span>

@@ -190,6 +190,38 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
     }
   }
 
+  const handleTogglePin = async (photoId: number, currentPinStatus: boolean) => {
+    try {
+      const res = await fetch('/api/photos/pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoId, isPinned: !currentPinStatus })
+      })
+      if (!res.ok) throw new Error('Failed to toggle pin')
+      setPhotos(prev => prev.map(p => p.id === photoId ? { ...p, is_bside: !currentPinStatus } : p))
+    } catch (err) {
+      console.error(err)
+      alert('핀 상태 변경에 실패했습니다.')
+    }
+  }
+
+  const handleDeletePhoto = async (photoId: number) => {
+    if (!confirm('정말 이 사진을 삭제하시겠습니까?')) return
+    try {
+      const res = await fetch('/api/photos/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoId })
+      })
+      if (!res.ok) throw new Error('Failed to delete photo')
+      setPhotos(prev => prev.filter(p => p.id !== photoId))
+      alert('사진이 삭제되었습니다.')
+    } catch (err) {
+      console.error(err)
+      alert('사진 삭제에 실패했습니다.')
+    }
+  }
+
   const handleSubmitEpisode = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user || !hike) return
@@ -778,10 +810,32 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
                       <div key={photo.id} className="relative w-full aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition border border-gray-200 group">
                         <img src={imgSrc} alt="Hike Photo" className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
                         {photo.is_bside && (
-                          <div className="absolute top-1.5 left-1.5 z-10" title="핀 고정된 대표 사진">
+                          <div className="absolute top-1.5 left-1.5 z-10 pointer-events-none" title="핀 고정된 대표 사진">
                             <span className="bg-amber-500 text-white font-bold text-[10px] px-1.5 py-0.5 rounded-full shadow flex items-center gap-0.5 border border-amber-300">
                               <span>📌</span>
                             </span>
+                          </div>
+                        )}
+                        {user && (
+                          <div className="absolute top-1.5 right-1.5 z-20 flex items-center gap-1 bg-black/40 p-1 rounded-full backdrop-blur-sm shadow-md">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleTogglePin(photo.id, photo.is_bside); }}
+                              className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full text-[10px] font-bold flex items-center justify-center transition ${
+                                photo.is_bside 
+                                  ? 'bg-amber-500 text-white hover:bg-amber-600' 
+                                  : 'bg-white/90 text-gray-800 hover:bg-amber-500 hover:text-white'
+                              }`}
+                              title={photo.is_bside ? '핀 해제' : '다이어리 대표 핀 꽂기'}
+                            >
+                              📌
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleDeletePhoto(photo.id); }}
+                              className="w-5 h-5 sm:w-6 sm:h-6 rounded-full text-[10px] font-bold bg-red-500 hover:bg-red-600 text-white flex items-center justify-center transition"
+                              title="사진 삭제"
+                            >
+                              🗑️
+                            </button>
                           </div>
                         )}
                       </div>
