@@ -54,17 +54,17 @@
   },
   "legal": {
     "backHome": "← Back to the service",
-    "contactEmail": "ljymygot@daum.net",
+    "contactEmail": "idobe@daum.net",
     "footerPrivacy": "Privacy Policy",
     "footerTerms": "Terms of Service",
     "effectiveDate": "Effective date: October 11, 2026",
     "contactLabel": "Contact",
     "companyInfo": {
-      "companyName": "HAPPIC (Tracking Diary Together)-WooriwaFNB",
+      "companyName": "WooriwaFNB",
       "representative": "",
       "businessNumber": "211-88-88661",
-      "representativeLabel": "CEO: KANG CHAN LYONG",
-      "businessNumberLabel": "Business Registration No: "
+      "representativeLabel": "CEO:",
+      "businessNumberLabel": "Business No:"
     },
     "privacy": {
       "title": "Privacy Policy",
@@ -116,11 +116,12 @@
     }
   },
   "footer": {
-    "title": "Happic • Where happy pieces become an epic",
-    "description": "A private archiving platform where happy moments and pictures build our own epic history. with Next.js 14+ App Router, Supabase & Google Shared Drive integration",
+    "title": "함께쓰는 크루 일기 • Shared Peak & Path Archive",
+    "description": "A private archiving platform where happy moments and pictures build our own epic history.",
     "specCompliance": "Full UC1~UC17 architecture spec compliance",
     "driveApi": "Google Shared Drive API v3",
-    "geminiAi": "Gemini AI episode support"
+    "geminiAi": "Gemini AI episode support",
+    "copyright": "© 2026 HAPPIC. All rights reserved."
   },
   "dashboard": {
     "heroBadge": "📸 Private Archive",

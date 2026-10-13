@@ -60,11 +60,11 @@
     "effectiveDate": "시행일: 2026년 10월 11일",
     "contactLabel": "문의",
     "companyInfo": {
-      "companyName": "HAPPIC (함께쓰는 Tracking 일기)-WooriwaFNB",
+      "companyName": "WooriwaFNB",
       "representative": "",
       "businessNumber": "211-88-88661",
-      "representativeLabel": "대표: ",
-      "businessNumberLabel": "사업자등록번호: "
+      "representativeLabel": "대표:",
+      "businessNumberLabel": "사업자등록번호:"
     },
     "privacy": {
       "title": "개인정보 처리방침",
@@ -117,10 +117,11 @@
   },
   "footer": {
     "title": "함께쓰는 크루 일기 • Shared Peak & Path Archive",
-    "description": "Next.js 14+ App Router & Supabase & Google Shared Drive 연동 완성형  추억 아카이빙 플랫폼",
-    "specCompliance": "UC1~UC17 아키텍처 스펙 완벽 준수",
+    "description": "Google Shared Drive 연동 완성형  추억 아카이빙 플랫폼",
+    "specCompliance": "",
     "driveApi": "Google Shared Drive API v3",
-    "geminiAi": "Gemini AI 에피소드 지원"
+    "geminiAi": "Gemini AI 에피소드 지원",
+    "copyright": "© 2026 HAPPIC. All rights reserved."
   },
   "dashboard": {
     "heroBadge": "🚀 종합 아카이브",
