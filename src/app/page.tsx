@@ -285,6 +285,7 @@ export default function Home() {
                 setSelectedHikeId(hikeId)
                 setActiveTab('diaries_id')
               }}
+              onOpenEpisodeModal={handleOpenEpisodeModal}
               hikes={hikes}
               clubs={clubs}
               allClubs={allClubs}
@@ -386,9 +387,11 @@ export default function Home() {
               </button>
             </div>
 
-            <div className="rounded-2xl overflow-hidden shadow border border-sand bg-gray-100 max-h-96">
-              <img src={episodeData.photo} className="w-full h-full object-cover" />
-            </div>
+            {episodeData.photo && (
+              <div className="rounded-2xl overflow-hidden shadow border border-sand bg-gray-100 max-h-96">
+                <img src={episodeData.photo} className="w-full h-full object-cover" />
+              </div>
+            )}
 
             <div className="space-y-3">
               <h4 className="font-heading font-bold text-base text-forest">{t('modal.episode.fullContentTitle')}</h4>

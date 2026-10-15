@@ -665,23 +665,25 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
                   <img src={photo.thumbnail_url || imgSrc} alt="Gallery Photo" loading="lazy" className="w-full h-auto object-cover group-hover:scale-105 transition duration-500" />
                 </div>
 
-                {/* Pinned Badge (항상 상단에 표시) */}
+                {/* Pinned Badge (핀 꽂힌 사진은 작고 심플한 핀 1개만 우측 상단에 표시, 호버 툴바가 뜰 때는 자연스럽게 전환) */}
                 {photo.is_bside && (
-                  <div className={`absolute ${selectMode ? 'top-2 left-10' : 'top-2 right-2'} z-10 pointer-events-none`}>
-                    <span className="bg-amber-500 text-white font-heading font-bold text-[10px] px-2 py-0.5 rounded-full shadow-md flex items-center gap-1 border border-amber-300 backdrop-blur-sm">
-                      <span>📌</span>
-                      <span>{t('gallery.pinnedBadge')}</span>
+                  <div className={`absolute ${selectMode ? 'top-2 left-10' : 'top-2 right-2'} z-10 pointer-events-none group-hover:opacity-0 transition-opacity`}>
+                    <span
+                      title={t('gallery.pinnedBadge')}
+                      className="w-6 h-6 rounded-full bg-amber-500 text-white font-bold text-xs flex items-center justify-center shadow-md border border-amber-300 backdrop-blur-sm"
+                    >
+                      📌
                     </span>
                   </div>
                 )}
 
                 {/* Card Action Buttons (Pin, Publish, Delete) - 마우스 오버 시 표시 */}
                 {user && (
-                  <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-black/30 p-1 rounded-full backdrop-blur-sm shadow-md">
-                    {/* Pin Toggle Button */}
+                  <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-black/40 p-1 rounded-full backdrop-blur-sm shadow-md">
+                    {/* Pin Toggle Button: 텍스트 없이 심플한 원형 핀 버튼 1개 */}
                     <button
                       onClick={(e) => { e.stopPropagation(); handleTogglePin(photo.id, photo.is_bside); }}
-                      className={`px-2 py-1 text-xs font-bold rounded-full shadow transition flex items-center gap-1 ${
+                      className={`w-6 h-6 text-xs font-bold rounded-full shadow transition flex items-center justify-center ${
                         photo.is_bside
                           ? 'bg-amber-500 text-white border border-amber-300 hover:bg-amber-600'
                           : 'bg-white/90 text-gray-800 border border-gray-200 hover:bg-amber-500 hover:text-white'
@@ -689,17 +691,16 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
                       title={photo.is_bside ? t('gallery.unpinPhoto') : t('gallery.pinPhoto')}
                     >
                       <span>📌</span>
-                      <span className="text-[10px]">{photo.is_bside ? '선정됨' : '핀'}</span>
                     </button>
 
                     {/* Publish Toggle Button */}
                     {isUploaderOrAdmin && (
                       <button
                         onClick={(e) => { e.stopPropagation(); handleTogglePublish(photo.id, photo.is_published); }}
-                        className={`px-2 py-1 text-xs font-bold rounded-full shadow transition ${photo.is_published ? 'bg-forest text-white' : 'bg-white/90 text-gray-700 hover:bg-white'}`}
+                        className={`px-2 py-0.5 text-[10px] font-bold rounded-full shadow transition ${photo.is_published ? 'bg-forest text-white' : 'bg-white/90 text-gray-700 hover:bg-white'}`}
                         title={photo.is_published ? t('gallery.published') : t('gallery.unpublished')}
                       >
-                        <span className="text-[10px]">{photo.is_published ? t('gallery.published') : t('gallery.unpublished')}</span>
+                        <span>{photo.is_published ? '전체' : '크루'}</span>
                       </button>
                     )}
 

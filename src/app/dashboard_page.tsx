@@ -9,6 +9,7 @@ interface DashboardPageProps {
   onNavigateTab: (tab: string) => void
   onOpenScheduleModal: (title: string) => void
   onOpenDiaryDetail?: (hikeId: number) => void
+  onOpenEpisodeModal?: (title: string, author: string, date: string, photo: string, content: string) => void
   hikes: Hike[]
   clubs?: Club[]
   allClubs?: Club[]
@@ -34,7 +35,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onAcceptInvite,
   inviteHikeId = null,
   onAcceptHikeInvite,
-  onOpenDiaryDetail
+  onOpenDiaryDetail,
+  onOpenEpisodeModal
 }: DashboardPageProps) => {
   const { t } = useTranslation()
 
@@ -217,7 +219,19 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                   <div
                     key={ep.id}
                     className="p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:shadow-md transition cursor-pointer"
-                    onClick={() => onOpenDiaryDetail && ep.hike_id && onOpenDiaryDetail(ep.hike_id)}
+                    onClick={() => {
+                      if (onOpenEpisodeModal) {
+                        onOpenEpisodeModal(
+                          ep.title,
+                          ep.users?.nickname || ep.hikes?.clubs?.name || '크루원',
+                          new Date(ep.created_at).toLocaleDateString(),
+                          ep.photo_urls?.[0] || '',
+                          ep.content
+                        )
+                      } else if (onOpenDiaryDetail && ep.hike_id) {
+                        onOpenDiaryDetail(ep.hike_id)
+                      }
+                    }}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
