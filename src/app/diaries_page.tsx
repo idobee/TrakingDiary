@@ -41,10 +41,10 @@ export const DiariesPage: React.FC<DiariesPageProps> = ({ clubId, clubName, onOp
             target="_blank"
             rel="noopener noreferrer"
             title="기억의 서가 사용법 가이드"
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-400 hover:bg-amber-300 text-stone-900 font-heading font-extrabold text-xs shadow-md border border-amber-200 transition transform hover:scale-105 self-end"
+            className="inline-flex items-center justify-center gap-1.5 w-7 h-7 sm:w-auto sm:h-auto sm:px-3.5 sm:py-1.5 rounded-full bg-amber-400 hover:bg-amber-300 text-stone-900 font-heading font-extrabold text-xs shadow-md border border-amber-200 transition transform hover:scale-105 self-end"
           >
-            <span className="w-4 h-4 rounded-full bg-stone-900 text-amber-300 text-[10px] flex items-center justify-center font-bold">?</span>
-            <span>사용법</span>
+            <span className="w-4 h-4 rounded-full bg-stone-900 text-amber-300 text-[10px] flex items-center justify-center font-bold flex-shrink-0">?</span>
+            <span className="hidden sm:inline">사용법</span>
           </a>
           <div className="bg-paper-low/10 border border-sand/30 px-4 py-2 rounded-xl text-[11px] font-label text-sand flex items-center space-x-1.5">
             <span>{t('diaries.tipText')}</span>

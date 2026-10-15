@@ -550,10 +550,10 @@ export function GalleryPage({ clubId, initialHikeId }: GalleryPageProps) {
             target="_blank"
             rel="noopener noreferrer"
             title="사진첩 사용법 가이드"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-forest text-sand hover:bg-forest-light hover:text-white font-heading font-extrabold text-xs shadow-sm border border-sand/40 transition transform hover:scale-105 flex-shrink-0"
+            className="inline-flex items-center justify-center gap-1.5 w-8 h-8 sm:w-auto sm:h-auto sm:px-3 sm:py-2 rounded-full sm:rounded-xl bg-forest text-sand hover:bg-forest-light hover:text-white font-heading font-extrabold text-xs shadow-sm border border-sand/40 transition transform hover:scale-105 flex-shrink-0"
           >
-            <span className="w-4 h-4 rounded-full bg-sand text-forest text-[10px] font-black flex items-center justify-center">?</span>
-            <span>사용법</span>
+            <span className="w-4 h-4 rounded-full bg-sand text-forest text-[10px] font-black flex items-center justify-center flex-shrink-0">?</span>
+            <span className="hidden sm:inline">사용법</span>
           </a>
         </div>
       </div>
