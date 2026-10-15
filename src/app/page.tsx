@@ -204,11 +204,17 @@ export default function Home() {
 
   // Modal States
   const [episodeModalOpen, setEpisodeModalOpen] = useState(false)
-  const [episodeData, setEpisodeData] = useState({
+  const [episodeData, setEpisodeData] = useState<{
+    title: string
+    author: string
+    date: string
+    photos: string[]
+    content: string
+  }>({
     title: '',
     author: '',
     date: '',
-    photo: '',
+    photos: [],
     content: '',
   })
 
@@ -224,10 +230,11 @@ export default function Home() {
     title: string,
     author: string,
     date: string,
-    photo: string,
+    photos: string | string[],
     content: string
   ) => {
-    setEpisodeData({ title, author, date, photo, content })
+    const photoArray = Array.isArray(photos) ? photos.filter(Boolean) : (photos ? [photos] : [])
+    setEpisodeData({ title, author, date, photos: photoArray, content })
     setEpisodeModalOpen(true)
   }
 
@@ -387,9 +394,41 @@ export default function Home() {
               </button>
             </div>
 
-            {episodeData.photo && (
-              <div className="rounded-2xl overflow-hidden shadow border border-sand bg-gray-100 max-h-96">
-                <img src={episodeData.photo} className="w-full h-full object-cover" />
+            {episodeData.photos && episodeData.photos.length > 0 && (
+              <div className="space-y-1.5">
+                <div className={`grid gap-2.5 ${
+                  episodeData.photos.length === 1 
+                    ? 'grid-cols-1' 
+                    : episodeData.photos.length === 2 
+                      ? 'grid-cols-2' 
+                      : 'grid-cols-2 sm:grid-cols-3'
+                } max-h-[440px] overflow-y-auto p-1 bg-gray-50/70 rounded-2xl border border-sand`}>
+                  {episodeData.photos.map((url, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => window.open(url, '_blank')}
+                      title="클릭하여 원본 크기로 보기"
+                      className={`rounded-xl overflow-hidden shadow-sm border border-gray-200 bg-gray-100 group relative cursor-pointer ${
+                        episodeData.photos.length === 1 ? 'aspect-video max-h-96' : 'aspect-square'
+                      }`}
+                    >
+                      <img
+                        src={url}
+                        alt={`에피소드 사진 ${idx + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <span className="text-white text-[11px] bg-black/60 px-2.5 py-1 rounded-full backdrop-blur-xs font-bold">🔍 확대</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {episodeData.photos.length > 1 && (
+                  <p className="text-[11px] font-label text-gray-500 text-right pr-1">
+                    총 {episodeData.photos.length}장의 사진
+                  </p>
+                )}
               </div>
             )}
 

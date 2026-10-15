@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 
 interface MyPageProps {
   user?: any
-  onOpenEpisodeModal: (title: string, author: string, date: string, photo: string, content: string) => void
+  onOpenEpisodeModal: (title: string, author: string, date: string, photo: string | string[], content: string) => void
   onOpenBadgeGrantModal: (name: string) => void
 }
 

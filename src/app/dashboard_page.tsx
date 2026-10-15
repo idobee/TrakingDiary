@@ -9,7 +9,7 @@ interface DashboardPageProps {
   onNavigateTab: (tab: string) => void
   onOpenScheduleModal: (title: string) => void
   onOpenDiaryDetail?: (hikeId: number) => void
-  onOpenEpisodeModal?: (title: string, author: string, date: string, photo: string, content: string) => void
+  onOpenEpisodeModal?: (title: string, author: string, date: string, photos: string | string[], content: string) => void
   hikes: Hike[]
   clubs?: Club[]
   allClubs?: Club[]
@@ -225,7 +225,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                           ep.title,
                           ep.users?.nickname || ep.hikes?.clubs?.name || '크루원',
                           new Date(ep.created_at).toLocaleDateString(),
-                          ep.photo_urls?.[0] || '',
+                          ep.photo_urls && ep.photo_urls.length > 0 ? ep.photo_urls : (ep.photo_url ? [ep.photo_url] : []),
                           ep.content
                         )
                       } else if (onOpenDiaryDetail && ep.hike_id) {
@@ -249,8 +249,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                     <h4 className="font-heading font-bold text-forest text-sm line-clamp-1">{ep.title}</h4>
                     <p className="text-xs text-gray-500 line-clamp-2 mt-1">{ep.content}</p>
                     {hasPhoto && (
-                      <div className="mt-2 h-20 overflow-hidden rounded-xl border border-gray-200">
+                      <div className="mt-2 h-24 overflow-hidden rounded-xl border border-gray-200 relative group">
                         <img src={ep.photo_urls[0]} className="w-full h-full object-cover" />
+                        {ep.photo_urls.length > 1 && (
+                          <span className="absolute bottom-1.5 right-1.5 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-xs flex items-center gap-1">
+                            📷 +{ep.photo_urls.length}
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>
