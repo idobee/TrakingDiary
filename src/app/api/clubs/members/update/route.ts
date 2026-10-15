@@ -11,9 +11,13 @@ const supabaseAdmin = createSupabaseClient(
 
 export async function POST(request: Request) {
   try {
-    const { clubId, userId, updateData } = await request.json()
+    const { clubId, userId, userIds, updateData } = await request.json()
 
-    if (!clubId || !userId || !updateData) {
+    const targetUserIds: string[] = (Array.isArray(userIds) && userIds.length > 0)
+      ? userIds
+      : (userId ? [userId] : [])
+
+    if (!clubId || targetUserIds.length === 0 || !updateData) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
@@ -78,12 +82,12 @@ export async function POST(request: Request) {
       // Check club_members for owner/admin
       const { data: callerMember } = await supabaseAdmin
         .from('club_members')
-        .select('role')
+        .select('role, status')
         .eq('club_id', clubId)
         .eq('user_id', authUser.id)
         .single()
         
-      if (callerMember && (callerMember.role === 'owner' || callerMember.role === 'admin')) {
+      if (callerMember && callerMember.status === 'approved' && (callerMember.role === 'owner' || callerMember.role === 'admin')) {
         hasPermission = true
       }
     }
@@ -97,14 +101,14 @@ export async function POST(request: Request) {
       .from('club_members')
       .update(updateData)
       .eq('club_id', clubId)
-      .eq('user_id', userId)
+      .in('user_id', targetUserIds)
 
     if (updateError) {
       console.error('Update error:', updateError)
       return NextResponse.json({ error: updateError.message }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, count: targetUserIds.length })
 
   } catch (err: any) {
     console.error('API Error:', err)
@@ -117,8 +121,16 @@ export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url)
     const clubId = searchParams.get('clubId')
     const userId = searchParams.get('userId')
+    const userIdsParam = searchParams.get('userIds')
 
-    if (!clubId || !userId) {
+    let targetUserIds: string[] = []
+    if (userIdsParam) {
+      targetUserIds = userIdsParam.split(',').filter(Boolean)
+    } else if (userId) {
+      targetUserIds = [userId]
+    }
+
+    if (!clubId || targetUserIds.length === 0) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
@@ -182,12 +194,12 @@ export async function DELETE(request: Request) {
     } else {
       const { data: callerMember } = await supabaseAdmin
         .from('club_members')
-        .select('role')
+        .select('role, status')
         .eq('club_id', clubId)
         .eq('user_id', authUser.id)
         .single()
         
-      if (callerMember && (callerMember.role === 'owner' || callerMember.role === 'admin')) {
+      if (callerMember && callerMember.status === 'approved' && (callerMember.role === 'owner' || callerMember.role === 'admin')) {
         hasPermission = true
       }
     }
@@ -201,14 +213,14 @@ export async function DELETE(request: Request) {
       .from('club_members')
       .delete()
       .eq('club_id', clubId)
-      .eq('user_id', userId)
+      .in('user_id', targetUserIds)
 
     if (deleteError) {
       console.error('Delete error:', deleteError)
       return NextResponse.json({ error: deleteError.message }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, count: targetUserIds.length })
 
   } catch (err: any) {
     console.error('API Error:', err)

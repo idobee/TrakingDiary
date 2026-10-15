@@ -17,7 +17,7 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
   const { members, isLoading, fetchMembers, updateMemberStatus, removeMember } = useClubMembers(clubId)
   
   const currentUserMember = members.find(m => m.user_id === user?.id)
-  const isClubAdmin = user?.system_role === 'admin' || user?.system_role === 'sys_admin' || currentUserMember?.role === 'owner' || currentUserMember?.role === 'admin'
+  const isClubAdmin = user?.system_role === 'admin' || user?.system_role === 'sys_admin' || (currentUserMember?.status === 'approved' && (currentUserMember?.role === 'owner' || currentUserMember?.role === 'admin'))
 
   const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'hikes_new' | 'hikes_view' | 'badges'>('approved')
   const [currentViewHike, setCurrentViewHike] = useState<any | null>(null)
@@ -206,23 +206,26 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
     if (!window.confirm(`선택한 ${selectedMemberIds.length}명의 회원을 일괄 처리하시겠습니까?`)) return
     
     try {
+      let success = false
       if (action === 'approve_regular') {
-        await supabase.from('club_members').update({ status: 'approved', role: 'regular' }).in('user_id', selectedMemberIds).eq('club_id', clubId)
+        success = await updateMemberStatus(selectedMemberIds, 'approved', 'regular')
       } else if (action === 'approve_guest') {
-        await supabase.from('club_members').update({ status: 'approved', role: 'guest' }).in('user_id', selectedMemberIds).eq('club_id', clubId)
+        success = await updateMemberStatus(selectedMemberIds, 'approved', 'guest')
       } else if (action === 'reject') {
-        await supabase.from('club_members').update({ status: 'rejected' }).in('user_id', selectedMemberIds).eq('club_id', clubId)
+        success = await updateMemberStatus(selectedMemberIds, 'rejected')
       } else if (action === 'promote_admin') {
-        await supabase.from('club_members').update({ role: 'admin' }).in('user_id', selectedMemberIds).eq('club_id', clubId)
+        success = await updateMemberStatus(selectedMemberIds, undefined, 'admin')
       } else if (action === 'demote_regular') {
-        await supabase.from('club_members').update({ role: 'regular' }).in('user_id', selectedMemberIds).eq('club_id', clubId)
+        success = await updateMemberStatus(selectedMemberIds, undefined, 'regular')
       } else if (action === 'demote_guest') {
-        await supabase.from('club_members').update({ role: 'guest' }).in('user_id', selectedMemberIds).eq('club_id', clubId)
+        success = await updateMemberStatus(selectedMemberIds, undefined, 'guest')
       } else if (action === 'remove') {
-        await supabase.from('club_members').delete().in('user_id', selectedMemberIds).eq('club_id', clubId)
+        success = await removeMember(selectedMemberIds)
       }
-      setSelectedMemberIds([])
-      await fetchMembers()
+
+      if (success) {
+        setSelectedMemberIds([])
+      }
     } catch (err) {
       console.error(err)
       alert('일괄 처리에 실패했습니다.')
@@ -233,11 +236,13 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
     const name = member.users?.nickname || 'Unknown'
     const email = member.users?.email || ''
     const avatar = member.users?.avatar_url || ''
+    const isTargetOwner = member.role === 'owner'
+    const isSelf = member.user_id === user?.id
     
     return (
       <div key={member.user_id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white border border-gray-100 rounded-2xl shadow-sm mb-3 gap-4">
         <div className="flex items-center space-x-4">
-          {isClubAdmin && member.role !== 'owner' && (
+          {isClubAdmin && !isTargetOwner && (
             <input 
               type="checkbox" 
               className="w-5 h-5 rounded border-gray-300 text-forest focus:ring-forest cursor-pointer"
@@ -269,6 +274,68 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
             )}
           </div>
         </div>
+
+        {/* 개별 액션 버튼 */}
+        {isClubAdmin && !isTargetOwner && (
+          <div className="flex flex-wrap items-center gap-1.5 self-end sm:self-auto">
+            {isPending ? (
+              <>
+                <button
+                  onClick={() => updateMemberStatus(member.user_id, 'approved', 'regular')}
+                  className="bg-forest hover:bg-forest-light text-white text-xs font-bold py-1.5 px-3 rounded-lg transition shadow-sm whitespace-nowrap"
+                >
+                  정회원 승인
+                </button>
+                <button
+                  onClick={() => updateMemberStatus(member.user_id, 'approved', 'guest')}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold py-1.5 px-3 rounded-lg transition shadow-sm whitespace-nowrap"
+                >
+                  게스트 승인
+                </button>
+                <button
+                  onClick={() => {
+                    if (window.confirm(`${name} 님의 가입 신청을 거절하시겠습니까?`)) {
+                      updateMemberStatus(member.user_id, 'rejected')
+                    }
+                  }}
+                  className="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold py-1.5 px-3 rounded-lg transition shadow-sm whitespace-nowrap"
+                >
+                  거절
+                </button>
+              </>
+            ) : (
+              !isSelf && (
+                <>
+                  {member.role !== 'admin' ? (
+                    <button
+                      onClick={() => handlePromoteAdmin(member.user_id)}
+                      className="bg-forest-container hover:bg-forest text-forest-dark hover:text-white text-[11px] font-bold py-1.5 px-2.5 rounded-lg transition shadow-sm whitespace-nowrap"
+                    >
+                      운영진 임명
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleDemoteAdmin(member.user_id)}
+                      className="bg-amber-50 hover:bg-amber-100 text-amber-700 text-[11px] font-bold py-1.5 px-2.5 rounded-lg transition shadow-sm whitespace-nowrap"
+                    >
+                      운영진 해제
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      if (window.confirm(`${name} 님을 정말 강제 탈퇴 처리하시겠습니까?`)) {
+                        removeMember(member.user_id)
+                      }
+                    }}
+                    className="bg-red-50 hover:bg-red-100 text-red-600 text-[11px] font-bold py-1.5 px-2.5 rounded-lg transition shadow-sm whitespace-nowrap"
+                  >
+                    강제 탈퇴
+                  </button>
+                </>
+              )
+            )}
+          </div>
+        )}
       </div>
     )
   }
@@ -277,46 +344,58 @@ export const ClubsAdminPage: React.FC<ClubsAdminPageProps> = ({ clubId }) => {
     <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-paper-high min-h-[500px]">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
-          <h2 className="font-heading font-extrabold text-3xl text-forest">{isClubAdmin ? '동호회 관리 센터' : '동호회 회원 명단'}</h2>
+          <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-forest">{isClubAdmin ? '동호회 관리 센터' : '동호회 회원 명단'}</h2>
           <p className="text-gray-500 text-sm mt-1">{isClubAdmin ? '멤버를 초대하고 가입 신청을 관리하세요.' : '우리 동호회에 가입된 회원들을 확인해 보세요.'}</p>
         </div>
         
-        {isClubAdmin && (
-          <div className="flex flex-col items-end gap-2">
-            <div className="flex space-x-2">
-              <button 
-                onClick={handleOpenDriveModal}
-                title="구글 드라이브 연동"
-                className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold py-2 px-3 sm:px-4 rounded-xl transition shadow-sm flex items-center space-x-1 sm:space-x-2"
-              >
-                <span>📁</span>
-                <span className="hidden sm:inline">구글 드라이브 연동</span>
-                <span className="inline sm:hidden">구글</span>
-              </button>
-              <button 
-                onClick={() => copyInviteLink('regular')}
-                title="정회원 초대 링크 복사"
-                className="bg-forest-container hover:bg-forest text-white text-xs sm:text-sm font-bold py-2 px-3 sm:px-4 rounded-xl transition shadow-sm flex items-center space-x-1 sm:space-x-2"
-              >
-                <span>🔗</span>
-                <span className="hidden sm:inline">정회원 초대 링크 복사</span>
-                <span className="inline sm:hidden">정회원</span>
-              </button>
-              <button 
-                onClick={() => copyInviteLink('guest')}
-                title="게스트 초대 링크 복사"
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-bold py-2 px-3 sm:px-4 rounded-xl transition shadow-sm flex items-center space-x-1 sm:space-x-2"
-              >
-                <span>🔗</span>
-                <span className="hidden sm:inline">게스트 초대 링크 복사</span>
-                <span className="inline sm:hidden">게스트</span>
-              </button>
-            </div>
-            {copyFeedback && (
-              <span className="text-xs text-terracotta font-bold animate-pulse">{copyFeedback}</span>
+        <div className="flex flex-col items-end gap-2 self-end sm:self-auto">
+          <div className="flex items-center space-x-2 flex-wrap gap-y-2">
+            <a
+              href="/guide.html#clubs"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="동호회 관리 사용법 가이드"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-forest text-sand hover:bg-forest-light hover:text-white font-heading font-extrabold text-xs shadow-sm border border-sand/40 transition transform hover:scale-105"
+            >
+              <span className="w-4 h-4 rounded-full bg-sand text-forest text-[10px] font-black flex items-center justify-center">?</span>
+              <span>사용법</span>
+            </a>
+            {isClubAdmin && (
+              <>
+                <button 
+                  onClick={handleOpenDriveModal}
+                  title="구글 드라이브 연동"
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold py-2 px-3 sm:px-4 rounded-xl transition shadow-sm flex items-center space-x-1 sm:space-x-2"
+                >
+                  <span>📁</span>
+                  <span className="hidden sm:inline">구글 드라이브 연동</span>
+                  <span className="inline sm:hidden">구글</span>
+                </button>
+                <button 
+                  onClick={() => copyInviteLink('regular')}
+                  title="정회원 초대 링크 복사"
+                  className="bg-forest-container hover:bg-forest text-white text-xs sm:text-sm font-bold py-2 px-3 sm:px-4 rounded-xl transition shadow-sm flex items-center space-x-1 sm:space-x-2"
+                >
+                  <span>🔗</span>
+                  <span className="hidden sm:inline">정회원 초대 링크 복사</span>
+                  <span className="inline sm:hidden">정회원</span>
+                </button>
+                <button 
+                  onClick={() => copyInviteLink('guest')}
+                  title="게스트 초대 링크 복사"
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-bold py-2 px-3 sm:px-4 rounded-xl transition shadow-sm flex items-center space-x-1 sm:space-x-2"
+                >
+                  <span>🔗</span>
+                  <span className="hidden sm:inline">게스트 초대 링크 복사</span>
+                  <span className="inline sm:hidden">게스트</span>
+                </button>
+              </>
             )}
           </div>
-        )}
+          {copyFeedback && (
+            <span className="text-xs text-terracotta font-bold animate-pulse">{copyFeedback}</span>
+          )}
+        </div>
       </div>
 
       {/* Tabs */}

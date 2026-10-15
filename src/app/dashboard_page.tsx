@@ -180,6 +180,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               >
                 <span>{t('dashboard.heroCtaDiaries')}</span>
               </button>
+              <a
+                href="/guide.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-amber-400 hover:bg-amber-300 text-stone-900 font-heading font-extrabold text-xs px-5 py-2.5 rounded-full transition shadow-md flex items-center space-x-1.5 border border-amber-200 transform hover:scale-105"
+              >
+                <span>📖</span>
+                <span>사용법 상세보기</span>
+              </a>
             </div>
           </div>
         </div>

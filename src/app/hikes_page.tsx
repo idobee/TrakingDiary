@@ -270,17 +270,29 @@ export default function HikesPage({
           <h2 className="font-heading font-extrabold text-xl sm:text-2xl text-forest">{t('hikes.title')}</h2>
           <p className="text-gray-500 text-sm mt-1">{t('hikes.subtitle')}</p>
         </div>
-        {isAdmin && (
-          <button
-            onClick={() => {
-              if (showNewForm) setEditingHike(null)
-              setShowNewForm(!showNewForm)
-            }}
-            className="bg-terracotta hover:bg-orange-600 text-white px-5 py-2.5 rounded-full font-bold text-sm transition shadow-md"
+        <div className="flex items-center space-x-2.5 self-end sm:self-auto">
+          <a
+            href="/guide.html#hikes"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="트레킹 일정 사용법 가이드"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-forest text-sand hover:bg-forest-light hover:text-white font-heading font-extrabold text-xs shadow-sm border border-sand/40 transition transform hover:scale-105"
           >
-            {showNewForm ? t('hikes.backToList') : t('hikes.createNew')}
-          </button>
-        )}
+            <span className="w-4 h-4 rounded-full bg-sand text-forest text-[10px] font-black flex items-center justify-center">?</span>
+            <span>사용법</span>
+          </a>
+          {isAdmin && (
+            <button
+              onClick={() => {
+                if (showNewForm) setEditingHike(null)
+                setShowNewForm(!showNewForm)
+              }}
+              className="bg-terracotta hover:bg-orange-600 text-white px-5 py-2.5 rounded-full font-bold text-sm transition shadow-md"
+            >
+              {showNewForm ? t('hikes.backToList') : t('hikes.createNew')}
+            </button>
+          )}
+        </div>
       </div>
 
       <div>

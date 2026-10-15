@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>happic 공식 사용법 가이드 | 함께쓰는 트래킹 일기</title>
+  <meta name="description" content="크루들과 함께하는 산행 추억 기록 플랫폼 happic의 상세 기능 가이드">
+  <link rel="icon" href="/logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;800&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --forest: #012d1d;
+      --forest-light: #0a3a27;
+      --forest-container: #1b4332;
+      --terracotta: #e76f51;
+      --terracotta-dark: #c85338;
+      --terracotta-light: #f4a261;
+      --paper: #fdfae7;
+      --paper-low: #fffdf5;
+      --paper-high: #f7f2d5;
+      --sand: #ffca98;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: var(--forest);
+      color: #333333;
+      line-height: 1.6;
+      scroll-behavior: smooth;
+    }
+
+    /* 상단 네비게이션 헤더 */
+    .guide-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background-color: rgba(1, 45, 29, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--forest-container);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--paper);
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .brand-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .brand-title {
+      font-family: 'Bricolage Grotesque', 'Noto Sans KR', sans-serif;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--paper);
+    }
+
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--sand);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-view-toggle {
+      background-color: var(--forest-container);
+      color: var(--paper);
+      border: 1px solid var(--terracotta-light);
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-view-toggle:hover {
+      background-color: var(--terracotta);
+      color: #ffffff;
+    }
+
+    .btn-close {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--paper);
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-close:hover {
+      background-color: rgba(255, 255, 255, 0.25);
+    }
+
+    /* 탭 네비게이션 */
+    .tabs-bar {
+      background-color: #012417;
+      border-bottom: 1px solid var(--forest-container);
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: none;
+    }
+
+    .tabs-bar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tabs-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 8px 20px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .tab-item {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #a7c4b5;
+      text-decoration: none;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tab-item:hover, .tab-item.active {
+      background-color: var(--terracotta);
+      color: #ffffff;
+    }
+
+    /* 메인 컨테이너 */
+    .guide-main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 30px 20px 80px;
+    }
+
+    /* 히어로 소개 */
+    .hero-intro {
+      background: linear-gradient(135deg, var(--forest-light), var(--forest-container));
+      border: 2px solid #2d5a45;
+      border-radius: 28px;
+      padding: 36px 30px;
+      color: var(--paper);
+      margin-bottom: 40px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      align-self: flex-start;
+      background-color: var(--terracotta);
+      color: #ffffff;
+      padding: 4px 14px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-title {
+      font-family: 'Bricolage Grotesque', 'Noto Sans KR', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--paper);
+      line-height: 1.3;
+    }
+
+    .hero-desc {
+      font-size: 1.05rem;
+      color: var(--sand);
+      max-width: 800px;
+    }
+
+    /* 가이드 섹션 카드 */
+    .guide-section {
+      background-color: var(--paper);
+      border-radius: 30px;
+      padding: 36px 30px;
+      margin-bottom: 44px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--paper-high);
+      scroll-margin-top: 130px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #ecdcb9;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .section-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .section-num {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background-color: var(--forest);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--forest);
+      letter-spacing: -0.5px;
+    }
+
+    .section-page-tag {
+      background-color: var(--forest-container);
+      color: var(--sand);
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    /* 이미지 영역 */
+    .image-container {
+      width: 100%;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      background-color: #012417;
+      margin-bottom: 24px;
+    }
+
+    .image-container img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+
+    .image-container:hover img {
+      transform: scale(1.01);
+    }
+
+    /* 설명 리스트 */
+    .guide-points {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .point-card {
+      background-color: #ffffff;
+      border: 1px solid #ebd8b2;
+      border-radius: 18px;
+      padding: 18px 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .point-card-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--forest);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .point-card-desc {
+      font-size: 0.92rem;
+      color: #555555;
+      line-height: 1.5;
+    }
+
+    .tip-box {
+      background-color: #eaf4ee;
+      border-left: 4px solid var(--forest-light);
+      padding: 14px 18px;
+      border-radius: 12px;
+      margin-top: 20px;
+      font-size: 0.92rem;
+      color: var(--forest);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    /* 하단 푸터 */
+    .guide-footer {
+      text-align: center;
+      padding: 40px 20px;
+      color: #a7c4b5;
+      font-size: 0.9rem;
+      border-top: 1px solid var(--forest-container);
+    }
+
+    .guide-footer a {
+      color: var(--sand);
+      text-decoration: underline;
+    }
+
+    /* 단일 이미지 반응형 스케일 및 뷰 토글 처리 */
+    .image-container img.guide-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.3s ease;
+      cursor: zoom-in;
+    }
+
+    .image-container:hover img.guide-img {
+      transform: scale(1.012);
+    }
+
+    /* 스마트폰 뷰 토글 시: 이미지 교체 없이 scale과 프레임 크기만 스마트폰 규격으로 조정 */
+    body.view-mobile .image-container {
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+      border: 6px solid var(--forest-container);
+      border-radius: 30px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    /* 이미지 확대 모달 (Lightbox) */
+    .img-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background-color: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      cursor: zoom-out;
+    }
+    .img-modal.open {
+      display: flex;
+    }
+    .img-modal img {
+      max-width: 95vw;
+      max-height: 92vh;
+      border-radius: 12px;
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      object-fit: contain;
+    }
+    .img-modal-close {
+      position: absolute;
+      top: 24px;
+      right: 28px;
+      color: #ffffff;
+      font-size: 2.2rem;
+      font-weight: 300;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      line-height: 1;
+      transition: background 0.2s;
+    }
+    .img-modal-close:hover {
+      background: rgba(231, 111, 81, 0.9);
+    }
+
+    @media (max-width: 768px) {
+      .header-container { padding: 10px 16px; }
+      .brand-title { font-size: 1.1rem; }
+      .hero-title { font-size: 1.5rem; }
+      .guide-section { padding: 22px 16px; border-radius: 20px; }
+      .section-title { font-size: 1.3rem; }
+      .section-num { width: 34px; height: 34px; font-size: 0.95rem; }
+      .btn-view-toggle { display: none; } /* 스마트폰 화면에서는 이미 모바일 뷰이므로 토글 버튼 숨김 */
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 네비게이션 헤더 -->
+  <header class="guide-header">
+    <div class="header-container">
+      <a href="/" class="brand-area" title="메인 화면으로 돌아가기">
+        <div class="brand-logo">
+          <img src="/logo.png" alt="happic logo">
+        </div>
+        <div>
+          <div class="brand-title">happic 사용법 가이드</div>
+          <div class="brand-subtitle">함께쓰는 트래킹 일기 공식 매뉴얼</div>
+        </div>
+      </a>
+
+      <div class="header-actions">
+        <button id="viewToggleBtn" class="btn-view-toggle" onclick="toggleViewMode()">
+          <span id="viewToggleIcon">📱</span>
+          <span id="viewToggleText">스마트폰 뷰로 보기</span>
+        </button>
+        <button onclick="goBackOrHome()" class="btn-close">
+          ✕ 닫기
+        </button>
+      </div>
+    </div>
+
+    <!-- 탭 네비게이션 -->
+    <nav class="tabs-bar">
+      <div class="tabs-container">
+        <a href="#dashboard" class="tab-item active">🏠 서비스 소개</a>
+        <a href="#clubs" class="tab-item">🤝 크루 라운지</a>
+        <a href="#hikes" class="tab-item">📅 트레킹 일정</a>
+        <a href="#diaries" class="tab-item">📚 기억의 서가</a>
+        <a href="#gallery" class="tab-item">📸 사진첩 스마트 활용</a>
+        <a href="#my" class="tab-item">🧭 나의 발자취</a>
+        <a href="#roles" class="tab-item">👑 역할 가이드</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- 메인 본문 -->
+  <main class="guide-main">
+
+    <!-- 히어로 배너 -->
+    <div class="hero-intro">
+      <span class="hero-badge">🌲 happic GUIDE</span>
+      <h1 class="hero-title">함께 발맞춘 산길, 한 권의 추억이 되다</h1>
+      <p class="hero-desc">
+        happic(해픽)은 크루들과 함께하는 트레킹 여정을 기록하고, 대용량 구글 드라이브와 AI를 결합하여 나만의 특별한 단행본으로 완성하는 아카이빙 플랫폼입니다. 아래에서 각 화면별 상세 사용법을 확인해 보세요.
+      </p>
+    </div>
+
+    <!-- 1. 메인 대시보드 & 인트로 (#dashboard) -->
+    <section id="dashboard" class="guide-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <div class="section-num">1</div>
+          <h2 class="section-title">함께하는 크루 추억 &amp; 동호회 시작</h2>
+        </div>
+        <span class="section-page-tag">dashboard_page (홈 메인)</span>
+      </div>
+
+      <div class="image-container">
+        <img class="guide-img" src="/images/guide/guide_dashboard.jpg" alt="대시보드 서비스 소개 가이드" loading="lazy">
+      </div>
+
+      <div class="guide-points">
+        <div class="point-card">
+          <div class="point-card-title">⛰️ 1. 산행 여정과 추억 기록</div>
+          <div class="point-card-desc">크루들과 걸어온 산행 코스, 정상 표지석, 순간의 감동을 폴라로이드 사진과 에피소드로 영구 보관합니다.</div>
+        </div>
+        <div class="point-card">
+          <div class="point-card-title">🤝 2. 동호회 개설 &amp; 승인</div>
+          <div class="point-card-desc">나만의 트레킹 동호회를 신청하고, 시스템 관리자 승인 후 즉시 전용 라운지 활동을 시작할 수 있습니다.</div>
+        </div>
+        <div class="point-card">
+          <div class="point-card-title">🔒 3. 초대 링크 전용 가입</div>
+          <div class="point-card-desc">초대 링크를 통해서만 회원이 가입되는 안전하고 프라이빗한 크루 모임 환경을 제공합니다.</div>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        <span>💡</span>
+        <div><strong>팁:</strong> 메인 홈화면의 [동호회 둘러보기]를 통해 승인된 다양한 동호회의 멋진 활동을 미리 엿볼 수 있습니다.</div>
+      </div>
+    </section>
+
+    <!-- 2. 동호회 라운지 & 구글 드라이브 (#clubs) -->
+    <section id="clubs" class="guide-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <div class="section-num">2</div>
+          <h2 class="section-title">동호회 라운지 운영 &amp; 구글 드라이브 연동</h2>
+        </div>
+        <span class="section-page-tag">clubs_page (크루 라운지)</span>
+      </div>
+
+      <div class="image-container">
+        <img class="guide-img" src="/images/guide/guide_clubs.jpg" alt="동호회 라운지 및 구글드라이브 연동 가이드" loading="lazy">
+      </div>
+
+      <div class="guide-points">
+        <div class="point-card">
+          <div class="point-card-title">🔗 1. 초대 링크 발송</div>
+          <div class="point-card-desc">정회원용과 게스트용 초대 링크를 따로 생성하여 카톡방에 공유하고 크루원들을 바로 초대할 수 있습니다.</div>
+        </div>
+        <div class="point-card">
+          <div class="point-card-title">👑 2. 회원 승인 관리</div>
+          <div class="point-card-desc">가입 신청 대기 회원을 운영진이 [정회원 승인] 또는 [게스트 승인]하여 권한을 체계적으로 분리합니다.</div>
+        </div>
+        <div class="point-card">
+          <div class="point-card-title">💬 3. 일정 등록 &amp; 카톡 공유</div>
+          <div class="point-card-desc">새로운 산행 일정을 등록하고, [카톡공유] 버튼 하나로 단체방에 깔끔한 일정 카드를 전송합니다.</div>
+        </div>
+        <div class="point-card">
+          <div class="point-card-title">☁️ 4. ⭐️ 구글 드라이브 1초 연동</div>
+          <div class="point-card-desc">동호회장의 구글 드라이브에 [TrackingDiary_동호회명] 전용 폴더가 자동 생성되어 대용량 원본 사진이 안전 보관됩니다.</div>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        <span>⭐️</span>
+        <div><strong>구글 드라이브 연동 필수:</strong> 동호회 관리자는 라운지 상단의 [구글 드라이브 연동] 버튼을 눌러 본인 구글 계정으로 1초 로그인만 해두시면 모든 준비가 끝납니다!</div>
+      </div>
+    </section>
+
+    <!-- 3. 트레킹 일정 & 캘린더 (#hikes) -->
+    <section id="hikes" class="guide-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <div class="section-num">3</div>
+          <h2 class="section-title">다음 일정 신청 &amp; 추억의 앨범 보기</h2>
+        </div>
+        <span class="section-page-tag">hikes_page (트레킹 모집 &amp; 캘린더)</span>
+      </div>
+
+      <div class="image-container">
+        <img class="guide-img" src="/images/guide/guide_hikes.jpg" alt="다음 일정 신청 및 트레킹 캘린더 가이드" loading="lazy">
+      </div>
+
+      <div class="guide-points">
+        <div class="point-card">
+          <div class="point-card-title">📅 1. 다가오는 2개월 일정 신청</div>
+          <div class="point-card-desc">산 이름, 난이도, 일정을 확인하고 주황색 [신청하기] 버튼을 눌러 손쉽게 참가할 수 있습니다.</div>
+        </div>
+        <div class="point-card">
+          <div class="point-card-title">📖 2. 종료된 일정은 [추억의 앨범보기]</div>
+          <div class="point-card-desc">산행이 종료되면 앨범 책 아이콘으로 자동 전환되어 [기억의 서가]에 꽂힌 앨범으로 즉시 이동합니다.</div>
+        </div>
+        <div class="point-card">
+          <div class="point-card-title">🗓️ 3. 월별 트레킹 캘린더 뷰</div>
+          <div class="point-card-desc">우측 달력에서 산행 예정일 핀과 참가 크루들의 아바타를 확인하며 주말 스케줄을 계획할 수 있습니다.</div>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        <span>💡</span>
+        <div><strong>참여자 등록 기능:</strong> 관리자는 직접 크루원들을 일정 참가자로 추가 등록시킬 수 있어 어르신 회원 관리도 편리합니다.</div>
+      </div>
+    </section>
+
+    <!-- 4. 기억의 서가 & AI 단행본 (#diaries) -->
+    <section id="diaries" class="guide-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <div class="section-num">4</div>
+          <h2 class="section-title">기억의 서가 &amp; AI 단행본 출판</h2>
+        </div>
+        <span class="section-page-tag">diaries_page (기억의 서가)</span>
+      </div>
+
+      <div class="image-container">
+        <img class="guide-img" src="/images/guide/guide_diaries.jpg" alt="기억의 서가 및 AI 단행본 출판 가이드" loading="lazy">
+      </div>
+
+      <div class="guide-points">
+        <div class="point-card">
+          <div class="point-card-title">📚 1. 일정별 추억 앨범 서가</div>
+          <div class="point-card-desc">모든 산행은 원목 서가에 한 권의 가죽 양장본 앨범으로 꽂히며, 펼치면 사진과 에피소드가 펼쳐집니다.</div>
+        </div>
+        <div class="point-card">
+          <div class="point-card-title">✍️ 2. 사진 &amp; 에피소드 다중 등록</div>
+          <div class="point-card-desc">여러 장의 사진을 한 번에 올릴 수 있으며, [회원 전용 공개] 또는 [홈화면 전체 공개]를 선택할 수 있습니다.</div>
+        </div>
+        <div class="point-card">
+          <div class="point-card-title">🪄 3. AI 수필 단행본 만들기</div>
+          <div class="point-card-desc">회원들의 에피소드가 모이면 AI가 여러 사연과 사진을 엮어 한 편의 감동적인 단행본 책으로 자동 집필합니다.</div>
+        </div>
+        <div class="point-card">
+          <div class="point-card-title">🔑 4. 개인 AI 키(API Key) 활용</div>
+          <div class="point-card-desc">Gemini, OpenAI(ChatGPT), Claude 등 본인의 개인 API 키를 등록하여 무제한으로 AI 수필집을 발행할 수 있습니다.</div>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        <span>📖</span>
+        <div><strong>블로그 공유:</strong> AI가 완성한 단행본 수필은 클릭 한 번으로 본문이 복사되어 개인 네이버/티스토리 블로그에도 쉽게 올릴 수 있습니다.</div>
+      </div>
+    </section>
+
+    <!-- 5. 사진첩 스마트 활용 (#gallery) -->
+    <section id="gallery" class="guide-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <div class="section-num">5</div>
+          <h2 class="section-title">사진첩 스마트 활용 가이드</h2>
+        </div>
+        <span class="section-page-tag">gallery_page (사진첩)</span>
+      </div>
+
+      <div class="image-container">
+        <img class="guide-img" src="/images/guide/guide_gallery.jpg" alt="사진첩 스마트 활용 가이드" loading="lazy">
+      </div>
+
+      <div class="guide-points">
+        <div class="point-card">
+          <div class="point-card-title">✍️ 1. 에피소드 만들기</div>
+          <div class="point-card-desc">상단의 [선택] 버튼을 누르면 사진마다 체크박스가 나타나며, 원하는 사진을 골라 즉시 에피소드를 작성합니다.</div>
+        </div>
+        <div class="point-card">
+          <div class="point-card-title">📸 2. 인스타그램 보내기</div>
+          <div class="point-card-desc">사진 위 인스타 팁을 누르면 추천 해시태그(#happic #등산크루)와 감성 문구가 자동 생성되어 간편하게 공유합니다.</div>
+        </div>
+        <div class="point-card">
+          <div class="point-card-title">📌 3. 앨범 대표사진 핀 꽂기</div>
+          <div class="point-card-desc">가장 잘 나온 인생샷에 황금 핀을 꽂으면 [기억의 서가] 앨범 단행본의 메인 표지로 장식됩니다.</div>
+        </div>
+        <div class="point-card">
+          <div class="point-card-title">🌐 4. 사진 공개 설정</div>
+          <div class="point-card-desc">기본은 [동호회원 전용]으로 안전하게 보호되며, [전체 공개]로 설정하면 메인 홈화면 갤러리에 당당히 전시됩니다.</div>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        <span>💡</span>
+        <div><strong>행사별 검색:</strong> 내가 참여한 행사별로 사진을 검색했을 때 체크박스 선택 및 에피소드 등록이 활성화됩니다.</div>
+      </div>
+    </section>
+
+    <!-- 6. 나의 발자취 & 맞춤 뱃지 (#my) -->
+    <section id="my" class="guide-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <div class="section-num">6</div>
+          <h2 class="section-title">나의 발자취 &amp; 동호회 맞춤 뱃지</h2>
+        </div>
+        <span class="section-page-tag">my_page (마이 트레킹)</span>
+      </div>
+
+      <div class="image-container">
+        <img class="guide-img" src="/images/guide/guide_my_page.jpg" alt="나의 발자취 및 동호회 맞춤 뱃지 가이드" loading="lazy">
+      </div>
+
+      <div class="guide-points">
+        <div class="point-card">
+          <div class="point-card-title">🧭 1. 나의 트레킹 스탯 &amp; 타임라인</div>
+          <div class="point-card-desc">총 걸은 거리(km), 완등 횟수, 내가 남긴 글과 다녀온 산행 코스 히스토리가 평생 기록됩니다.</div>
+        </div>
+        <div class="point-card">
+          <div class="point-card-title">🎒 2. '만물상' 뱃지</div>
+          <div class="point-card-desc">비상약, 간식, 장비를 든든히 챙겨와 크루들을 보살펴준 고마운 회원에게 동호회장이 수여하는 명예 뱃지!</div>
+        </div>
+        <div class="point-card">
+          <div class="point-card-title">🐿️ 3. '날다람쥐' 뱃지</div>
+          <div class="point-card-desc">가파른 깔딱고개도 지치지 않고 날쌔게 앞장서며 길을 밝혀준 활력 넘치는 선두 크루에게 수여!</div>
+        </div>
+        <div class="point-card">
+          <div class="point-card-title">📸 4. '인생샷 메이커' 뱃지</div>
+          <div class="point-card-desc">정상 표지석과 능선에서 크루들에게 멋진 인생 사진을 선물해 준 최고의 포토그래퍼 크루에게 수여!</div>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        <span>🎖️</span>
+        <div><strong>뱃지 부여 방법:</strong> 동호회 운영진은 [기억의 서가 앨범] 하단의 참여자 명단에서 원하는 회원에게 손쉽게 뱃지를 수여할 수 있습니다.</div>
+      </div>
+    </section>
+
+    <!-- 7. 운영진 vs 일반 회원 역할 (#roles) -->
+    <section id="roles" class="guide-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <div class="section-num">7</div>
+          <h2 class="section-title">동호회 운영진 vs 일반 회원 역할 안내</h2>
+        </div>
+        <span class="section-page-tag">전체 가이드</span>
+      </div>
+
+      <div class="image-container">
+        <img class="guide-img" src="/images/guide/guide_roles.jpg" alt="운영진 및 일반 회원 역할 안내" loading="lazy">
+      </div>
+
+      <div class="guide-points">
+        <div class="point-card">
+          <div class="point-card-title">👑 운영진이 할 일</div>
+          <div class="point-card-desc">
+            • 모임 일정 기획 및 활동 계획 수립<br>
+            • 가입 신청 대기 회원 승인 (정회원/게스트)<br>
+            • 동호회 전용 맞춤 뱃지 제작 및 참여자 수여<br>
+            • 부관리자 임명 및 구글 드라이브 연동 관리
+          </div>
+        </div>
+        <div class="point-card">
+          <div class="point-card-title">🥾 일반 회원이 즐길 일</div>
+          <div class="point-card-desc">
+            • 산행 활동 사진 대량 업로드 (구글 드라이브 자동 저장)<br>
+            • 활동 소감 및 사진 후기 에피소드 작성<br>
+            • 개인 API를 활용한 나만의 AI 감성 단행본 집필<br>
+            • 활동 내용 블로그 복사 및 인스타그램 공유
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 하단 푸터 -->
+  <footer class="guide-footer">
+    <p>© 2026 happic. 함께 발맞춘 산길, 한 권의 추억이 되다.</p>
+    <p style="margin-top: 8px;">
+      <a href="/">메인 홈화면으로 돌아가기</a>
+    </p>
+  </footer>
+
+  <!-- 이미지 확대 모달 (Lightbox) -->
+  <div id="imgModal" class="img-modal" onclick="closeImgModal()">
+    <span class="img-modal-close" onclick="closeImgModal()">&times;</span>
+    <img id="imgModalTarget" src="" alt="가이드 이미지 확대 보기" onclick="event.stopPropagation()">
+  </div>
+
+  <script>
+    // 이미지 클릭 시 확대 모달 열기
+    function openImgModal(src) {
+      const modal = document.getElementById('imgModal');
+      const target = document.getElementById('imgModalTarget');
+      target.src = src;
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeImgModal() {
+      const modal = document.getElementById('imgModal');
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    // 모든 가이드 이미지에 클릭 확대 이벤트 연결
+    document.querySelectorAll('.guide-img').forEach(img => {
+      img.addEventListener('click', () => openImgModal(img.src));
+    });
+
+    // ESC 키로 모달 닫기
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeImgModal();
+    });
+
+    // 모바일 뷰 / 데스크톱 뷰 토글
+    let isMobileView = false;
+    function toggleViewMode() {
+      isMobileView = !isMobileView;
+      const body = document.body;
+      const icon = document.getElementById('viewToggleIcon');
+      const text = document.getElementById('viewToggleText');
+
+      if (isMobileView) {
+        body.classList.add('view-mobile');
+        icon.textContent = '💻';
+        text.textContent = 'PC 가로 뷰로 보기';
+      } else {
+        body.classList.remove('view-mobile');
+        icon.textContent = '📱';
+        text.textContent = '스마트폰 뷰로 보기';
+      }
+    }
+
+    // 닫기 또는 뒤로가기
+    function goBackOrHome() {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = '/';
+      }
+    }
+
+    // 탭 클릭 시 활성화 스타일
+    const tabs = document.querySelectorAll('.tab-item');
+    window.addEventListener('scroll', () => {
+      const scrollPos = window.scrollY + 200;
+      const sections = document.querySelectorAll('.guide-section');
+      
+      sections.forEach(sec => {
+        if (sec.offsetTop <= scrollPos && (sec.offsetTop + sec.offsetHeight) > scrollPos) {
+          tabs.forEach(t => t.classList.remove('active'));
+          const activeTab = document.querySelector('.tab-item[href="#' + sec.id + '"]');
+          if (activeTab) activeTab.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

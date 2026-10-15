@@ -47,6 +47,18 @@ export const Header: React.FC<HeaderProps> = ({
                   <h1 className="font-heading font-extrabold text-base sm:text-lg tracking-tight text-paper leading-tight">
                     {t('header.appTitle')}
                   </h1>
+                  <a
+                    href="/guide.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    title="사용법 상세보기 가이드"
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-400 hover:bg-amber-300 text-stone-900 font-heading font-bold text-[11px] shadow-sm transition transform hover:scale-105 border border-amber-200"
+                  >
+                    <span>📖</span>
+                    <span className="hidden sm:inline">사용법 상세보기</span>
+                    <span className="inline sm:hidden">사용법</span>
+                  </a>
                 </div>
                 <p className="hidden sm:block font-label text-xs text-sand/80 font-medium">{t('header.appSubtitle')}</p>
               </div>

@@ -53,15 +53,23 @@ export const ClubsPage: React.FC<ClubsPageProps> = ({
       {/* Section Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-md border border-paper-high">
         <div>
-          <div className="flex items-center space-x-2">
-            <h2 className="font-heading font-extrabold text-2xl text-forest">{t('clubs.sectionTitle')}</h2>
-          </div>
+          <h2 className="font-heading font-extrabold text-2xl text-forest">{t('clubs.sectionTitle')}</h2>
           <p className="text-xs text-gray-600 font-body mt-1">
             {t('clubs.sectionDesc')}
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2 self-end sm:self-auto">
+          <a
+            href="/guide.html#clubs"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="크루 라운지 사용법 가이드"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-forest text-sand hover:bg-forest-light hover:text-white font-heading font-extrabold text-xs shadow-sm border border-sand/40 transition transform hover:scale-105"
+          >
+            <span className="w-4 h-4 rounded-full bg-sand text-forest text-[10px] font-black flex items-center justify-center">?</span>
+            <span>사용법</span>
+          </a>
           {isAdmin && (
             <button
               onClick={() => setActiveTab(activeTab === 'approved' ? 'pending' : 'approved')}

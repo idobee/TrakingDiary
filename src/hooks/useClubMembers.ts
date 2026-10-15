@@ -42,14 +42,23 @@ export function useClubMembers(clubId: number | null) {
   }, [fetchMembers])
 
   const updateMemberStatus = async (
-    userId: string,
-    newStatus: 'pending' | 'approved' | 'rejected',
+    userId: string | string[],
+    newStatus?: 'pending' | 'approved' | 'rejected',
     newRole?: 'owner' | 'admin' | 'regular' | 'guest',
     newRoleTitle?: string | null
   ) => {
     if (!clubId) return false
 
-    const updateData: any = { status: newStatus }
+    const targetUserIds = Array.isArray(userId) ? userId : [userId]
+    if (targetUserIds.length === 0) return false
+
+    const updateData: any = {}
+    if (newStatus) {
+      updateData.status = newStatus
+      if (newStatus === 'approved') {
+        updateData.approved_at = new Date().toISOString()
+      }
+    }
     if (newRole) {
       updateData.role = newRole
       // If role_title isn't explicitly provided, infer it from the newRole if it's regular/guest
@@ -59,9 +68,6 @@ export function useClubMembers(clubId: number | null) {
     }
     if (newRoleTitle !== undefined) {
       updateData.role_title = newRoleTitle
-    }
-    if (newStatus === 'approved') {
-      updateData.approved_at = new Date().toISOString()
     }
 
     try {
@@ -75,7 +81,7 @@ export function useClubMembers(clubId: number | null) {
         },
         body: JSON.stringify({
           clubId,
-          userId,
+          userIds: targetUserIds,
           updateData
         })
       })
@@ -97,13 +103,16 @@ export function useClubMembers(clubId: number | null) {
     return true
   }
 
-  const removeMember = async (userId: string) => {
+  const removeMember = async (userId: string | string[]) => {
     if (!clubId) return false
+
+    const targetUserIds = Array.isArray(userId) ? userId : [userId]
+    if (targetUserIds.length === 0) return false
 
     try {
       const { data: { session } } = await supabase.auth.getSession()
 
-      const res = await fetch(`/api/clubs/members/update?clubId=${clubId}&userId=${userId}`, {
+      const res = await fetch(`/api/clubs/members/update?clubId=${clubId}&userIds=${targetUserIds.join(',')}`, {
         method: 'DELETE',
         headers: {
           ...(session?.access_token ? { 'Authorization': `Bearer ${session.access_token}` } : {})
