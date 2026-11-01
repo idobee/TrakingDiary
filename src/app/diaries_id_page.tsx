@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/auth'
 import imageCompression from 'browser-image-compression'
+import { isLightningHike } from '@/lib/hikes'
 
 const supabase = createClient()
 
@@ -696,7 +697,18 @@ export default function DiariesIdPage({ hikeId, onBack, onOpenGallery }: Diaries
 
           <div className="absolute bottom-6 left-6 md:left-8 right-6 md:right-8 flex flex-col">
             <div className="flex items-center justify-between w-full mb-1">
-              <span className="text-terracotta font-bold text-xs bg-white px-2 py-1 rounded-sm uppercase tracking-wide">Vol {hikeId}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-terracotta font-bold text-xs bg-white px-2 py-1 rounded-sm uppercase tracking-wide">Vol {hikeId}</span>
+                {isLightningHike(hike) ? (
+                  <span className="bg-teal-400 text-stone-950 font-heading font-extrabold text-xs px-2.5 py-0.5 rounded-full shadow-sm">
+                    ⚡ 번개산행 (벙개)
+                  </span>
+                ) : (
+                  <span className="bg-gradient-to-r from-amber-400 to-amber-500 text-stone-950 font-heading font-extrabold text-xs px-2.5 py-0.5 rounded-full shadow-sm border border-amber-300">
+                    👑 정기산행 (정모)
+                  </span>
+                )}
+              </div>
               <button onClick={onBack} className="bg-white/20 hover:bg-white/40 text-white py-1 px-3 text-xs md:text-sm font-bold rounded-full backdrop-blur-sm transition whitespace-nowrap">
                 ← 돌아가기
               </button>

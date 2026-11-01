@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from '@/lib/i18n'
 import { useHikes } from '@/hooks/useHikes'
+import { isLightningHike, getHikeBookGradient } from '@/lib/hikes'
 
 interface DiariesPageProps {
   clubId: number | null
@@ -13,16 +14,18 @@ interface DiariesPageProps {
 export const DiariesPage: React.FC<DiariesPageProps> = ({ clubId, clubName, onOpenDiaryDetail }) => {
   const { t } = useTranslation()
   const { hikes, isLoading } = useHikes(clubId || undefined)
+  const [filterType, setFilterType] = useState<'all' | 'regular' | 'lightning'>('all')
 
   const completedHikes = hikes // 완주하지 않아도 모든 일정을 앨범에 표시
 
-  // Covers predefined colors for books
-  const bookGradients = [
-    'from-[#0a3a27] via-[#012d1d] to-[#001c12]', // Emerald
-    'from-[#802410] via-[#500c00] to-[#360600]', // Terracotta
-    'from-[#192b4d] via-[#0b172a] to-[#040914]', // Navy
-    'from-[#4d3a19] via-[#2a1d0b] to-[#140d04]', // Bronze
-  ]
+  const regularCount = completedHikes.filter((h) => !isLightningHike(h)).length
+  const lightningCount = completedHikes.filter((h) => isLightningHike(h)).length
+
+  const filteredHikes = completedHikes.filter((hike) => {
+    if (filterType === 'all') return true
+    const isLightning = isLightningHike(hike)
+    return filterType === 'lightning' ? isLightning : !isLightning
+  })
 
   return (
     <div className="space-y-6">
@@ -31,6 +34,9 @@ export const DiariesPage: React.FC<DiariesPageProps> = ({ clubId, clubName, onOp
         <div>
           <div className="flex items-center space-x-2">
             <span className="bg-terracotta text-white text-[11px] font-label font-bold px-3 py-1 rounded-full uppercase">{t('diaries.badgeLabel')}</span>
+            <span className="bg-amber-400/20 text-amber-300 border border-amber-300/30 text-[11px] font-label font-semibold px-2.5 py-0.5 rounded-full">
+              👑 {t('diaries.regularBadge')} & ⚡ {t('diaries.lightningBadge')}
+            </span>
           </div>
           <h2 className="font-heading font-extrabold text-xl sm:text-2xl mt-2">{t('diaries.sectionTitle')}</h2>
           <p className="text-xs text-paper/80 font-body mt-1">{t('diaries.sectionDesc')}</p>
@@ -55,54 +61,181 @@ export const DiariesPage: React.FC<DiariesPageProps> = ({ clubId, clubName, onOp
       {/* Real Wooden Bookshelf Frame Container */}
       <div className="bg-[#2a170a] p-5 sm:p-8 rounded-3xl border-4 border-[#1a0e05] shadow-2xl space-y-6 relative overflow-hidden">
         {/* Bookshelf Top Brass Header Plate */}
-        <div className="flex justify-between items-center border-b-2 border-[#5c3718] pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-[#5c3718] pb-4">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-full bg-amber-700/60 border border-amber-400/40 text-amber-200 flex items-center justify-center font-heading font-bold text-sm shadow">🏛️</div>
+            <div className="w-9 h-9 rounded-full bg-amber-700/60 border border-amber-400/40 text-amber-200 flex items-center justify-center font-heading font-bold text-base shadow">🏛️</div>
             <div>
               <h3 className="font-heading font-extrabold text-base sm:text-lg text-amber-100 tracking-wide">{clubName ? `${clubName} 앨범` : t('diaries.shelfHeader')}</h3>
               <p className="text-[10px] text-amber-300/70 font-label">{t('diaries.shelfMeta')}</p>
             </div>
           </div>
-          <span className="bg-amber-950/80 text-amber-300 border border-amber-600/50 font-label text-[10px] font-bold px-3 py-1 rounded-full shadow">
-            {t('diaries.shelfSeasonBadge')}
-          </span>
+
+          {/* Regular / Lightning Filter Pill Tabs */}
+          <div className="flex items-center gap-1.5 bg-[#170c04]/80 p-1.5 rounded-2xl border border-[#5c3718] shadow-inner self-start sm:self-auto">
+            <button
+              onClick={() => setFilterType('all')}
+              className={`px-3 py-1 rounded-xl text-xs font-heading font-bold transition ${
+                filterType === 'all'
+                  ? 'bg-amber-400 text-stone-950 shadow-md scale-105'
+                  : 'text-amber-200/70 hover:text-amber-100 hover:bg-white/5'
+              }`}
+            >
+              {t('diaries.filterAll')} ({completedHikes.length})
+            </button>
+            <button
+              onClick={() => setFilterType('regular')}
+              className={`px-3 py-1 rounded-xl text-xs font-heading font-bold transition flex items-center gap-1 ${
+                filterType === 'regular'
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 shadow-md scale-105 border border-amber-300'
+                  : 'text-amber-300/80 hover:text-amber-100 hover:bg-white/5'
+              }`}
+            >
+              <span>👑 {t('diaries.filterRegular')}</span>
+              <span className="text-[10px] opacity-80">({regularCount})</span>
+            </button>
+            <button
+              onClick={() => setFilterType('lightning')}
+              className={`px-3 py-1 rounded-xl text-xs font-heading font-bold transition flex items-center gap-1 ${
+                filterType === 'lightning'
+                  ? 'bg-teal-400 text-stone-950 shadow-md scale-105 border border-teal-200'
+                  : 'text-teal-200/80 hover:text-teal-100 hover:bg-white/5'
+              }`}
+            >
+              <span>⚡ {t('diaries.filterLightning')}</span>
+              <span className="text-[10px] opacity-80">({lightningCount})</span>
+            </button>
+          </div>
         </div>
 
         {isLoading ? (
-          <div className="text-amber-200/50 text-center py-10 font-body">앨범을 불러오는 중입니다...</div>
-        ) : completedHikes.length === 0 ? (
-          <div className="text-amber-200/50 text-center py-10 font-body">아직 완성된 트레킹 앨범이 없습니다.</div>
+          <div className="text-amber-200/50 text-center py-12 font-body animate-pulse">앨범을 불러오는 중입니다...</div>
+        ) : filteredHikes.length === 0 ? (
+          <div className="text-amber-200/60 text-center py-14 font-body space-y-2">
+            <p className="text-2xl">📚</p>
+            <p className="text-sm font-semibold">{t('diaries.emptyFiltered')}</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4 pb-2">
-            {completedHikes.map((hike, index) => {
-              const bgGradient = bookGradients[index % bookGradients.length]
+            {filteredHikes.map((hike, index) => {
+              const isLightning = isLightningHike(hike)
+              const bgGradient = getHikeBookGradient(hike, index)
+              const difficultyLabel =
+                hike.difficulty === 'easy'
+                  ? t('hikes.diffEasy')
+                  : hike.difficulty === 'hard'
+                  ? t('hikes.diffHard')
+                  : hike.difficulty === 'expert'
+                  ? t('hikes.diffExpert')
+                  : t('hikes.diffMedium')
+
               return (
                 <div
                   key={hike.id}
                   onClick={() => onOpenDiaryDetail(hike.id)}
-                  className={`hardcover-book bg-gradient-to-br ${bgGradient} p-4 sm:p-6 text-paper flex flex-col justify-between h-56 sm:h-80 group cursor-pointer`}
+                  className={`hardcover-book ${
+                    isLightning ? 'book-lightning' : 'book-regular'
+                  } bg-gradient-to-br ${bgGradient} p-5 sm:p-6 text-paper flex flex-col justify-between h-64 sm:h-84 group cursor-pointer relative overflow-hidden`}
                 >
-                  <div className="space-y-3">
+                  {/* Decorative Inner Frame */}
+                  {isLightning ? (
+                    <div className="lightning-fresh-frame" />
+                  ) : (
+                    <>
+                      <div className="gold-filigree-frame" />
+                      {/* Antique Gold Corner Filigrees */}
+                      <span className="absolute top-2 left-4 text-amber-400/70 text-[10px] select-none pointer-events-none font-serif">⌜</span>
+                      <span className="absolute top-2 right-2 text-amber-400/70 text-[10px] select-none pointer-events-none font-serif">⌝</span>
+                      <span className="absolute bottom-2 left-4 text-amber-400/70 text-[10px] select-none pointer-events-none font-serif">⌞</span>
+                      <span className="absolute bottom-2 right-2 text-amber-400/70 text-[10px] select-none pointer-events-none font-serif">⌟</span>
+                    </>
+                  )}
+
+                  {/* Header: Volume Tag & Meetup Type Badge */}
+                  <div className="space-y-3 relative z-10">
                     <div className="flex justify-between items-center border-b border-sand/30 pb-2">
-                      <span className="font-label text-xs text-amber-300 font-bold bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-500/40 shadow-sm">Vol {index + 1}</span>
-                      <span className="text-xs text-amber-200">단행본</span>
+                      <span
+                        className={`font-label text-xs font-bold px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1 ${
+                          isLightning
+                            ? 'bg-white/95 text-teal-950 font-extrabold border border-teal-200'
+                            : 'bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-stone-950 font-extrabold border border-amber-300 shadow-[0_0_8px_rgba(251,191,36,0.5)]'
+                        }`}
+                      >
+                        {isLightning ? '⚡' : '👑'} Vol {index + 1}
+                      </span>
+                      <span
+                        className={`text-[11px] font-heading font-extrabold px-2 py-0.5 rounded-full ${
+                          isLightning
+                            ? 'bg-white/20 text-white border border-white/40'
+                            : 'bg-amber-950/80 text-amber-300 border border-amber-500/50 shadow-sm'
+                        }`}
+                      >
+                        {isLightning ? t('diaries.lightningBookType') : t('diaries.regularBookType')}
+                      </span>
                     </div>
-                    <div className="pt-2">
-                      <span className="text-[10px] font-label text-sand/70 block uppercase tracking-wider">{t('common.scrapbookHardcover')}</span>
-                      <h3 className="font-heading font-extrabold text-base sm:text-xl text-amber-100 group-hover:text-white transition mt-1 sm:mt-2 leading-tight sm:leading-snug">
+
+                    <div className="pt-1.5">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span
+                          className={`text-[9px] font-label font-bold uppercase tracking-widest px-1.5 py-0.5 rounded ${
+                            isLightning
+                              ? 'bg-white/25 text-white'
+                              : 'bg-amber-400/20 text-amber-300 border border-amber-400/30'
+                          }`}
+                        >
+                          {isLightning ? t('diaries.lightningSubtext') : t('diaries.regularSubtext')}
+                        </span>
+                      </div>
+                      <h3
+                        className={`font-heading font-extrabold text-base sm:text-xl transition mt-1 leading-tight sm:leading-snug line-clamp-2 ${
+                          isLightning
+                            ? 'text-white group-hover:text-amber-100 drop-shadow-sm'
+                            : 'text-amber-100 group-hover:text-amber-50 drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]'
+                        }`}
+                      >
                         {hike.title}
                       </h3>
-                      <p className="text-[11px] text-sand/80 font-body mt-2">{hike.mountain_name} • {new Date(hike.hike_date).toLocaleDateString()}</p>
+                      <p
+                        className={`text-[11px] font-body mt-2 flex items-center gap-1.5 ${
+                          isLightning ? 'text-white/85 font-medium' : 'text-sand/85'
+                        }`}
+                      >
+                        <span>⛰️ {hike.mountain_name}</span>
+                        <span>•</span>
+                        <span>📅 {new Date(hike.hike_date).toLocaleDateString()}</span>
+                      </p>
                     </div>
                   </div>
 
-                  <div className="space-y-2 sm:space-y-3">
-                    <div className="p-2 sm:p-2.5 bg-black/30 rounded-xl border border-sand/20 text-[10px] text-amber-100/90 font-body line-clamp-2 italic">
-                      {hike.description}
+                  {/* Bottom: Description Snippet & Open Action */}
+                  <div className="space-y-2 sm:space-y-3 relative z-10">
+                    <div
+                      className={`p-2 sm:p-2.5 rounded-xl border text-[10px] font-body line-clamp-2 italic ${
+                        isLightning
+                          ? 'bg-black/20 border-white/25 text-white/95'
+                          : 'bg-black/35 border-amber-400/30 text-amber-100/95'
+                      }`}
+                    >
+                      {hike.description || '산행 추억과 에피소드가 담겨 있는 앨범입니다.'}
                     </div>
-                    <div className="pt-2 border-t border-sand/20 flex justify-between items-center text-[9px] sm:text-[10px] font-label text-amber-300">
-                      <span className="font-bold">{hike.mountain_name}</span>
-                      <span className="bg-amber-400 text-amber-950 font-extrabold px-2 py-0.5 rounded-full shadow text-[9px] group-hover:bg-white transition">{t('common.openBook')}</span>
+                    <div
+                      className={`pt-2 border-t flex justify-between items-center text-[9px] sm:text-[10px] font-label ${
+                        isLightning ? 'border-white/25 text-white' : 'border-amber-400/30 text-amber-300'
+                      }`}
+                    >
+                      <span className="font-bold flex items-center gap-1.5">
+                        <span>{isLightning ? `⚡ ${t('hikes.typeLightningShort')}` : `👑 ${t('hikes.typeRegularShort')}`}</span>
+                        <span className="opacity-50">•</span>
+                        <span className="opacity-90">{t('hikes.difficulty')}: {difficultyLabel}</span>
+                      </span>
+                      <button
+                        className={`font-extrabold px-2.5 py-1 rounded-full shadow text-[9px] transition ${
+                          isLightning
+                            ? 'bg-white text-stone-900 group-hover:bg-teal-50 group-hover:scale-105'
+                            : 'bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-stone-950 shadow-[0_0_10px_rgba(251,191,36,0.5)] group-hover:bg-white group-hover:scale-105'
+                        }`}
+                      >
+                        {t('common.openBook')}
+                      </button>
                     </div>
                   </div>
                 </div>

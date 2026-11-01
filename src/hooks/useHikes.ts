@@ -11,6 +11,8 @@ export interface Hike {
   difficulty: string
   status: string
   description: string
+  hike_type?: 'regular' | 'lightning' | null
+  cover_image_url?: string | null
 }
 
 export function useHikes(clubId: number | undefined) {

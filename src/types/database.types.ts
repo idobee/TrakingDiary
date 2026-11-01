@@ -139,6 +139,7 @@ export interface Database {
           description: string | null
           cover_image_url: string | null
           google_drive_folder_id: string | null
+          hike_type: 'regular' | 'lightning' | null
           created_at: string
         }
         Insert: {
@@ -153,6 +154,7 @@ export interface Database {
           description?: string | null
           cover_image_url?: string | null
           google_drive_folder_id?: string | null
+          hike_type?: 'regular' | 'lightning' | null
           created_at?: string
         }
         Update: {
@@ -167,6 +169,7 @@ export interface Database {
           description?: string | null
           cover_image_url?: string | null
           google_drive_folder_id?: string | null
+          hike_type?: 'regular' | 'lightning' | null
           created_at?: string
         }
         Relationships: []

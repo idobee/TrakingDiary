@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslation } from '@/lib/i18n'
+import { isLightningHike } from '@/lib/hikes'
 
 interface HikeNewFormProps {
   clubId: number
@@ -10,6 +11,9 @@ interface HikeNewFormProps {
 
 export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, initialData, onSuccess }) => {
   const { t } = useTranslation()
+  const [hikeType, setHikeType] = useState<'regular' | 'lightning'>(
+    initialData?.hike_type || (isLightningHike(initialData) ? 'lightning' : 'regular')
+  )
   const [title, setTitle] = useState(initialData?.title || '')
   const [mountainName, setMountainName] = useState(initialData?.mountain_name || '')
   
@@ -47,43 +51,88 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, initialData, o
 
       let currentHike: any = initialData
 
+      // Format title with tag if user chose lightning but didn't put it in title yet
+      let processedTitle = title.trim()
+
       if (initialData) {
-        // Update Mode
-        const { data: updatedHike, error: updateError } = await supabase
+        // Update Mode: Try with hike_type first
+        let updatePayload: any = {
+          title: processedTitle,
+          mountain_name: mountainName,
+          hike_date: new Date(hikeDate).toISOString(),
+          difficulty,
+          description,
+          cover_image_url: imageUrl || initialData.cover_image_url,
+          hike_type: hikeType,
+        }
+
+        let { data: updatedHike, error: updateError } = await supabase
           .from('hikes')
-          .update({
-            title,
-            mountain_name: mountainName,
-            hike_date: new Date(hikeDate).toISOString(), // Ensure UTC for DB
-            difficulty,
-            description,
-            cover_image_url: imageUrl || initialData.cover_image_url,
-          })
+          .update(updatePayload)
           .eq('id', initialData.id)
           .select()
           .single()
 
-        if (updateError) throw updateError
+        // Fallback: If hike_type column does not exist in DB yet
+        if (updateError && (updateError.code === '42703' || updateError.code === 'PGRST204' || updateError.message?.includes('hike_type'))) {
+          delete updatePayload.hike_type
+          if (hikeType === 'lightning' && !isLightningHike({ title: updatePayload.title, description: updatePayload.description })) {
+            updatePayload.title = `[벙개] ${updatePayload.title}`
+          } else if (hikeType === 'regular') {
+            updatePayload.title = updatePayload.title.replace(/^\[(벙개|번개)\]\s*/i, '')
+            updatePayload.description = (updatePayload.description || '').replace(/#(벙개|번개)\s*/gi, '').trim()
+          }
+          const retryRes = await supabase
+            .from('hikes')
+            .update(updatePayload)
+            .eq('id', initialData.id)
+            .select()
+            .single()
+          if (retryRes.error) throw retryRes.error
+          updatedHike = retryRes.data
+        } else if (updateError) {
+          throw updateError
+        }
+
         currentHike = updatedHike
       } else {
-        // Insert Mode
-        const { data: newHike, error: hikeError } = await supabase
+        // Insert Mode: Try with hike_type first
+        let insertPayload: any = {
+          club_id: clubId,
+          organizer_id: user.id,
+          title: processedTitle,
+          mountain_name: mountainName,
+          hike_date: new Date(hikeDate).toISOString(),
+          difficulty,
+          description,
+          cover_image_url: imageUrl || null,
+          status: 'recruiting',
+          hike_type: hikeType,
+        }
+
+        let { data: newHike, error: hikeError } = await supabase
           .from('hikes')
-          .insert({
-            club_id: clubId,
-            organizer_id: user.id,
-            title,
-            mountain_name: mountainName,
-            hike_date: new Date(hikeDate).toISOString(),
-            difficulty,
-            description,
-            cover_image_url: imageUrl || null,
-            status: 'recruiting'
-          } as any)
+          .insert(insertPayload as any)
           .select()
           .single()
 
-        if (hikeError) throw hikeError
+        // Fallback: If hike_type column does not exist in DB yet
+        if (hikeError && (hikeError.code === '42703' || hikeError.code === 'PGRST204' || hikeError.message?.includes('hike_type'))) {
+          delete insertPayload.hike_type
+          if (hikeType === 'lightning' && !isLightningHike({ title: insertPayload.title, description: insertPayload.description })) {
+            insertPayload.title = `[벙개] ${insertPayload.title}`
+          }
+          const retryRes = await supabase
+            .from('hikes')
+            .insert(insertPayload as any)
+            .select()
+            .single()
+          if (retryRes.error) throw retryRes.error
+          newHike = retryRes.data
+        } else if (hikeError) {
+          throw hikeError
+        }
+
         currentHike = newHike
 
         // 2. Add organizer as member automatically only on create
@@ -152,6 +201,54 @@ export const HikeNewForm: React.FC<HikeNewFormProps> = ({ clubId, initialData, o
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">{error}</div>}
         
+        {/* Meetup Type Selector: 정모 vs 벙개 */}
+        <div className="bg-stone-50 p-3.5 sm:p-4 rounded-xl border border-stone-200/80">
+          <label className="block text-sm font-bold text-gray-800 mb-2">
+            {t('hikes.typeLabel')}
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+            <button
+              type="button"
+              onClick={() => setHikeType('regular')}
+              className={`p-3 rounded-xl border text-left transition flex items-start gap-3 ${
+                hikeType === 'regular'
+                  ? 'bg-amber-50/90 border-amber-400 ring-2 ring-amber-300/50 shadow-sm'
+                  : 'bg-white border-gray-200 hover:border-gray-300 opacity-75'
+              }`}
+            >
+              <span className="text-2xl">👑</span>
+              <div>
+                <p className="font-heading font-extrabold text-sm text-stone-900">
+                  {t('hikes.typeRegular')}
+                </p>
+                <p className="text-[11px] text-gray-500 font-body mt-0.5">
+                  {t('hikes.typeRegularDesc')}
+                </p>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setHikeType('lightning')}
+              className={`p-3 rounded-xl border text-left transition flex items-start gap-3 ${
+                hikeType === 'lightning'
+                  ? 'bg-teal-50/90 border-teal-400 ring-2 ring-teal-300/50 shadow-sm'
+                  : 'bg-white border-gray-200 hover:border-gray-300 opacity-75'
+              }`}
+            >
+              <span className="text-2xl">⚡</span>
+              <div>
+                <p className="font-heading font-extrabold text-sm text-stone-900">
+                  {t('hikes.typeLightning')}
+                </p>
+                <p className="text-[11px] text-gray-500 font-body mt-0.5">
+                  {t('hikes.typeLightningDesc')}
+                </p>
+              </div>
+            </button>
+          </div>
+        </div>
+
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-1">{t('hikes.formNameLabel')}</label>
           <input 

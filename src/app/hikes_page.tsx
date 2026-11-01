@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useTranslation } from '@/lib/i18n'
 import { createClient } from '@/lib/supabase/client'
 import { HikeNewForm } from '@/components/hikes/HikeNewForm'
+import { isLightningHike } from '@/lib/hikes'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 export default function HikesPage({ 
@@ -59,7 +60,7 @@ export default function HikesPage({
       const { data: hikesData } = await supabase
         .from('hikes')
         .select(`
-          id, title, mountain_name, hike_date, difficulty, status, organizer_id, description, cover_image_url,
+          *,
           clubs(name),
           users!hikes_organizer_id_fkey(nickname)
         `)
@@ -331,11 +332,22 @@ export default function HikesPage({
                       <div key={hike.id} className="bg-white rounded-3xl p-5 sm:p-6 shadow-sm hover:shadow-md transition border border-gray-100 flex flex-col justify-between">
                         <div>
                           <div className="flex justify-between items-start mb-4">
-                            {new Date(hike.hike_date) >= new Date(new Date().setHours(0,0,0,0)) && (
-                              <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">
-                                {t('hikes.recruitingBadge')}
-                              </span>
-                            )}
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {isLightningHike(hike) ? (
+                                <span className="bg-teal-50 text-teal-700 border border-teal-200/80 px-2.5 py-0.5 rounded-full text-xs font-extrabold shadow-xs">
+                                  ⚡ {t('hikes.typeLightningShort')}
+                                </span>
+                              ) : (
+                                <span className="bg-amber-50 text-amber-800 border border-amber-300 px-2.5 py-0.5 rounded-full text-xs font-extrabold shadow-xs">
+                                  👑 {t('hikes.typeRegularShort')}
+                                </span>
+                              )}
+                              {new Date(hike.hike_date) >= new Date(new Date().setHours(0,0,0,0)) && (
+                                <span className="bg-green-100 text-green-700 px-3 py-0.5 rounded-full text-xs font-bold">
+                                  {t('hikes.recruitingBadge')}
+                                </span>
+                              )}
+                            </div>
                             <span className={`px-2 py-1 rounded-md text-[10px] font-bold ${hike.difficulty === 'easy' ? 'bg-blue-50 text-blue-600' :
                                 hike.difficulty === 'medium' ? 'bg-yellow-50 text-yellow-600' :
                                   hike.difficulty === 'hard' ? 'bg-orange-50 text-orange-600' : 'bg-red-50 text-red-600'
