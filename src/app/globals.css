@@ -132,71 +132,23 @@ body {
   pointer-events: none;
 }
 
-/* 👑 정모 (Regular Hike) 전용: 중후한 하드커버 양장본 + 찬란한 금장테 (Gold Border & Filigree) */
-.book-regular {
-  border: 2px solid #f59e0b;
-  border-left: 14px solid #1a0f07; /* 묵직한 가죽 양장본 제본선 */
-  border-right: 6px solid #fdfbf7; /* 종이 책장 단면 */
-  box-shadow: 
-    0 0 0 1px rgba(254, 240, 138, 0.6),
-    0 0 18px rgba(245, 158, 11, 0.35),
-    inset 0 0 14px rgba(245, 158, 11, 0.2),
-    6px 14px 28px rgba(0, 0, 0, 0.55);
-}
-.book-regular:hover {
-  transform: translateY(-10px) rotate(1deg) scale(1.02);
-  border-color: #fbbf24;
-  box-shadow: 
-    0 0 0 2px rgba(254, 240, 138, 0.9),
-    0 0 28px rgba(245, 158, 11, 0.6),
-    inset 0 0 20px rgba(245, 158, 11, 0.3),
-    14px 26px 42px rgba(0, 0, 0, 0.7);
-}
-
-/* 정모 내측 금빛 장식 프레임 (Inner Gold Filigree Frame) */
-.gold-filigree-frame {
-  position: absolute;
-  inset: 7px 7px 7px 11px;
-  border: 1px solid rgba(251, 191, 36, 0.45);
-  border-radius: 2px 10px 10px 2px;
-  pointer-events: none;
-  z-index: 5;
-}
-.gold-filigree-frame::before {
-  content: '';
-  position: absolute;
-  inset: 3px;
-  border: 1px dashed rgba(251, 191, 36, 0.25);
-  border-radius: 1px 7px 7px 1px;
-}
-
-/* ⚡ 벙개 (Lightning Hike) 전용: 가볍고 산뜻한 라이트 & 캐주얼 매거진 커버 */
+/* 👑 정모 (Regular Hike) & ⚡ 벙개 (Lightning Hike) 깔끔한 하드커버 책 표지 */
+.book-regular,
 .book-lightning {
-  border: 1.5px solid rgba(255, 255, 255, 0.65);
-  border-left: 10px solid rgba(255, 255, 255, 0.35); /* 산뜻하고 가벼운 컬러 바인더 */
-  border-right: 5px solid #ffffff;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-left: 12px solid rgba(0, 0, 0, 0.35); /* 깔끔한 책등 제본선 */
+  border-right: 5px solid #fdfbf7; /* 종이 책장 단면 */
   box-shadow: 
-    0 10px 24px -4px rgba(0, 0, 0, 0.22),
-    0 4px 10px -2px rgba(0, 0, 0, 0.12),
-    inset 0 1px 3px rgba(255, 255, 255, 0.4);
+    6px 14px 28px rgba(0, 0, 0, 0.45),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2);
 }
+.book-regular:hover,
 .book-lightning:hover {
   transform: translateY(-8px) scale(1.02);
-  border-color: #ffffff;
   box-shadow: 
-    0 20px 32px -6px rgba(0, 0, 0, 0.32),
-    0 8px 16px -4px rgba(0, 0, 0, 0.18),
-    inset 0 2px 5px rgba(255, 255, 255, 0.6);
-}
-
-/* 벙개 내측 산뜻한 스티치 프레임 (Inner Fresh Stitch Frame) */
-.lightning-fresh-frame {
-  position: absolute;
-  inset: 7px 7px 7px 8px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 2px 10px 10px 2px;
-  pointer-events: none;
-  z-index: 5;
+    12px 22px 36px rgba(0, 0, 0, 0.6),
+    inset 0 1px 3px rgba(255, 255, 255, 0.3);
 }
 
 /* Wooden Bookshelf Ledge & Shadow */
